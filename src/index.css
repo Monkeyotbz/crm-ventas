@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Clash Display", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "General Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --color-night-950: #05060a;
+  --color-night-900: #0a0c14;
+  --color-night-800: #10131f;
+  --color-night-700: #1a1f31;
+  --color-night-600: #262c42;
+
+  --color-neon-cyan: #22d3ee;
+  --color-neon-violet: #a78bfa;
+  --color-neon-emerald: #34d399;
+}
+
+body {
+  @apply bg-night-950 text-slate-200 font-body antialiased;
+}
+
+::selection {
+  background-color: rgba(34, 211, 238, 0.3);
+}
