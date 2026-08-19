@@ -3,3 +3,8 @@ dist/
 .env
 .env.local
 *.log
+
+# Bundle generado por el helper de Claude Design (editor completo + contenido
+# inline, ~2MB). No es código fuente: se re-genera desde design/*.dc.html +
+# design/canvas.json. Ver CLAUDE.md.
+design/crm-ventas-dashboard-direcciones.html

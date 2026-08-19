@@ -1,0 +1,362 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .app {
+    width: 1440px;
+    height: 900px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(ellipse 60% 40% at 15% 0%, rgba(10,132,255,0.07), transparent),
+      radial-gradient(ellipse 50% 35% at 100% 10%, rgba(191,90,242,0.06), transparent),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(100,210,255,0.06), transparent),
+      #eef0f4;
+    color: #1c1c1e;
+    font-family: 'Manrope', ui-sans-serif, -apple-system, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+  .glass {
+    background: rgba(255,255,255,0.62);
+    backdrop-filter: blur(30px) saturate(1.8);
+    -webkit-backdrop-filter: blur(30px) saturate(1.8);
+    border: 0.5px solid rgba(255,255,255,0.9);
+    box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 12px 32px rgba(30,30,50,0.08);
+  }
+  .topbar { flex-shrink: 0; margin: 16px 24px 0; padding: 0 8px 0 18px; height: 58px; border-radius: 20px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 9px; }
+  .brand-logo { width: 26px; height: 26px; border-radius: 8px; background: linear-gradient(135deg, #0A84FF, #64D2FF); box-shadow: 0 2px 8px rgba(10,132,255,0.35); }
+  .brand-text { font-weight: 800; font-size: 16px; color: #1c1c1e; letter-spacing: -0.01em; }
+  .brand-domain { font-size: 10.5px; font-weight: 600; color: #8e8e93; margin-left: 2px; }
+  .seg { display: flex; gap: 2px; background: rgba(120,120,128,0.12); border-radius: 12px; padding: 3px; position: relative; }
+  .seg-item { padding: 7px 16px; border-radius: 9px; font-size: 12.5px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: transparent; color: #6c6c70; }
+  .seg-item.active { background: #ffffff; color: #1c1c1e; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 1px rgba(0,0,0,0.06); }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .search { width: 210px; height: 34px; border-radius: 10px; background: rgba(120,120,128,0.12); color: #8e8e93; font-size: 12.5px; padding: 0 12px; display: flex; align-items: center; gap: 6px; }
+  .avatar { width: 32px; height: 32px; border-radius: 999px; background: linear-gradient(135deg, #BF5AF2, #FF375F); box-shadow: 0 2px 6px rgba(191,90,242,0.3); }
+
+  .subheader { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 20px 32px 12px; }
+  .subheader h1 { font-size: 21px; font-weight: 800; margin: 0; color: #1c1c1e; letter-spacing: -0.02em; }
+  .kpis { display: flex; gap: 8px; }
+  .kpi { display: flex; align-items: center; gap: 7px; border-radius: 13px; padding: 8px 14px; }
+  .kpi-dot { width: 7px; height: 7px; border-radius: 999px; flex-shrink: 0; }
+  .kpi-val { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; }
+  .kpi-label { font-size: 10px; color: #6c6c70; font-weight: 600; }
+
+  .agenda { flex-shrink: 0; margin: 0 32px 16px; padding: 10px 14px; border-radius: 18px; display: flex; align-items: center; gap: 8px; overflow-x: auto; }
+  .agenda-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #8e8e93; font-weight: 700; flex-shrink: 0; padding-right: 8px; border-right: 0.5px solid rgba(60,60,67,0.15); }
+  .agenda-item { flex-shrink: 0; display: flex; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; background: rgba(120,120,128,0.08); }
+  .agenda-item.current { background: rgba(10,132,255,0.12); box-shadow: 0 0 0 1px rgba(10,132,255,0.25) inset; }
+  .agenda-avatar { width: 24px; height: 24px; border-radius: 999px; background: linear-gradient(135deg, #64D2FF, #0A84FF); flex-shrink: 0; }
+  .agenda-name { font-size: 11.5px; font-weight: 700; color: #1c1c1e; white-space: nowrap; }
+  .agenda-time { font-size: 10px; color: #8e8e93; font-family: 'JetBrains Mono', monospace; white-space: nowrap; }
+  .agenda-item.current .agenda-time { color: #0A84FF; }
+
+  .bodyrow { flex: 1; display: flex; gap: 14px; padding: 0 32px 24px; min-height: 0; }
+
+  .leads-col { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+  .segfilter { display: flex; gap: 2px; background: rgba(120,120,128,0.1); border-radius: 11px; padding: 3px; margin-bottom: 12px; width: fit-content; }
+  .segfilter-item { padding: 6px 13px; border-radius: 8px; font-size: 11.5px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: transparent; color: #6c6c70; }
+  .segfilter-item.active { background: #ffffff; color: #1c1c1e; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+  .leads-scroll { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 7px; }
+  .lead-card { display: flex; align-items: center; gap: 12px; border-radius: 16px; padding: 12px 14px; cursor: pointer; }
+  .lead-card.selected { box-shadow: 0 1px 0 rgba(255,255,255,0.9) inset, 0 8px 22px rgba(10,132,255,0.14), 0 0 0 1px rgba(10,132,255,0.3) inset; }
+  .lead-avatar { width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; color: #fff; }
+  .lead-main { flex: 1; min-width: 0; }
+  .lead-name { font-size: 13px; font-weight: 700; color: #1c1c1e; }
+  .lead-empresa { font-size: 11px; color: #8e8e93; margin-top: 1px; }
+  .lead-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .lead-valcol { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .lead-valor { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700; color: #1c1c1e; }
+  .interest-dots { display: flex; gap: 3px; }
+  .interest-dot { width: 6px; height: 6px; border-radius: 999px; background: rgba(120,120,128,0.18); }
+  .chevron { color: #c7c7cc; flex-shrink: 0; }
+
+  .copilot-col { width: 372px; flex-shrink: 0; border-radius: 22px; padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+  .copilot-title { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 800; color: #1c1c1e; letter-spacing: -0.01em; }
+  .copilot-title-dot { width: 8px; height: 8px; border-radius: 999px; background: linear-gradient(135deg, #0A84FF, #BF5AF2); }
+  .who { font-size: 11.5px; color: #8e8e93; margin-top: -8px; font-weight: 600; }
+  .ring-wrap { display: flex; align-items: center; gap: 16px; border-radius: 16px; padding: 16px; }
+  .ring { width: 82px; height: 82px; border-radius: 999px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ring-inner { width: 66px; height: 66px; border-radius: 999px; background: #fdfdff; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-num { font-family: 'JetBrains Mono', monospace; font-size: 18px; font-weight: 700; color: #1c1c1e; }
+  .ring-label { font-size: 8px; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; }
+  .side-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: #8e8e93; font-weight: 700; margin-bottom: 5px; }
+  .sent-chip { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .goal-box { border-radius: 15px; padding: 14px; }
+  .goal-label { font-size: 10px; font-weight: 800; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+  .goal-text { font-size: 12.5px; line-height: 1.55; color: #3a3a3c; }
+  .suggest-box { border-radius: 15px; padding: 14px; background: rgba(10,132,255,0.06); box-shadow: 0 0 0 1px rgba(10,132,255,0.14) inset; }
+  .suggest-label { font-size: 10px; font-weight: 800; color: #0A84FF; margin-bottom: 8px; letter-spacing: 0.02em; text-transform: uppercase; }
+  .suggest-text { font-size: 12.5px; line-height: 1.5; color: #1c1c1e; margin-bottom: 12px; }
+  .use-btn { width: 100%; border: none; border-radius: 11px; padding: 10px; font-weight: 800; font-size: 12.5px; cursor: pointer; font-family: 'Manrope', sans-serif; color: #fff; background: #0A84FF; box-shadow: 0 4px 12px rgba(10,132,255,0.35); }
+  .use-btn.used { background: rgba(10,132,255,0.1); color: #0A84FF; box-shadow: none; }
+  .cite-label { font-size: 10px; font-weight: 800; color: #8e8e93; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .cite-card { border-radius: 13px; padding: 10px 12px; }
+  .cite-source { font-size: 9.5px; color: #0A84FF; font-weight: 800; margin-bottom: 3px; }
+  .cite-text { font-size: 11px; color: #6c6c70; line-height: 1.4; }
+</style>
+</helmet>
+
+<div class="app">
+  <div class="topbar glass">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      <div class="brand-text">candyCRM</div>
+      <div class="brand-domain">getcandycrm.com</div>
+    </div>
+    <div class="seg">
+      <button class="seg-item active">Panel de hoy</button>
+      <button class="seg-item">Bandeja</button>
+      <button class="seg-item">Pipeline</button>
+      <button class="seg-item">Reportes</button>
+    </div>
+    <div class="topbar-right">
+      <div class="search glass">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><path d="m21 21-4.3-4.3"></path></svg>
+        Buscar...
+      </div>
+      <div class="avatar"></div>
+    </div>
+  </div>
+
+  <div class="subheader">
+    <h1>Panel de hoy</h1>
+    <div class="kpis">
+      <div class="kpi glass"><div class="kpi-dot" style="background:#0A84FF;"></div><div class="kpi-val">{{totalLeads}}</div><div class="kpi-label">Leads nuevos</div></div>
+      <div class="kpi glass"><div class="kpi-dot" style="background:#FF375F;"></div><div class="kpi-val">{{hotCount}}</div><div class="kpi-label">Calientes</div></div>
+      <div class="kpi glass"><div class="kpi-dot" style="background:#BF5AF2;"></div><div class="kpi-val">{{totalValue}}</div><div class="kpi-label">Valor potencial</div></div>
+    </div>
+  </div>
+
+  <div class="agenda glass">
+    <div class="agenda-label">Agenda</div>
+    <sc-for list="{{agenda}}" as="ag" hint-placeholder-count="4">
+      <div class="agenda-item {{ag.cls}}">
+        <div class="agenda-avatar"></div>
+        <div>
+          <div class="agenda-name">{{ag.nombre}}</div>
+          <div class="agenda-time">{{ag.hora}}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div class="bodyrow">
+    <div class="leads-col">
+      <div class="segfilter">
+        <sc-for list="{{filters}}" as="f" hint-placeholder-count="5">
+          <button class="segfilter-item {{f.cls}}" onClick="{{f.pick}}">{{f.label}}</button>
+        </sc-for>
+      </div>
+      <div class="leads-scroll">
+        <sc-for list="{{leads}}" as="lead" hint-placeholder-count="6">
+          <div class="lead-card glass {{lead.cls}}" onClick="{{lead.select}}">
+            <div class="lead-avatar" style="background:{{lead.avatarBg}};">{{lead.iniciales}}</div>
+            <div class="lead-main">
+              <div class="lead-name">{{lead.contacto}}</div>
+              <div class="lead-empresa">{{lead.empresa}}</div>
+            </div>
+            <dc-import name="ChannelIcon" canal="{{lead.canal}}" hint-size="90px,20px"></dc-import>
+            <div class="lead-right">
+              <div class="lead-valcol">
+                <div class="lead-valor">{{lead.valorFmt}}</div>
+                <div class="interest-dots">
+                  <sc-for list="{{lead.dots}}" as="d" hint-placeholder-count="4">
+                    <div class="interest-dot" style="background:{{d.color}};"></div>
+                  </sc-for>
+                </div>
+              </div>
+              <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"></path></svg>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="copilot-col glass">
+      <div class="copilot-title"><div class="copilot-title-dot"></div>Copiloto IA</div>
+      <div class="who">{{selected.contacto}} · {{selected.empresa}}</div>
+
+      <div class="ring-wrap glass">
+        <div class="ring" style="background: {{selected.ringBg}};">
+          <div class="ring-inner">
+            <div class="ring-num">{{selected.score}}</div>
+            <div class="ring-label">score</div>
+          </div>
+        </div>
+        <div>
+          <div class="side-label">Sentimiento</div>
+          <div class="sent-chip" style="background:{{selected.sentBg}}; color:{{selected.sentFg}};">{{selected.sentimientoLabel}}</div>
+        </div>
+      </div>
+
+      <div class="goal-box glass">
+        <div class="goal-label">Resumen de la conversación</div>
+        <div class="goal-text">{{selected.resumen}}</div>
+      </div>
+
+      <div class="suggest-box">
+        <div class="suggest-label">Sugerencia de respuesta</div>
+        <div class="suggest-text">{{selected.sugerencia}}</div>
+        <button class="use-btn {{selected.useCls}}" onClick="{{useSuggestion}}">{{selected.useLabel}}</button>
+      </div>
+
+      <div>
+        <div class="cite-label">Contexto (RAG)</div>
+        <div class="cite-card glass">
+          <div class="cite-source">{{selected.citaFuente}}</div>
+          <div class="cite-text">{{selected.citaTexto}}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeFilter: 'todos',
+      selectedId: 3,
+      usedSuggestion: false,
+      leadsData: [
+        { id: 1, contacto: 'Laura Méndez', empresa: 'Constructora Delta', canal: 'chat_web', valor: 8500000, score: 62, interes: 2, sentimiento: 'neutro',
+          resumen: 'Preguntó por automatización de seguimiento de obras. Aún no menciona presupuesto ni fecha de arranque.',
+          sugerencia: 'Ofrecele agendar el diagnóstico gratuito de 30 min y mencioná un caso similar del portafolio.',
+          citaFuente: 'FAQ · Sector construcción', citaTexto: 'Los proyectos de construcción arrancan con un diagnóstico de 30 min sin costo antes de cualquier propuesta.' },
+        { id: 2, contacto: 'Julián Prada', empresa: 'Prada & Hnos.', canal: 'meta_ads', valor: 6200000, score: 41, interes: 1, sentimiento: 'neutro',
+          resumen: 'Llegó por un anuncio, todavía no respondió el primer mensaje de calificación.',
+          sugerencia: 'Mandale un mensaje corto preguntando qué proceso manual le quita más tiempo hoy.',
+          citaFuente: 'Guía · Primer contacto', citaTexto: 'Preguntas abiertas sobre el proceso actual califican mejor que ofrecer la demo de entrada.' },
+        { id: 3, contacto: 'Camila Ortiz', empresa: 'Cobranzas Pacífico', canal: 'instagram', valor: 22000000, score: 85, interes: 4, sentimiento: 'positivo',
+          resumen: 'Vio el caso de cobranzas del portafolio y preguntó directamente si hay algo similar para su empresa. Alta intención de compra.',
+          sugerencia: 'Compartile el caso de estudio completo de cobranzas e invitala a ver la demo interactiva esta semana.',
+          citaFuente: 'Caso de estudio · Cobranzas', citaTexto: 'Dashboard de cartera vencida con cruce automático de reportes y seguimiento de gestión de cobro en un solo lugar.' },
+        { id: 4, contacto: 'Sofía Restrepo', empresa: 'Restrepo & Asociados', canal: 'linkedin', valor: 16800000, score: 71, interes: 3, sentimiento: 'positivo',
+          resumen: 'Llegó por una publicación orgánica de LinkedIn sobre automatización legal. Buen encaje de sector.',
+          sugerencia: 'Invitala a una llamada de 20 min esta semana para entender el volumen de casos del estudio.',
+          citaFuente: 'Guía · Sector legal', citaTexto: 'Los estudios jurídicos suelen calificar rápido cuando ven un caso de un despacho similar en tamaño.' },
+        { id: 5, contacto: 'Diego Salas', empresa: 'Transportes Salas', canal: 'whatsapp', valor: 18000000, score: 88, interes: 4, sentimiento: 'positivo',
+          resumen: 'Ya vio la propuesta y confirmó presupuesto aprobado internamente. Solo falta coordinar fecha de inicio.',
+          sugerencia: 'Proponele dos fechas concretas de arranque esta semana para cerrar el trato.',
+          citaFuente: 'Plantilla · Cierre', citaTexto: 'Ofrecer dos fechas concretas (no abiertas) acelera la decisión final en un 30% según el histórico de cierres.' },
+        { id: 6, contacto: 'Marcela Uribe', empresa: 'Textiles Uribe', canal: 'manual', valor: 9000000, score: 30, interes: 1, sentimiento: 'negativo',
+          resumen: 'Contacto cargado manualmente hace dos semanas, sin respuesta a los últimos dos mensajes.',
+          sugerencia: 'Probá un último mensaje breve preguntando si sigue siendo el momento adecuado, sin presionar.',
+          citaFuente: 'Guía · Reactivación', citaTexto: 'Un mensaje corto sin urgencia reactiva más leads fríos que un recordatorio de seguimiento genérico.' },
+      ],
+      agendaData: [
+        { id: 1, nombre: 'Andrés Rico', hora: '10:00 · 30 min', current: false },
+        { id: 2, nombre: 'Camila Ortiz', hora: '11:30 · 20 min', current: true },
+        { id: 3, nombre: 'Sofía Restrepo', hora: '14:00 · 20 min', current: false },
+        { id: 4, nombre: 'Diego Salas', hora: '16:15 · 15 min', current: false },
+      ],
+    };
+  }
+
+  formatMoney(n) {
+    return '$' + (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+  }
+
+  initials(name) {
+    return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+  }
+
+  avatarGrad(interes) {
+    const grads = [
+      'linear-gradient(135deg, #98989d, #6c6c70)',
+      'linear-gradient(135deg, #64D2FF, #0A84FF)',
+      'linear-gradient(135deg, #BF5AF2, #0A84FF)',
+      'linear-gradient(135deg, #FF375F, #BF5AF2)',
+    ];
+    return grads[interes - 1] ?? grads[0];
+  }
+
+  dotColors(interes) {
+    const scale = ['#c7c7cc', '#0A84FF', '#BF5AF2', '#FF375F'];
+    return [1, 2, 3, 4].map((i) => ({ color: i <= interes ? scale[interes - 1] : 'rgba(120,120,128,0.18)' }));
+  }
+
+  renderVals() {
+    const filterDefs = [
+      { id: 'todos', label: 'Todos', test: () => true },
+      { id: 'caliente', label: 'Caliente', test: (l) => l.interes === 4 },
+      { id: 'alto', label: 'Interés alto', test: (l) => l.interes === 3 },
+      { id: 'medio', label: 'Interés medio', test: (l) => l.interes === 2 },
+      { id: 'bajo', label: 'Interés bajo', test: (l) => l.interes === 1 },
+    ];
+    const active = filterDefs.find((f) => f.id === this.state.activeFilter) ?? filterDefs[0];
+    const filters = filterDefs.map((f) => ({
+      label: f.label,
+      cls: f.id === this.state.activeFilter ? 'active' : '',
+      pick: () => this.setState({ activeFilter: f.id }),
+    }));
+
+    const visible = this.state.leadsData.filter(active.test);
+    const leads = visible.map((l) => ({
+      ...l,
+      iniciales: this.initials(l.contacto),
+      valorFmt: this.formatMoney(l.valor),
+      avatarBg: this.avatarGrad(l.interes),
+      dots: this.dotColors(l.interes),
+      cls: l.id === this.state.selectedId ? 'selected' : '',
+      select: () => this.setState({ selectedId: l.id, usedSuggestion: false }),
+    }));
+
+    const totalLeads = this.state.leadsData.length;
+    const hotCount = this.state.leadsData.filter((l) => l.interes === 4).length;
+    const totalValue = this.formatMoney(this.state.leadsData.reduce((acc, l) => acc + l.valor, 0));
+
+    const rawSelected = this.state.leadsData.find((l) => l.id === this.state.selectedId) ?? this.state.leadsData[0];
+    const ringColor = rawSelected.score >= 75 ? '#FF375F' : rawSelected.score >= 50 ? '#0A84FF' : '#98989d';
+    const pct = Math.max(0, Math.min(100, rawSelected.score));
+    const sentMap = {
+      positivo: { fg: '#FF375F', bg: 'rgba(255,55,95,0.12)', label: 'Positivo' },
+      neutro: { fg: '#0A84FF', bg: 'rgba(10,132,255,0.12)', label: 'Neutro' },
+      negativo: { fg: '#6c6c70', bg: 'rgba(108,108,112,0.12)', label: 'Negativo' },
+    };
+    const sent = sentMap[rawSelected.sentimiento] ?? sentMap.neutro;
+
+    const selected = {
+      ...rawSelected,
+      ringBg: `conic-gradient(${ringColor} ${pct}%, rgba(120,120,128,0.14) 0)`,
+      sentFg: sent.fg,
+      sentBg: sent.bg,
+      sentimientoLabel: sent.label,
+      useCls: this.state.usedSuggestion ? 'used' : '',
+      useLabel: this.state.usedSuggestion ? 'Insertada en el mensaje ✓' : 'Usar sugerencia',
+    };
+
+    const agenda = this.state.agendaData.map((ag) => ({ ...ag, cls: ag.current ? 'current' : '' }));
+
+    return {
+      filters,
+      leads,
+      totalLeads,
+      hotCount,
+      totalValue,
+      agenda,
+      selected,
+      useSuggestion: () => this.setState({ usedSuggestion: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

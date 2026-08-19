@@ -1,0 +1,93 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Pipeline protagonista (Pipedrive)"
+    },
+    {
+      "file": "Inbox.dc.html",
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "Bandeja protagonista (Front/Intercom)"
+    },
+    {
+      "file": "CandyAero.dc.html",
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "candyCRM — Panel de hoy"
+    },
+    {
+      "file": "CandyInbox.dc.html",
+      "x": 4560,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "candyCRM — Bandeja (protagonista, colores por canal)"
+    },
+    {
+      "file": "iOSGlass.dc.html",
+      "x": 6080,
+      "y": 0,
+      "w": 1440,
+      "h": 900,
+      "title": "candyCRM — iOS Liquid Glass (alternativa a comparar)"
+    },
+    {
+      "file": "ChannelIcon.dc.html",
+      "x": 0,
+      "y": 1020,
+      "w": 200,
+      "h": 60,
+      "title": "Componente: ChannelIcon"
+    },
+    {
+      "file": "ScoreBadge.dc.html",
+      "x": 260,
+      "y": 1020,
+      "w": 200,
+      "h": 60,
+      "title": "Componente: ScoreBadge"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "note-direcciones",
+      "x": 0,
+      "y": -100,
+      "w": 700,
+      "text": "Primeras 2 direcciones exploradas (Pipeline y Bandeja como protagonista). Las direcciones \"Copiloto IA\", \"Minimalista\" y \"Síntesis\" se descartaron — la dirección elegida es \"candyCRM — Candy + Aero\", a la derecha."
+    },
+    {
+      "id": "note-candyaero",
+      "x": 3040,
+      "y": -160,
+      "w": 780,
+      "text": "La favorita hasta ahora. candyCRM / getcandycrm.com, con identidad propia separada de la paleta oscura de hellominus.com. Paleta candy multicolor (rosa, azul, violeta, menta, durazno) + estética aero/glassmorphism (paneles translúcidos con blur, brillo especular, sombras de color) sobre la pantalla de leads + Copiloto IA."
+    },
+    {
+      "id": "note-candyinbox",
+      "x": 4560,
+      "y": -180,
+      "w": 780,
+      "text": "El chat también es protagonista: bandeja unificada en el mismo sistema Candy + Aero, con cada canal usando sus propios colores de marca — WhatsApp verde, Instagram con el degradado naranja/rosa/violeta, Messenger azul, LinkedIn azul corporativo, Chat web en la paleta candy. El color de marca tiñe el badge del canal en el header del hilo, las burbujas de mensaje saliente y el botón de enviar — así cada conversación se siente nativa de su canal sin salir del CRM. Los íconos son genéricos (no los logos exactos de cada red) para no reproducir marcas registradas; el color y la etiqueta de texto ya identifican el canal con claridad."
+    },
+    {
+      "id": "note-ios",
+      "x": 6080,
+      "y": -200,
+      "w": 800,
+      "text": "Exploración alternativa que pediste: algo con sensación de entorno iOS actual y a la vanguardia (Liquid Glass / materiales del sistema de Apple) — misma pantalla y mismos datos que \"Panel de hoy\" en Candy + Aero, para que se pueda comparar directo. Diferencias frente a Candy + Aero: fondo neutro casi blanco (en vez del wash multicolor), colores de acento del sistema iOS (azul #0A84FF, rosa #FF375F, violeta #BF5AF2) usados con moderación en vez de todo pintado, control segmentado tipo iOS para la navegación y los filtros, anillo de progreso estilo Activity Ring para el score del Copiloto, tipografía Manrope (más geométrica/neutra que la redondeada Baloo 2 de Candy), y vidrio más sutil (blur alto pero con mucho menos color detrás — el material \"vidrio\" se nota más porque hay menos ruido de fondo). No es un reemplazo de Candy + Aero, es la otra punta para comparar cuál dirección final querés."
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

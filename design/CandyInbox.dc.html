@@ -1,0 +1,348 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .app {
+    width: 1440px;
+    height: 900px;
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 12% 15%, rgba(255,90,160,0.34), transparent 42%),
+      radial-gradient(circle at 88% 8%, rgba(88,150,255,0.3), transparent 45%),
+      radial-gradient(circle at 50% 100%, rgba(167,120,255,0.26), transparent 55%),
+      radial-gradient(circle at 92% 85%, rgba(45,210,160,0.24), transparent 42%),
+      linear-gradient(160deg, #fdf3ff 0%, #eef3ff 45%, #fff2f7 100%);
+    color: #2b1f3d;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+  }
+  .glass {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(18px) saturate(1.5);
+    -webkit-backdrop-filter: blur(18px) saturate(1.5);
+    border: 1px solid rgba(255,255,255,0.75);
+    box-shadow: 0 10px 30px rgba(120,60,200,0.12), inset 0 1px 0 rgba(255,255,255,0.9);
+  }
+  .topbar { flex-shrink: 0; margin: 14px 20px 0; padding: 0 20px; height: 60px; border-radius: 999px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-logo { width: 30px; height: 30px; border-radius: 999px; background: conic-gradient(from 200deg, #ff5ca8, #ffb35c, #6ee7b7, #5b9bff, #b98bff, #ff5ca8); box-shadow: 0 3px 10px rgba(180,90,220,0.35); }
+  .brand-text { font-family: 'Baloo 2', ui-rounded, sans-serif; font-weight: 800; font-size: 18px; color: #3b2a55; }
+  .brand-domain { font-size: 10.5px; font-weight: 600; color: #9b7fc9; margin-left: 2px; }
+  .nav { display: flex; gap: 4px; background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.8); border-radius: 999px; padding: 4px; }
+  .nav-item { padding: 8px 16px; border-radius: 999px; font-size: 13px; font-weight: 700; cursor: pointer; border: none; font-family: inherit; background: transparent; color: #7a6a99; }
+  .nav-item.active { background: linear-gradient(180deg, #ff8fc0, #ff5ca8); color: #fff; box-shadow: 0 3px 10px rgba(255,92,168,0.4), inset 0 1px 0 rgba(255,255,255,0.5); }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .search { width: 200px; height: 36px; border-radius: 999px; background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.85); color: #9b8fb5; font-size: 12.5px; padding: 0 14px; display: flex; align-items: center; }
+  .avatar { width: 34px; height: 34px; border-radius: 999px; background: linear-gradient(135deg, #5b9bff, #b98bff); box-shadow: 0 3px 8px rgba(120,90,220,0.35); }
+
+  .bodyrow { flex: 1; display: flex; gap: 14px; padding: 14px 20px 20px; min-height: 0; }
+
+  .list-col { width: 336px; flex-shrink: 0; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+  .list-head { padding: 16px 16px 10px; flex-shrink: 0; }
+  .list-head h1 { font-family: 'Baloo 2', sans-serif; font-size: 16px; font-weight: 800; margin: 0 0 10px; color: #3b2a55; }
+  .chfilters { display: flex; gap: 5px; flex-wrap: wrap; }
+  .chfilter { padding: 5px 10px; border-radius: 999px; font-size: 10.5px; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.8); background: rgba(255,255,255,0.5); color: #7a6a99; font-family: inherit; }
+  .chfilter.active { color: #fff; border-color: rgba(255,255,255,0.9); box-shadow: 0 3px 8px rgba(0,0,0,0.12); }
+  .conv-scroll { flex: 1; overflow-y: auto; padding: 4px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
+  .conv-row { display: flex; gap: 10px; padding: 10px; border-radius: 14px; cursor: pointer; align-items: flex-start; border: 1px solid transparent; }
+  .conv-row.selected { background: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.9); box-shadow: 0 6px 18px rgba(120,60,200,0.14); }
+  .conv-avatar { width: 34px; height: 34px; border-radius: 999px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-family: 'Baloo 2', sans-serif; font-size: 12px; font-weight: 700; color: #fff; position: relative; }
+  .conv-chdot { position: absolute; bottom: -2px; right: -2px; width: 12px; height: 12px; border-radius: 999px; border: 2px solid #fdf3ff; }
+  .conv-body { flex: 1; min-width: 0; }
+  .conv-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .conv-name { font-size: 12.5px; font-weight: 700; color: #3b2a55; }
+  .conv-time { font-size: 10px; color: #9b8fb5; font-family: 'JetBrains Mono', monospace; }
+  .conv-preview { font-size: 11.5px; color: #8478a0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 2px; }
+
+  .thread-col { flex: 1; min-width: 0; border-radius: 20px; display: flex; flex-direction: column; overflow: hidden; }
+  .thread-head { flex-shrink: 0; padding: 16px 22px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(150,120,200,0.15); }
+  .thread-head-name { font-family: 'Baloo 2', sans-serif; font-size: 15px; font-weight: 800; color: #3b2a55; }
+  .thread-head-sub { font-size: 11.5px; color: #8478a0; margin-top: 2px; }
+  .ch-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 999px; color: #fff; }
+  .thread-msgs { flex: 1; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+  .msg-row { display: flex; }
+  .msg-row.out { justify-content: flex-end; }
+  .bubble { max-width: 58%; padding: 11px 15px; border-radius: 16px; font-size: 13px; line-height: 1.45; }
+  .bubble.in { background: rgba(255,255,255,0.6); border: 1px solid rgba(255,255,255,0.85); color: #3b2a55; border-bottom-left-radius: 4px; }
+  .bubble.out { color: #fff; border-bottom-right-radius: 4px; box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+  .composer { flex-shrink: 0; padding: 14px 22px 20px; }
+  .composer-row { display: flex; gap: 10px; align-items: center; }
+  .composer-box { flex: 1; border: 1px solid rgba(255,255,255,0.85); background: rgba(255,255,255,0.55); border-radius: 999px; padding: 12px 16px; color: #9b8fb5; font-size: 12.5px; }
+  .send-btn { width: 40px; height: 40px; border-radius: 999px; border: none; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.18); }
+
+  .side-col { width: 280px; flex-shrink: 0; border-radius: 20px; padding: 18px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
+  .side-title { display: flex; align-items: center; gap: 8px; font-family: 'Baloo 2', sans-serif; font-size: 13px; font-weight: 800; color: #3b2a55; }
+  .side-title-dot { width: 16px; height: 16px; border-radius: 999px; background: conic-gradient(from 0deg, #ff5ca8, #ffb35c, #6ee7b7, #5b9bff, #b98bff, #ff5ca8); }
+  .side-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: #8478a0; font-weight: 700; margin-bottom: 4px; }
+  .side-val { font-size: 13px; color: #3b2a55; font-weight: 600; }
+  .score-row { display: flex; align-items: center; gap: 10px; }
+  .score-pill { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; padding: 5px 10px; border-radius: 10px; }
+  .sent-chip { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+  .suggest-box { border-radius: 14px; padding: 13px; border: 1px solid rgba(255,255,255,0.85); background: linear-gradient(160deg, rgba(255,220,240,0.55), rgba(230,235,255,0.5)); box-shadow: 0 8px 20px rgba(160,90,220,0.14), inset 0 1px 0 rgba(255,255,255,0.9); }
+  .suggest-label { font-size: 10px; font-weight: 800; color: #d6367d; margin-bottom: 7px; text-transform: uppercase; letter-spacing: 0.02em; }
+  .suggest-text { font-size: 12px; line-height: 1.5; color: #3b2a55; margin-bottom: 10px; }
+  .use-btn { width: 100%; border: none; border-radius: 10px; padding: 9px; font-weight: 800; font-size: 11.5px; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif; color: #fff; background: linear-gradient(180deg, #ff8fc0 0%, #ff5ca8 55%, #e0397f 100%); box-shadow: 0 4px 12px rgba(255,92,168,0.4), inset 0 1px 0 rgba(255,255,255,0.6); }
+  .use-btn.used { background: rgba(255,255,255,0.6); color: #d6367d; box-shadow: none; border: 1px solid rgba(255,255,255,0.9); }
+</style>
+</helmet>
+
+<div class="app">
+  <div class="topbar glass">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      <div class="brand-text">candyCRM</div>
+      <div class="brand-domain">getcandycrm.com</div>
+    </div>
+    <div class="nav">
+      <button class="nav-item active">Bandeja</button>
+      <button class="nav-item">Panel de hoy</button>
+      <button class="nav-item">Reportes</button>
+    </div>
+    <div class="topbar-right">
+      <div class="search glass">Buscar...</div>
+      <div class="avatar"></div>
+    </div>
+  </div>
+
+  <div class="bodyrow">
+    <div class="list-col glass">
+      <div class="list-head">
+        <h1>Bandeja unificada</h1>
+        <div class="chfilters">
+          <sc-for list="{{chFilters}}" as="f" hint-placeholder-count="6">
+            <button class="chfilter {{f.cls}}" style="{{f.style}}" onClick="{{f.pick}}">{{f.label}}</button>
+          </sc-for>
+        </div>
+      </div>
+      <div class="conv-scroll">
+        <sc-for list="{{conversations}}" as="c" hint-placeholder-count="6">
+          <div class="conv-row {{c.cls}}" onClick="{{c.select}}">
+            <div class="conv-avatar" style="background:{{c.avatarBg}};">
+              {{c.iniciales}}
+              <div class="conv-chdot" style="background:{{c.chColor}};"></div>
+            </div>
+            <div class="conv-body">
+              <div class="conv-top">
+                <div class="conv-name">{{c.contacto}}</div>
+                <div class="conv-time">{{c.hora}}</div>
+              </div>
+              <div class="conv-preview">{{c.preview}}</div>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div class="thread-col glass">
+      <div class="thread-head">
+        <div>
+          <div class="thread-head-name">{{active.contacto}} · {{active.empresa}}</div>
+          <div class="thread-head-sub">Último mensaje {{active.hora}}</div>
+        </div>
+        <div class="ch-badge" style="background:{{active.chGradient}};">{{active.chLabel}}</div>
+      </div>
+      <div class="thread-msgs">
+        <sc-for list="{{active.mensajes}}" as="m" hint-placeholder-count="4">
+          <div class="msg-row {{m.dir}}">
+            <div class="bubble {{m.dir}}" style="{{m.style}}">{{m.texto}}</div>
+          </div>
+        </sc-for>
+      </div>
+      <div class="composer">
+        <div class="composer-row">
+          <div class="composer-box glass">Escribir una respuesta...</div>
+          <button class="send-btn" style="background:{{active.chGradient}};">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"></path><path d="M22 2 11 13"></path></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="side-col glass">
+      <div class="side-title"><div class="side-title-dot"></div>Copiloto IA</div>
+      <div>
+        <div class="side-label">Empresa</div>
+        <div class="side-val">{{active.empresa}}</div>
+      </div>
+      <div>
+        <div class="side-label">Valor estimado</div>
+        <div class="side-val">{{active.valorFmt}}</div>
+      </div>
+      <div>
+        <div class="side-label">Score IA / Sentimiento</div>
+        <div class="score-row">
+          <div class="score-pill" style="color:{{active.scoreColor}}; background:{{active.scoreBg}};">{{active.score}}</div>
+          <div class="sent-chip" style="background:{{active.sentBg}}; color:{{active.sentFg}};">{{active.sentimientoLabel}}</div>
+        </div>
+      </div>
+      <div class="suggest-box">
+        <div class="suggest-label">Sugerencia del copiloto</div>
+        <div class="suggest-text">{{active.sugerencia}}</div>
+        <button class="use-btn {{useCls}}" onClick="{{useSuggestion}}">{{useLabel}}</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      channelFilter: 'todos',
+      selectedId: 3,
+      usedSuggestion: false,
+      conversations: [
+        { id: 1, contacto: 'Laura Méndez', empresa: 'Constructora Delta', canal: 'chat_web', hora: '10:24', valor: 8500000, score: 62, sentimiento: 'neutro',
+          preview: 'Quisiera saber cómo automatizan el seguimiento de obra...',
+          sugerencia: 'Ofrecele agendar la llamada de diagnóstico gratuita y mencioná un caso similar del portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Hola, vi el chat de la web y quiero saber más sobre automatización para obras.' },
+            { dir: 'out', texto: '¡Hola Laura! Contame un poco más: ¿qué proceso te consume más tiempo hoy?' },
+            { dir: 'in', texto: 'El seguimiento de avances y los reportes semanales a los clientes.' },
+          ] },
+        { id: 2, contacto: 'Andrés Rico', empresa: 'Bufete Salazar & Asoc.', canal: 'whatsapp', hora: '09:51', valor: 12000000, score: 78, sentimiento: 'positivo',
+          preview: 'Perfecto, me interesa avanzar con una propuesta formal',
+          sugerencia: 'Lead caliente (score 78). Sugerí enviar la cotización hoy mismo y proponer una fecha de inicio.',
+          mensajes: [
+            { dir: 'out', texto: 'Buenas Andrés, te comparto el resumen de lo que hablamos ayer.' },
+            { dir: 'in', texto: 'Gracias, lo revisé con el equipo.' },
+            { dir: 'in', texto: 'Perfecto, me interesa avanzar con una propuesta formal.' },
+          ] },
+        { id: 3, contacto: 'Camila Ortiz', empresa: 'Cobranzas Pacífico', canal: 'instagram', hora: 'ayer', valor: 22000000, score: 85, sentimiento: 'positivo',
+          preview: '¿Tienen algo similar a lo que hicieron para WTW?',
+          sugerencia: 'Preguntó por el caso WTW. Compartile el caso de estudio de cobranzas del portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Vi su caso de cobranzas en el portafolio, ¿tienen algo similar para nosotros?' },
+            { dir: 'out', texto: '¡Sí! Es prácticamente el mismo problema. Te cuento cómo lo resolvimos.' },
+          ] },
+        { id: 4, contacto: 'Nicolás Fabra', empresa: 'Fabra Logística', canal: 'messenger', hora: '11:40', valor: 10200000, score: 58, sentimiento: 'neutro',
+          preview: '¿Cuánto demora la implementación?',
+          sugerencia: 'Preguntó tiempos de implementación. Dale un rango concreto (2-4 semanas) y ofrecé un piloto acotado primero.',
+          mensajes: [
+            { dir: 'in', texto: 'Hola, vi el anuncio. ¿Cuánto demora poner esto a andar?' },
+            { dir: 'out', texto: '¡Hola Nicolás! Depende del proceso, pero en general 2 a 4 semanas para el primer piloto.' },
+          ] },
+        { id: 5, contacto: 'Sofía Restrepo', empresa: 'Restrepo & Asociados', canal: 'linkedin', hora: 'mar', valor: 16800000, score: 71, sentimiento: 'positivo',
+          preview: 'Vi tu publicación sobre automatización legal, me interesa',
+          sugerencia: 'Llegó por contenido orgánico de LinkedIn. Invitala a una llamada de 20 min esta semana.',
+          mensajes: [
+            { dir: 'in', texto: 'Vi tu publicación sobre automatización de procesos legales, me interesa mucho.' },
+            { dir: 'out', texto: '¡Qué bueno! Contame un poco del estudio, ¿cuántos abogados son hoy?' },
+          ] },
+        { id: 6, contacto: 'Diego Salas', empresa: 'Transportes Salas', canal: 'whatsapp', hora: 'vie', valor: 18000000, score: 88, sentimiento: 'positivo',
+          preview: 'Listo, arrancamos el lunes',
+          sugerencia: 'Deal ganado. Sugerí programar el kickoff y pedir la reseña para el portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Listo, arrancamos el lunes entonces.' },
+            { dir: 'out', texto: '¡Excelente! Te mando la agenda del kickoff hoy mismo.' },
+          ] },
+      ],
+    };
+  }
+
+  formatMoney(n) {
+    return '$' + (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+  }
+
+  channelStyle(canal) {
+    const map = {
+      chat_web: { label: 'Chat web', gradient: 'linear-gradient(135deg, #5b9bff, #b98bff)', avatar: 'linear-gradient(135deg, #5b9bff, #7fc9ff)' },
+      whatsapp: { label: 'WhatsApp', gradient: 'linear-gradient(135deg, #25D366, #128C7E)', avatar: 'linear-gradient(135deg, #25D366, #128C7E)' },
+      instagram: { label: 'Instagram', gradient: 'linear-gradient(135deg, #f58529, #dd2a7b, #8134af)', avatar: 'linear-gradient(135deg, #f58529, #dd2a7b, #8134af)' },
+      messenger: { label: 'Messenger', gradient: 'linear-gradient(135deg, #00c6ff, #0072ff)', avatar: 'linear-gradient(135deg, #00c6ff, #0072ff)' },
+      linkedin: { label: 'LinkedIn', gradient: 'linear-gradient(135deg, #0A66C2, #004182)', avatar: 'linear-gradient(135deg, #0A66C2, #004182)' },
+    };
+    return map[canal] ?? map.chat_web;
+  }
+
+  initials(name) {
+    return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]).join('').toUpperCase();
+  }
+
+  renderVals() {
+    const channelDefs = [
+      { id: 'todos', label: 'Todos', color: '#7a6a99' },
+      { id: 'whatsapp', label: 'WhatsApp', color: '#25D366' },
+      { id: 'instagram', label: 'Instagram', color: '#dd2a7b' },
+      { id: 'messenger', label: 'Messenger', color: '#0072ff' },
+      { id: 'linkedin', label: 'LinkedIn', color: '#0A66C2' },
+      { id: 'chat_web', label: 'Chat web', color: '#5b9bff' },
+    ];
+    const filter = this.state.channelFilter;
+    const chFilters = channelDefs.map((f) => ({
+      label: f.label,
+      cls: f.id === filter ? 'active' : '',
+      style: f.id === filter ? `background:${f.color};` : '',
+      pick: () => this.setState({ channelFilter: f.id }),
+    }));
+
+    const visible = this.state.conversations.filter((c) => filter === 'todos' || c.canal === filter);
+    const conversations = visible.map((c) => {
+      const chs = this.channelStyle(c.canal);
+      return {
+        ...c,
+        iniciales: this.initials(c.contacto),
+        avatarBg: chs.avatar,
+        chColor: chs.gradient,
+        cls: c.id === this.state.selectedId ? 'selected' : '',
+        select: () => this.setState({ selectedId: c.id, usedSuggestion: false }),
+      };
+    });
+
+    const rawActive = this.state.conversations.find((c) => c.id === this.state.selectedId) ?? this.state.conversations[0];
+    const chs = this.channelStyle(rawActive.canal);
+    const scoreColor = rawActive.score >= 75 ? '#e0397f' : rawActive.score >= 50 ? '#3f7fe0' : '#7a6a99';
+    const scoreBg = rawActive.score >= 75 ? 'rgba(255,92,168,0.16)' : rawActive.score >= 50 ? 'rgba(91,155,255,0.16)' : 'rgba(150,120,200,0.14)';
+    const sentMap = {
+      positivo: { fg: '#d6367d', bg: 'rgba(255,92,168,0.16)', label: 'Positivo' },
+      neutro: { fg: '#3f7fe0', bg: 'rgba(91,155,255,0.16)', label: 'Neutro' },
+      negativo: { fg: '#7a6a99', bg: 'rgba(150,120,200,0.16)', label: 'Negativo' },
+    };
+    const sent = sentMap[rawActive.sentimiento] ?? sentMap.neutro;
+
+    const mensajes = rawActive.mensajes.map((m) => ({
+      ...m,
+      style: m.dir === 'out' ? `background:${chs.gradient};` : '',
+    }));
+
+    const active = {
+      ...rawActive,
+      valorFmt: this.formatMoney(rawActive.valor),
+      chLabel: chs.label,
+      chGradient: chs.gradient,
+      scoreColor,
+      scoreBg,
+      sentFg: sent.fg,
+      sentBg: sent.bg,
+      sentimientoLabel: sent.label,
+      mensajes,
+    };
+
+    return {
+      chFilters,
+      conversations,
+      active,
+      useCls: this.state.usedSuggestion ? 'used' : '',
+      useLabel: this.state.usedSuggestion ? 'Insertada en el mensaje ✓' : 'Usar sugerencia',
+      useSuggestion: () => this.setState({ usedSuggestion: true }),
+    };
+  }
+}
+</script>
+</body>
+</html>

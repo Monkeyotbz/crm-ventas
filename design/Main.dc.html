@@ -1,0 +1,429 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .app {
+    width: 1440px;
+    height: 900px;
+    background: #05060a;
+    background-image:
+      radial-gradient(ellipse 70% 40% at 20% -10%, rgba(34,211,238,0.06), transparent),
+      radial-gradient(ellipse 50% 30% at 90% 0%, rgba(167,139,250,0.05), transparent);
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+  .topbar {
+    height: 60px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    border-bottom: 1px solid #1a1f31;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: #f8fafc;
+  }
+  .brand-dot { width: 8px; height: 8px; border-radius: 999px; background: #22d3ee; box-shadow: 0 0 12px rgba(34,211,238,0.7); }
+  .nav {
+    display: flex;
+    gap: 4px;
+    background: #10131f;
+    border: 1px solid #1a1f31;
+    border-radius: 10px;
+    padding: 3px;
+  }
+  .nav-item {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  .topbar-right { display: flex; align-items: center; gap: 14px; }
+  .search {
+    width: 220px;
+    height: 34px;
+    border-radius: 8px;
+    background: #10131f;
+    border: 1px solid #1a1f31;
+    color: #64748b;
+    font-size: 12.5px;
+    padding: 0 12px;
+    display: flex;
+    align-items: center;
+  }
+  .avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa);
+  }
+  .subheader {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+  }
+  .subheader h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #f8fafc;
+  }
+  .stats { display: flex; gap: 20px; }
+  .stat { font-family: 'JetBrains Mono', monospace; }
+  .stat-label { font-size: 10.5px; color: #64748b; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stat-val { font-size: 15px; font-weight: 500; color: #f8fafc; }
+  .new-deal-btn {
+    background: #22d3ee;
+    color: #05060a;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .note {
+    margin: 0 24px 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(167,139,250,0.08);
+    border: 1px solid rgba(167,139,250,0.25);
+    color: #cbd5e1;
+    font-size: 12.5px;
+  }
+  .board {
+    flex: 1;
+    display: flex;
+    gap: 14px;
+    padding: 0 24px 24px;
+    overflow-x: auto;
+    min-height: 0;
+  }
+  .col {
+    width: 236px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .col-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 4px 12px;
+    border-bottom-width: 2px;
+    border-bottom-style: solid;
+  }
+  .col-title { display: flex; align-items: center; gap: 8px; font-size: 12.5px; font-weight: 700; }
+  .col-dot { width: 7px; height: 7px; border-radius: 999px; }
+  .col-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: #64748b;
+    background: #10131f;
+    border-radius: 999px;
+    padding: 1px 7px;
+  }
+  .col-sum { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #475569; margin-top: 4px; }
+  .col-cards {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+  }
+  .card {
+    background: #0a0c14;
+    border: 1px solid #1a1f31;
+    border-radius: 10px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .card-empresa { font-size: 12.5px; font-weight: 600; color: #f1f5f9; }
+  .card-contacto { font-size: 11px; color: #64748b; margin-top: 1px; }
+  .card-row { display: flex; align-items: center; justify-content: space-between; }
+  .card-valor { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #a78bfa; }
+  .drawer {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 340px;
+    height: 900px;
+    background: #0a0c14;
+    border-left: 1px solid #1a1f31;
+    box-shadow: -24px 0 48px rgba(0,0,0,0.4);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .drawer-close {
+    align-self: flex-end;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #10131f;
+    border: 1px solid #1a1f31;
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .drawer h2 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin: 0; color: #f8fafc; }
+  .drawer-empresa { font-size: 12.5px; color: #64748b; margin-top: -12px; }
+  .drawer-field-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; margin-bottom: 4px; }
+  .drawer-field-val { font-size: 13.5px; color: #e2e8f0; }
+  .drawer-divider { border-top: 1px solid #1a1f31; }
+  .move-btn {
+    background: #a78bfa;
+    color: #05060a;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    text-align: left;
+  }
+</style>
+</helmet>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand"><div class="brand-dot"></div>[CRM] · Hellominus</div>
+    <div class="nav">
+      <button class="nav-item" style="background:{{navPipelineBg}}; color:{{navPipelineFg}};" onClick="{{setNavPipeline}}">Pipeline</button>
+      <button class="nav-item" style="background:{{navBandejaBg}}; color:{{navBandejaFg}};" onClick="{{setNavBandeja}}">Bandeja</button>
+      <button class="nav-item" style="background:{{navReportesBg}}; color:{{navReportesFg}};" onClick="{{setNavReportes}}">Reportes</button>
+    </div>
+    <div class="topbar-right">
+      <div class="search">Buscar contacto o empresa...</div>
+      <div class="avatar"></div>
+    </div>
+  </div>
+
+  <sc-if value="{{showNote}}" hint-placeholder-val="{{false}}">
+    <div class="note">Esta propuesta explora el <strong>Pipeline (Kanban)</strong> como pantalla protagonista, estilo Pipedrive. La Bandeja y los Reportes se diseñan a fondo en las otras direcciones.</div>
+  </sc-if>
+
+  <div class="subheader">
+    <h1>Pipeline de ventas</h1>
+    <div class="stats">
+      <div class="stat"><div class="stat-label">Oportunidades</div><div class="stat-val">{{totalDeals}}</div></div>
+      <div class="stat"><div class="stat-label">Valor total</div><div class="stat-val">{{totalValue}}</div></div>
+    </div>
+    <button class="new-deal-btn">+ Nuevo deal</button>
+  </div>
+
+  <div class="board">
+    <sc-for list="{{columns}}" as="col" hint-placeholder-count="7">
+      <div class="col">
+        <div class="col-head" style="border-bottom-color: {{col.color}};">
+          <div class="col-title"><div class="col-dot" style="background:{{col.color}};"></div>{{col.nombre}}</div>
+          <div class="col-count">{{col.count}}</div>
+        </div>
+        <div class="col-sum">{{col.sum}}</div>
+        <div class="col-cards">
+          <sc-for list="{{col.deals}}" as="deal" hint-placeholder-count="2">
+            <div class="card" onClick="{{deal.select}}">
+              <div>
+                <div class="card-empresa">{{deal.empresa}}</div>
+                <div class="card-contacto">{{deal.contacto}}</div>
+              </div>
+              <dc-import name="ChannelIcon" canal="{{deal.canal}}" hint-size="90px,20px"></dc-import>
+              <div class="card-row">
+                <div class="card-valor">{{deal.valorFmt}}</div>
+                <dc-import name="ScoreBadge" score="{{deal.score}}" sentimiento="{{deal.sentimiento}}" hint-size="60px,26px"></dc-import>
+              </div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{hasSelected}}" hint-placeholder-val="{{false}}">
+    <div class="drawer">
+      <button class="drawer-close" onClick="{{closeDrawer}}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M18 6 6 18"></path>
+          <path d="M6 6l12 12"></path>
+        </svg>
+      </button>
+      <div>
+        <h2>{{selected.contacto}}</h2>
+        <div class="drawer-empresa">{{selected.empresa}}</div>
+      </div>
+      <div class="drawer-divider"></div>
+      <div>
+        <div class="drawer-field-label">Etapa actual</div>
+        <div class="drawer-field-val">{{selected.stageNombre}}</div>
+      </div>
+      <div>
+        <div class="drawer-field-label">Valor estimado</div>
+        <div class="drawer-field-val">{{selected.valorFmt}}</div>
+      </div>
+      <div>
+        <div class="drawer-field-label">Fuente</div>
+        <dc-import name="ChannelIcon" canal="{{selected.canal}}" hint-size="90px,20px"></dc-import>
+      </div>
+      <div>
+        <div class="drawer-field-label">Score IA / Sentimiento</div>
+        <dc-import name="ScoreBadge" score="{{selected.score}}" sentimiento="{{selected.sentimiento}}" hint-size="60px,26px"></dc-import>
+      </div>
+      <div class="drawer-divider"></div>
+      <sc-if value="{{selected.hasNext}}" hint-placeholder-val="{{true}}">
+        <button class="move-btn" onClick="{{selected.moveNext}}">Mover a: {{selected.nextStageName}} →</button>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeNav: 'pipeline',
+      selectedDealId: null,
+      deals: [
+        { id: 1, stageId: 1, contacto: 'Laura Méndez', empresa: 'Constructora Delta', valor: 8500000, canal: 'chat_web', score: 62, sentimiento: 'neutro' },
+        { id: 2, stageId: 1, contacto: 'Julián Prada', empresa: 'Prada & Hnos.', valor: 6200000, canal: 'meta_ads', score: 41, sentimiento: 'neutro' },
+        { id: 3, stageId: 2, contacto: 'Andrés Rico', empresa: 'Bufete Salazar & Asoc.', valor: 12000000, canal: 'whatsapp', score: 78, sentimiento: 'positivo' },
+        { id: 4, stageId: 3, contacto: 'Camila Ortiz', empresa: 'Cobranzas Pacífico', valor: 22000000, canal: 'instagram', score: 85, sentimiento: 'positivo' },
+        { id: 5, stageId: 4, contacto: 'Tomás Rey', empresa: 'Grupo Ferretero Rey', valor: 15500000, canal: 'meta_ads', score: 55, sentimiento: 'neutro' },
+        { id: 6, stageId: 5, contacto: 'Valentina Cruz', empresa: 'Ingeniería Cruz S.A.S.', valor: 30000000, canal: 'chat_web', score: 91, sentimiento: 'positivo' },
+        { id: 7, stageId: 6, contacto: 'Diego Salas', empresa: 'Transportes Salas', valor: 18000000, canal: 'whatsapp', score: 88, sentimiento: 'positivo' },
+        { id: 8, stageId: 7, contacto: 'Marcela Uribe', empresa: 'Textiles Uribe', valor: 9000000, canal: 'manual', score: 30, sentimiento: 'negativo' },
+      ],
+    };
+  }
+
+  stagesDef() {
+    return [
+      { id: 1, nombre: 'Nuevo', color: '#22d3ee' },
+      { id: 2, nombre: 'Contactado', color: '#22d3ee' },
+      { id: 3, nombre: 'Calificado', color: '#a78bfa' },
+      { id: 4, nombre: 'Propuesta', color: '#a78bfa' },
+      { id: 5, nombre: 'Negociación', color: '#a78bfa' },
+      { id: 6, nombre: 'Ganado', color: '#34d399' },
+      { id: 7, nombre: 'Perdido', color: '#64748b' },
+    ];
+  }
+
+  formatMoney(n) {
+    return '$' + (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+  }
+
+  moveDealToNextStage(dealId) {
+    const stages = this.stagesDef();
+    this.setState({
+      deals: this.state.deals.map((d) => {
+        if (d.id !== dealId) return d;
+        const idx = stages.findIndex((s) => s.id === d.stageId);
+        const next = stages[idx + 1];
+        return next ? { ...d, stageId: next.id } : d;
+      }),
+    });
+  }
+
+  renderVals() {
+    const stages = this.stagesDef();
+    const deals = this.state.deals;
+
+    const columns = stages.map((s) => {
+      const colDeals = deals
+        .filter((d) => d.stageId === s.id)
+        .map((d) => ({
+          ...d,
+          valorFmt: this.formatMoney(d.valor),
+          select: () => this.setState({ selectedDealId: d.id }),
+        }));
+      const sum = colDeals.reduce((acc, d) => acc + d.valor, 0);
+      return { ...s, deals: colDeals, count: colDeals.length, sum: this.formatMoney(sum) };
+    });
+
+    const totalDeals = deals.length;
+    const totalValue = this.formatMoney(deals.reduce((acc, d) => acc + d.valor, 0));
+
+    const selectedRaw = deals.find((d) => d.id === this.state.selectedDealId) || null;
+    let selected = null;
+    if (selectedRaw) {
+      const stage = stages.find((s) => s.id === selectedRaw.stageId);
+      const idx = stages.findIndex((s) => s.id === selectedRaw.stageId);
+      const next = stages[idx + 1];
+      selected = {
+        ...selectedRaw,
+        valorFmt: this.formatMoney(selectedRaw.valor),
+        stageNombre: stage ? stage.nombre : '',
+        hasNext: Boolean(next),
+        nextStageName: next ? next.nombre : '',
+        moveNext: () => this.moveDealToNextStage(selectedRaw.id),
+      };
+    }
+
+    const nav = this.state.activeNav;
+    const activeBg = '#22d3ee';
+    const activeFg = '#05060a';
+    const idleBg = 'transparent';
+    const idleFg = '#94a3b8';
+
+    return {
+      columns,
+      totalDeals,
+      totalValue,
+      hasSelected: Boolean(selected),
+      selected: selected || {},
+      showNote: nav !== 'pipeline',
+      navPipelineBg: nav === 'pipeline' ? activeBg : idleBg,
+      navPipelineFg: nav === 'pipeline' ? activeFg : idleFg,
+      navBandejaBg: nav === 'bandeja' ? activeBg : idleBg,
+      navBandejaFg: nav === 'bandeja' ? activeFg : idleFg,
+      navReportesBg: nav === 'reportes' ? activeBg : idleBg,
+      navReportesFg: nav === 'reportes' ? activeFg : idleFg,
+      setNavPipeline: () => this.setState({ activeNav: 'pipeline' }),
+      setNavBandeja: () => this.setState({ activeNav: 'bandeja' }),
+      setNavReportes: () => this.setState({ activeNav: 'reportes' }),
+      closeDrawer: () => this.setState({ selectedDealId: null }),
+    };
+  }
+}
+</script>
+</body>
+</html>

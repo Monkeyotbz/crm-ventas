@@ -1,0 +1,333 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; }
+  .app {
+    width: 1440px;
+    height: 900px;
+    background: #05060a;
+    color: #e2e8f0;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    display: flex;
+    overflow: hidden;
+  }
+  .rail {
+    width: 64px;
+    flex-shrink: 0;
+    background: #0a0c14;
+    border-right: 1px solid #1a1f31;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px 0;
+    gap: 8px;
+  }
+  .rail-logo { width: 10px; height: 10px; border-radius: 999px; background: #22d3ee; box-shadow: 0 0 12px rgba(34,211,238,0.7); margin-bottom: 14px; }
+  .rail-item {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .list-col {
+    width: 340px;
+    flex-shrink: 0;
+    border-right: 1px solid #1a1f31;
+    display: flex;
+    flex-direction: column;
+  }
+  .list-head { padding: 18px 18px 12px; }
+  .list-head h1 { font-family: 'Space Grotesk', sans-serif; font-size: 17px; margin: 0 0 12px; color: #f8fafc; }
+  .filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-pill {
+    padding: 5px 11px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid #1a1f31;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .conv-scroll { flex: 1; overflow-y: auto; padding: 4px 8px; }
+  .conv-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    align-items: flex-start;
+  }
+  .conv-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #22d3ee, #a78bfa);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: #05060a;
+  }
+  .conv-body { flex: 1; min-width: 0; }
+  .conv-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .conv-name { font-size: 13px; font-weight: 600; color: #f1f5f9; }
+  .conv-time { font-size: 10.5px; color: #475569; font-family: 'JetBrains Mono', monospace; }
+  .conv-preview { font-size: 12px; color: #64748b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin: 3px 0 6px; }
+  .thread-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .thread-head {
+    height: 66px;
+    flex-shrink: 0;
+    border-bottom: 1px solid #1a1f31;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+  }
+  .thread-head-name { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 600; color: #f8fafc; }
+  .thread-head-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+  .stage-chip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(167,139,250,0.12);
+    color: #a78bfa;
+  }
+  .thread-msgs { flex: 1; overflow-y: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px; }
+  .msg-row { display: flex; }
+  .msg-row.out { justify-content: flex-end; }
+  .bubble {
+    max-width: 60%;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  .bubble.in { background: #10131f; border: 1px solid #1a1f31; color: #e2e8f0; border-bottom-left-radius: 4px; }
+  .bubble.out { background: rgba(34,211,238,0.14); border: 1px solid rgba(34,211,238,0.3); color: #ecfeff; border-bottom-right-radius: 4px; }
+  .composer { flex-shrink: 0; padding: 16px 24px 24px; }
+  .composer-box {
+    border: 1px solid #1a1f31;
+    background: #0a0c14;
+    border-radius: 12px;
+    padding: 12px 14px;
+    color: #475569;
+    font-size: 13px;
+  }
+  .side-col { width: 260px; flex-shrink: 0; border-left: 1px solid #1a1f31; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .side-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.06em; color: #475569; margin-bottom: 6px; }
+  .side-val { font-size: 13px; color: #e2e8f0; }
+  .side-divider { border-top: 1px solid #1a1f31; }
+  .copilot-box {
+    border: 1px solid rgba(167,139,250,0.25);
+    background: rgba(167,139,250,0.06);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .copilot-title { font-size: 11px; font-weight: 700; color: #a78bfa; margin-bottom: 6px; }
+  .copilot-text { font-size: 12px; color: #cbd5e1; line-height: 1.5; }
+</style>
+</helmet>
+
+<div class="app">
+  <div class="rail">
+    <div class="rail-logo"></div>
+    <button class="rail-item" style="background:{{navBandejaBg}}; color:{{navBandejaFg}};" onClick="{{setNavBandeja}}">BND</button>
+    <button class="rail-item" style="background:{{navPipelineBg}}; color:{{navPipelineFg}};" onClick="{{setNavPipeline}}">PIP</button>
+    <button class="rail-item" style="background:{{navReportesBg}}; color:{{navReportesFg}};" onClick="{{setNavReportes}}">REP</button>
+  </div>
+
+  <div class="list-col">
+    <div class="list-head">
+      <h1>Bandeja unificada</h1>
+      <div class="filters">
+        <button class="filter-pill" style="background:{{fAllBg}}; color:{{fAllFg}}; border-color:{{fAllBorder}};" onClick="{{setFilterAll}}">Todos</button>
+        <button class="filter-pill" style="background:{{fWebBg}}; color:{{fWebFg}}; border-color:{{fWebBorder}};" onClick="{{setFilterWeb}}">Chat web</button>
+        <button class="filter-pill" style="background:{{fWaBg}}; color:{{fWaFg}}; border-color:{{fWaBorder}};" onClick="{{setFilterWa}}">WhatsApp</button>
+        <button class="filter-pill" style="background:{{fIgBg}}; color:{{fIgFg}}; border-color:{{fIgBorder}};" onClick="{{setFilterIg}}">Instagram</button>
+      </div>
+    </div>
+    <div class="conv-scroll">
+      <sc-for list="{{conversations}}" as="c" hint-placeholder-count="5">
+        <div class="conv-row" style="background:{{c.rowBg}};" onClick="{{c.select}}">
+          <div class="conv-avatar">{{c.iniciales}}</div>
+          <div class="conv-body">
+            <div class="conv-top">
+              <div class="conv-name">{{c.contacto}}</div>
+              <div class="conv-time">{{c.hora}}</div>
+            </div>
+            <div class="conv-preview">{{c.preview}}</div>
+            <dc-import name="ChannelIcon" canal="{{c.canal}}" hint-size="90px,20px"></dc-import>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div class="thread-col">
+    <div class="thread-head">
+      <div>
+        <div class="thread-head-name">{{active.contacto}} · {{active.empresa}}</div>
+        <div class="thread-head-sub">Último mensaje {{active.hora}}</div>
+      </div>
+      <div class="stage-chip">{{active.stageNombre}}</div>
+    </div>
+    <div class="thread-msgs">
+      <sc-for list="{{active.mensajes}}" as="m" hint-placeholder-count="4">
+        <div class="msg-row {{m.dir}}">
+          <div class="bubble {{m.dir}}">{{m.texto}}</div>
+        </div>
+      </sc-for>
+    </div>
+    <div class="composer">
+      <div class="composer-box">Escribir una respuesta...</div>
+    </div>
+  </div>
+
+  <div class="side-col">
+    <div>
+      <div class="side-label">Empresa</div>
+      <div class="side-val">{{active.empresa}}</div>
+    </div>
+    <div>
+      <div class="side-label">Valor estimado</div>
+      <div class="side-val">{{active.valorFmt}}</div>
+    </div>
+    <div>
+      <div class="side-label">Score IA / Sentimiento</div>
+      <dc-import name="ScoreBadge" score="{{active.score}}" sentimiento="{{active.sentimiento}}" hint-size="60px,26px"></dc-import>
+    </div>
+    <div class="side-divider"></div>
+    <div class="copilot-box">
+      <div class="copilot-title">Sugerencia del copiloto</div>
+      <div class="copilot-text">{{active.sugerencia}}</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+
+<script data-dc-script data-props='{}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      activeNav: 'bandeja',
+      channelFilter: 'todos',
+      selectedId: 1,
+      conversations: [
+        { id: 1, contacto: 'Laura Méndez', empresa: 'Constructora Delta', canal: 'chat_web', hora: '10:24', stageNombre: 'Nuevo', valor: 8500000, score: 62, sentimiento: 'neutro',
+          preview: 'Quisiera saber cómo automatizan el seguimiento de obra...',
+          sugerencia: 'Ofrecele agendar la llamada de diagnóstico gratuita y mencioná el caso de Constructora similar del portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Hola, vi el chat de la web y quiero saber más sobre automatización para obras.' },
+            { dir: 'out', texto: '¡Hola Laura! Contame un poco más: ¿qué proceso te consume más tiempo hoy?' },
+            { dir: 'in', texto: 'El seguimiento de avances y los reportes semanales a los clientes.' },
+          ] },
+        { id: 2, contacto: 'Andrés Rico', empresa: 'Bufete Salazar & Asoc.', canal: 'whatsapp', hora: '09:51', stageNombre: 'Contactado', valor: 12000000, score: 78, sentimiento: 'positivo',
+          preview: 'Perfecto, me interesa avanzar con una propuesta formal',
+          sugerencia: 'Lead caliente (score 78). Sugerí enviar la cotización hoy mismo y proponer una fecha de inicio.',
+          mensajes: [
+            { dir: 'out', texto: 'Buenas Andrés, te comparto el resumen de lo que hablamos ayer.' },
+            { dir: 'in', texto: 'Gracias, lo revisé con el equipo.' },
+            { dir: 'in', texto: 'Perfecto, me interesa avanzar con una propuesta formal.' },
+          ] },
+        { id: 3, contacto: 'Camila Ortiz', empresa: 'Cobranzas Pacífico', canal: 'instagram', hora: 'ayer', stageNombre: 'Calificado', valor: 22000000, score: 85, sentimiento: 'positivo',
+          preview: '¿Tienen algo similar a lo que hicieron para WTW?',
+          sugerencia: 'Preguntó por el caso WTW. Compartile el caso de estudio de cobranzas del portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Vi su caso de cobranzas en el portafolio, ¿tienen algo similar para nosotros?' },
+            { dir: 'out', texto: '¡Sí! Es prácticamente el mismo problema. Te cuento cómo lo resolvimos.' },
+          ] },
+        { id: 4, contacto: 'Tomás Rey', empresa: 'Grupo Ferretero Rey', canal: 'meta_ads', hora: 'lun', stageNombre: 'Propuesta', valor: 15500000, score: 55, sentimiento: 'neutro',
+          preview: 'Todavía estoy comparando opciones',
+          sugerencia: 'Sentimiento neutro y comparando proveedores. Reforzá el diferenciador (copiloto IA) frente a herramientas genéricas.',
+          mensajes: [
+            { dir: 'in', texto: 'Estoy viendo un par de opciones más, todavía no decido.' },
+            { dir: 'out', texto: 'Entiendo. ¿Qué es lo que más te importa comparar?' },
+          ] },
+        { id: 5, contacto: 'Diego Salas', empresa: 'Transportes Salas', canal: 'whatsapp', hora: 'vie', stageNombre: 'Ganado', valor: 18000000, score: 88, sentimiento: 'positivo',
+          preview: 'Listo, arrancamos el lunes',
+          sugerencia: 'Deal ganado. Sugerí programar el kickoff y pedir la reseña para el portafolio.',
+          mensajes: [
+            { dir: 'in', texto: 'Listo, arrancamos el lunes entonces.' },
+            { dir: 'out', texto: '¡Excelente! Te mando la agenda del kickoff hoy mismo.' },
+          ] },
+      ],
+    };
+  }
+
+  formatMoney(n) {
+    return '$' + (n / 1000000).toFixed(1).replace('.0', '') + 'M';
+  }
+
+  renderVals() {
+    const filter = this.state.channelFilter;
+    const list = this.state.conversations.filter((c) => filter === 'todos' || c.canal === filter);
+
+    const conversations = list.map((c) => ({
+      ...c,
+      iniciales: c.contacto.split(' ').map((p) => p[0]).slice(0, 2).join(''),
+      rowBg: c.id === this.state.selectedId ? '#10131f' : 'transparent',
+      select: () => this.setState({ selectedId: c.id }),
+    }));
+
+    const activeRaw = this.state.conversations.find((c) => c.id === this.state.selectedId) || this.state.conversations[0];
+    const active = { ...activeRaw, valorFmt: this.formatMoney(activeRaw.valor) };
+
+    const nav = this.state.activeNav;
+    const activeBg = '#22d3ee';
+    const activeFg = '#05060a';
+    const idleBg = 'transparent';
+    const idleFg = '#64748b';
+
+    const pillOn = { bg: 'rgba(34,211,238,0.14)', fg: '#22d3ee', border: 'rgba(34,211,238,0.4)' };
+    const pillOff = { bg: 'transparent', fg: '#64748b', border: '#1a1f31' };
+    const p = (key) => (filter === key ? pillOn : pillOff);
+
+    return {
+      conversations,
+      active,
+      navBandejaBg: nav === 'bandeja' ? activeBg : idleBg,
+      navBandejaFg: nav === 'bandeja' ? activeFg : idleFg,
+      navPipelineBg: nav === 'pipeline' ? activeBg : idleBg,
+      navPipelineFg: nav === 'pipeline' ? activeFg : idleFg,
+      navReportesBg: nav === 'reportes' ? activeBg : idleBg,
+      navReportesFg: nav === 'reportes' ? activeFg : idleFg,
+      setNavBandeja: () => this.setState({ activeNav: 'bandeja' }),
+      setNavPipeline: () => this.setState({ activeNav: 'pipeline' }),
+      setNavReportes: () => this.setState({ activeNav: 'reportes' }),
+      fAllBg: p('todos').bg, fAllFg: p('todos').fg, fAllBorder: p('todos').border,
+      fWebBg: p('chat_web').bg, fWebFg: p('chat_web').fg, fWebBorder: p('chat_web').border,
+      fWaBg: p('whatsapp').bg, fWaFg: p('whatsapp').fg, fWaBorder: p('whatsapp').border,
+      fIgBg: p('instagram').bg, fIgFg: p('instagram').fg, fIgBorder: p('instagram').border,
+      setFilterAll: () => this.setState({ channelFilter: 'todos' }),
+      setFilterWeb: () => this.setState({ channelFilter: 'chat_web' }),
+      setFilterWa: () => this.setState({ channelFilter: 'whatsapp' }),
+      setFilterIg: () => this.setState({ channelFilter: 'instagram' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

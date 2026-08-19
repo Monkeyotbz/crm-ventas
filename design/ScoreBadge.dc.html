@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  .sb-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+  .sb-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 500;
+    border-width: 1.5px;
+    border-style: solid;
+  }
+  .sb-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    flex-shrink: 0;
+  }
+</style>
+</helmet>
+<div class="sb-wrap">
+  <div class="sb-num" style="color: {{scoreColor}}; border-color: {{scoreColor}};">{{score}}</div>
+  <div class="sb-dot" style="background: {{sentColor}};"></div>
+</div>
+</x-dc>
+<script data-dc-script data-props='{"score":{"editor":"range","default":70,"min":0,"max":100,"step":1},"sentimiento":{"editor":"enum","default":"neutro","options":["positivo","neutro","negativo"]}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const score = this.props.score ?? 70;
+    const sentimiento = this.props.sentimiento ?? 'neutro';
+    const scoreColor = score >= 75 ? '#34d399' : score >= 50 ? '#22d3ee' : '#64748b';
+    const sentMap = { positivo: '#34d399', neutro: '#22d3ee', negativo: '#64748b' };
+    return { score, scoreColor, sentColor: sentMap[sentimiento] ?? '#64748b' };
+  }
+}
+</script>
+</body>
+</html>
