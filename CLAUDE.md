@@ -19,6 +19,7 @@ No hay código de producción implementado todavía sobre esta dirección visual
 
 ## Estado del proyecto
 
-- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link, `supabase/setup.sql` con el esquema inicial (ver [supabase/README.md](supabase/README.md)).
-- **No existe todavía un proyecto Supabase real** para este CRM — `setup.sql` no se corrió contra ninguna base. Cualquier cambio de esquema se edita directo en `setup.sql`, no como migración incremental, hasta que exista una base real con datos que proteger.
-- Próximo paso de planeación (no de código): rediseñar el esquema de base de datos a la luz de lo que el canvas de diseño reveló (canales `messenger`/`linkedin`, insights de IA por conversación — resumen, sugerencia, citas RAG —, agenda/reuniones). Ver los Sprints en [README.md](README.md).
+- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link.
+- Esquema de base de datos **rediseñado** en `supabase/setup.sql` a la luz de lo que reveló el canvas de diseño: los `domain` `canal_type`/`fuente_type` ahora incluyen `messenger`/`linkedin`, tabla nueva `conversation_insights` (estado actual del Copiloto IA por conversación: score, sentimiento, nivel de interés derivado, resumen, sugerencia, citas RAG), tabla nueva `meetings` (agenda de llamadas), `contacts.sector`, e índices en las columnas FK que antes no tenían ninguno. Detalle completo en [supabase/README.md](supabase/README.md).
+- **Sigue sin existir un proyecto Supabase real** para este CRM — `setup.sql` todavía no se corrió contra ninguna base (y no se pudo probar con un Postgres local tampoco: no hay Docker instalado en la máquina de desarrollo). Es puramente planificación hasta que exista un proyecto real; cualquier cambio de esquema se sigue editando directo en `setup.sql`, no como migración incremental.
+- Próximo paso de código (no de planeación): Sprint 1 (Kanban funcional) recién puede arrancar después de crear ese proyecto Supabase real y correr el script. Ver los Sprints en [README.md](README.md).
