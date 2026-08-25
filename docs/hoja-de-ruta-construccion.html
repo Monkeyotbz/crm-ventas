@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Hoja de Ruta de Construcción — Herramientas del proyecto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a;
+    --ink-raised:#161a23;
+    --panel:#171c26;
+    --panel-hi:#1e2430;
+    --border:#2b3244;
+    --border-soft:#212636;
+    --copper:#cc7a42;
+    --copper-dim:#8a5732;
+    --teal:#43c2ae;
+    --teal-dim:#2c8577;
+    --slate:#7c8bb0;
+    --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0;
+    --text-dim:#8d96a8;
+    --text-faint:#565f70;
+    --mono:'JetBrains Mono', monospace;
+    --display:'Space Grotesk', sans-serif;
+    --body:'Inter', sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);
+    line-height:1.6;font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:
+      linear-gradient(rgba(203,122,66,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(203,122,66,0.035) 1px, transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  /* top bar */
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,0.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:1000px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-faint);}
+  .top-bar-links{display:flex;gap:16px;font-family:var(--mono);font-size:11px;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  /* hero */
+  .hero{padding:80px 0 48px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,0.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.8vw,48px);line-height:1.1;letter-spacing:-.01em;max-width:20ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:20px;max-width:62ch;font-size:16.5px;color:var(--text-dim);}
+
+  /* progress stepper */
+  .stepper{display:flex;gap:0;margin-top:44px;overflow-x:auto;padding-bottom:4px;}
+  .step-chip{
+    flex-shrink:0;display:flex;align-items:center;gap:10px;
+    font-family:var(--mono);font-size:12px;padding:10px 18px;
+    border:1px solid var(--border);background:var(--panel);
+    white-space:nowrap;position:relative;
+  }
+  .step-chip:not(:last-child)::after{
+    content:"";position:absolute;right:-1px;top:50%;width:16px;height:1px;
+    background:var(--border);transform:translateY(-50%);
+  }
+  .step-chip.done{border-color:var(--teal-dim);color:var(--teal);}
+  .step-chip.done .dot{background:var(--teal);}
+  .step-chip.pending{border-style:dashed;color:var(--text-faint);}
+  .step-chip .dot{width:6px;height:6px;border-radius:50%;background:var(--text-faint);flex-shrink:0;}
+
+  /* section head */
+  .section-head{padding:70px 0 8px;}
+  .section-head h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,28px);}
+  .section-head p{color:var(--text-dim);margin-top:8px;max-width:64ch;}
+
+  /* tool step block */
+  .tool-step{padding:36px 0;border-top:1px solid var(--border-soft);scroll-margin-top:70px;}
+  .tool-step:first-of-type{border-top:1px solid var(--border);}
+
+  .tool-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:22px;flex-wrap:wrap;}
+  .tool-num{
+    font-family:var(--mono);font-weight:700;font-size:15px;color:var(--ink);
+    background:var(--teal);width:38px;height:38px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .tool-titles{flex:1;min-width:200px;}
+  .tool-titles h3{font-family:var(--display);font-weight:700;font-size:23px;}
+  .tool-tag{font-family:var(--mono);font-size:11px;color:var(--text-faint);letter-spacing:.04em;margin-top:3px;}
+  .status-badge{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;
+    padding:5px 11px;border-radius:12px;background:rgba(67,194,174,0.12);color:var(--teal);
+    align-self:flex-start;white-space:nowrap;
+  }
+
+  .tool-what{color:var(--text-dim);max-width:70ch;margin-bottom:28px;font-size:15px;}
+  .tool-what strong{color:var(--text);}
+
+  .why-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin-bottom:28px;}
+  .why-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
+  .why-card .k{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--copper);margin-bottom:8px;}
+  .why-card .v{font-size:13.5px;color:var(--text-dim);}
+
+  .flow-mini{background:var(--ink-raised);border:1px solid var(--border);border-radius:8px;padding:22px 26px;margin-bottom:28px;}
+  .flow-mini .label{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:16px;}
+  .flow-steps{display:flex;flex-direction:column;gap:0;}
+  .flow-item{display:grid;grid-template-columns:20px 1fr;gap:14px;position:relative;padding-bottom:16px;}
+  .flow-item:last-child{padding-bottom:0;}
+  .flow-item .fdot{width:8px;height:8px;border-radius:50%;background:var(--teal);margin-top:5px;position:relative;z-index:1;}
+  .flow-item:not(:last-child)::before{
+    content:"";position:absolute;left:3px;top:14px;bottom:-4px;width:2px;background:var(--border);
+  }
+  .flow-item .ftext{font-size:13.5px;color:var(--text-dim);}
+  .flow-item .ftext b{color:var(--text);font-weight:500;}
+
+  .chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:28px;}
+  .chip{
+    font-family:var(--mono);font-size:11.5px;color:var(--text-dim);
+    background:var(--panel);border:1px solid var(--border);
+    padding:6px 12px;border-radius:14px;
+  }
+
+  .risk-callout{
+    border-left:3px solid var(--lost);background:rgba(168,82,63,0.07);
+    padding:18px 22px;border-radius:0 6px 6px 0;
+  }
+  .risk-callout .rk-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;color:var(--lost);text-transform:uppercase;margin-bottom:10px;}
+  .risk-callout ul{margin-left:18px;color:var(--text-dim);font-size:13.5px;}
+  .risk-callout li{margin-bottom:6px;}
+
+  .code-panel{background:#0c0e13;border:1px solid var(--border);border-radius:8px;padding:22px 24px;overflow-x:auto;margin-bottom:28px;}
+  .code-panel .cp-label{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:14px;}
+  .code-panel pre{font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--text-dim);}
+  .code-panel .kw{color:var(--teal);}
+  .code-panel .cmt{color:var(--text-faint);}
+
+  .roi-table{width:100%;border-collapse:collapse;margin-bottom:28px;font-size:13.5px;}
+  .roi-table caption{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);text-align:left;margin-bottom:10px;}
+  .roi-table th{font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:9px 14px;border-bottom:1px solid var(--border);background:var(--ink-raised);}
+  .roi-table td{padding:11px 14px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+  .roi-table td.num{font-family:var(--mono);text-align:right;}
+  .roi-table td.hl{color:var(--copper);font-weight:600;font-family:var(--mono);}
+  .roi-table td.hl.good{color:var(--teal);}
+  .roi-table tr.bad td.hl{color:var(--lost);}
+
+  /* pending slot */
+  .pending-slot{
+    margin-top:24px;border:1px dashed var(--border);border-radius:10px;
+    padding:30px 28px;color:var(--text-faint);
+  }
+  .pending-slot .p-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
+  .pending-slot .p-hint{font-size:13.5px;color:var(--text-faint);}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (max-width:640px){
+    .tool-head{flex-direction:column;}
+    .status-badge{align-self:flex-start;}
+  }
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} }
+  @media print{
+    * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; color-adjust:exact !important; }
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">HOJA DE RUTA · CONSTRUCCIÓN DEL PROYECTO</span>
+    <div class="top-bar-links">
+      <a href="pipeline-crm-ventas.html">pipeline-crm-ventas.html</a>
+      <a href="pipelines-por-tipo-de-lead.html">pipelines-por-tipo-de-lead.html</a>
+      <a href="catalogo-de-agentes.html">catalogo-de-agentes.html</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Documento vivo — se actualiza cada vez que se indique</div>
+    <h1>Paso a paso: herramientas para <span>construir el proyecto</span></h1>
+    <p class="hero-sub">
+      Cada entrada de esta hoja de ruta es una herramienta o pieza necesaria para levantar
+      el CRM de ventas con agentes IA: qué es, por qué hace falta, y qué haría exactamente
+      dentro del sistema. Se va llenando en el orden en que se va definiendo, no por orden de instalación.
+    </p>
+
+    <div class="stepper">
+      <div class="step-chip done"><span class="dot"></span>01 · Modelo de datos</div>
+      <div class="step-chip done"><span class="dot"></span>02 · Router</div>
+      <div class="step-chip done"><span class="dot"></span>03 · Atribución de campañas</div>
+      <div class="step-chip done"><span class="dot"></span>04 · Normalización</div>
+      <div class="step-chip done"><span class="dot"></span>05 · Orquestación de agentes</div>
+      <div class="step-chip done"><span class="dot"></span>06 · Core CRM + API</div>
+      <div class="step-chip pending"><span class="dot"></span>07 · Por definir</div>
+    </div>
+  </section>
+
+  <section class="section-head" style="padding-top:24px;">
+    <h2>Herramientas</h2>
+    <p>En orden en que se van agregando a esta hoja de ruta.</p>
+  </section>
+
+  <!-- ===================== PASO 01 — MODELO DE DATOS ===================== -->
+  <article class="tool-step" id="paso-01">
+    <div class="tool-head">
+      <div class="tool-num">01</div>
+      <div class="tool-titles">
+        <h3>Modelo de datos</h3>
+        <div class="tool-tag">BASE DE DATOS · POSTGRES (SUPABASE) · FUNDACIÓN DE TODO LO DEMÁS</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      Es el conjunto de tablas SQL que sostiene el CRM completo: organizaciones, contactos, deals,
+      pipelines, mensajes y el histórico de eventos. <strong>Va antes que el Router y antes que
+      cualquier bot</strong> — sin tablas, no hay dónde escribir ni leer nada.
+    </p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="k">Si queda mal</div>
+        <div class="v">Todo lo demás se rompe después. Reestructurar el modelo con datos reales adentro es doloroso y arriesgado.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Si falta atribución</div>
+        <div class="v">Sin campos como <code style="font-family:var(--mono)">source</code>, <code style="font-family:var(--mono)">campaign_id</code>, <code style="font-family:var(--mono)">utm_*</code> desde el día 1, no puedes medir ROI de ninguna campaña después.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Si "source" es texto libre</div>
+        <div class="v">En cuanto alguien escriba "instagram", "IG" e "Insta", los reportes por canal dejan de servir.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Si no hay RLS desde el inicio</div>
+        <div class="v">Activar seguridad multi-tenant después de tener clientes reales en la base es mucho más riesgoso que definirla ahora.</div>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="cp-label">Esqueleto mínimo (migración SQL)</div>
+      <pre><span class="kw">create table</span> organizations (
+  id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(),
+  nombre text <span class="kw">not null</span>,
+  dominio text,
+  created_at timestamptz <span class="kw">default</span> now()
+);
+
+<span class="kw">create table</span> contacts (
+  id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(),
+  organization_id uuid <span class="kw">references</span> organizations(id),
+  nombre text, email text, telefono text,
+  <span class="cmt">-- atribución desde el día 1</span>
+  source text, campaign_id text, utm_source text, utm_medium text,
+  created_at timestamptz <span class="kw">default</span> now()
+);
+
+<span class="kw">create table</span> pipelines (id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(), nombre text, tipo text);
+<span class="kw">create table</span> stages    (id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(), pipeline_id uuid <span class="kw">references</span> pipelines(id), orden int, nombre text, probabilidad numeric);
+
+<span class="kw">create table</span> deals (
+  id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(),
+  contact_id uuid <span class="kw">references</span> contacts(id),
+  pipeline_id uuid <span class="kw">references</span> pipelines(id),
+  stage_id uuid <span class="kw">references</span> stages(id),
+  monto numeric,
+  created_at timestamptz <span class="kw">default</span> now()
+);
+
+<span class="cmt">-- append-only: nunca se hace update ni delete aquí</span>
+<span class="kw">create table</span> events (id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(), deal_id uuid, tipo text, payload jsonb, created_at timestamptz <span class="kw">default</span> now());</pre>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip">Supabase Postgres</span>
+      <span class="chip">supabase/migrations/*.sql</span>
+      <span class="chip">Row Level Security (RLS)</span>
+      <span class="chip">Enum lead_source</span>
+      <span class="chip">Tabla events (append-only)</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">Orden de creación importa</div>
+      <ul>
+        <li>Primero las tablas sin dependencias (<code style="font-family:var(--mono)">organizations</code>, <code style="font-family:var(--mono)">pipelines</code>), luego las que las referencian.</li>
+        <li>Postgres rechaza una foreign key hacia una tabla que todavía no existe.</li>
+        <li>Se hace por migraciones versionadas en Git, no por el Table Editor a mano — así queda registro de cada cambio.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ===================== PASO 02 — ROUTER ===================== -->
+  <article class="tool-step" id="paso-02">
+    <div class="tool-head">
+      <div class="tool-num">02</div>
+      <div class="tool-titles">
+        <h3>Router (Agente de enrutamiento)</h3>
+        <div class="tool-tag">BACKEND · LÓGICA DE DECISIÓN · CORRE ANTES QUE CUALQUIER BOT RESPONDA</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      El Router es la pieza que decide, en el momento en que entra un mensaje, <strong>a qué pipeline
+      pertenece el lead</strong> (Transaccional, Consultivo o Expansión) y <strong>qué agente debe
+      responderle</strong>. No es un chatbot conversacional — no le habla al cliente. Es un paso de
+      decisión que corre antes de generar cualquier respuesta.
+    </p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="k">Sin Router</div>
+        <div class="v">Todos los leads reciben la misma respuesta automática, sin importar si valen $15 o $18,000.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Sin Router</div>
+        <div class="v">La tabla <code style="font-family:var(--mono)">deals</code> no tiene pipeline_id → los reportes no pueden separar métricas por tipo de lead.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Sin Router</div>
+        <div class="v">No hay detección de escalamiento — un lead corporativo disfrazado de compra pequeña se pierde para siempre.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Sin Router</div>
+        <div class="v">Todo depende de que un humano reclasifique a mano, y en la práctica eso no pasa a tiempo.</div>
+      </div>
+    </div>
+
+    <div class="flow-mini">
+      <div class="label">Qué hace exactamente, en orden</div>
+      <div class="flow-steps">
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Recibe el mensaje nuevo apenas se guarda en la base de datos.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capa 1 — reglas determinísticas:</b> revisa señales duras contra una tabla de reglas (fuente, dominio de correo, SKU mencionado, ticket estimado). Rápido y sin costo de LLM.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capa 2 — semántica:</b> si las reglas no alcanzan, llama a un modelo pequeño (no el que conversa con el cliente) y le pide una salida estructurada: pipeline sugerido, confianza, señales detectadas.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Si la confianza es baja, por defecto manda al pipeline consultivo (B) — nunca al transaccional. El costo de calificar de más es bajo; el de perder un lead grande es alto.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Escribe <b>pipeline_id</b> y <b>stage_id</b> en el deal, y dispara al agente correspondiente.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Se vuelve a ejecutar en <b>cada mensaje siguiente</b> — así detecta si un lead debe saltar de pipeline (ej. de A a B).</div></div>
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip">Supabase Edge Function</span>
+      <span class="chip">Database Webhook (on INSERT)</span>
+      <span class="chip">Tabla routing_rules</span>
+      <span class="chip">Tabla pipeline_transfers</span>
+      <span class="chip">LLM pequeño (ej. Claude Haiku)</span>
+      <span class="chip">Postgres</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">No viene configurado por defecto</div>
+      <ul>
+        <li>Supabase da la infraestructura (Edge Functions, Webhooks, Postgres) — no la lógica de negocio.</li>
+        <li>El Router es código que se escribe una vez y vive en <code style="font-family:var(--mono)">supabase/functions/router/</code>.</li>
+        <li>Las reglas de la tabla <code style="font-family:var(--mono)">routing_rules</code> sí se pueden ajustar después sin tocar código.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ANCLA: los próximos pasos se agregan justo aquí, como nuevos <article class="tool-step"> -->
+
+  <!-- ===================== PASO 03 — ATRIBUCIÓN Y ROI ===================== -->
+  <article class="tool-step" id="paso-03">
+    <div class="tool-head">
+      <div class="tool-num">03</div>
+      <div class="tool-titles">
+        <h3>Atribución y medición de campañas (ROI de Meta Ads)</h3>
+        <div class="tool-tag">MEDICIÓN · CIERRA EL CICLO ENTRE GASTO PUBLICITARIO E INGRESO REAL</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      Meta sabe cuánto gastaste y cuántos leads generó cada campaña — <strong>no sabe cuáles de
+      esos leads terminaron pagando</strong>. Esa mitad de la ecuación solo la tiene el CRM. Esta pieza
+      conecta el gasto publicitario con el ingreso real de cada deal cerrado.
+    </p>
+
+    <table class="roi-table">
+      <caption>Por qué el costo por lead no basta — ejemplo con dos campañas de $500</caption>
+      <thead><tr><th></th><th>Campaña "Gadgets"</th><th>Campaña "ERP Construcción"</th></tr></thead>
+      <tbody>
+        <tr><td>Leads generados</td><td class="num">200</td><td class="num">12</td></tr>
+        <tr><td>Costo por lead</td><td class="num">$2.50</td><td class="num">$41.67</td></tr>
+        <tr><td>Cerrados</td><td class="num">30 ventas</td><td class="num">1 venta</td></tr>
+        <tr><td>Ingreso</td><td class="num">$450</td><td class="num">$18,400</td></tr>
+        <tr class="bad"><td>ROI real</td><td class="num hl">−10%</td><td class="num hl good">+3,580%</td></tr>
+      </tbody>
+    </table>
+    <p class="tool-what" style="margin-top:-14px;">La campaña que parecía mejor por costo-por-lead hizo perder dinero. La "cara" pagó el año — y ese cálculo solo lo puede hacer el CRM, porque solo él conoce el monto final de cada deal.</p>
+
+    <div class="flow-mini">
+      <div class="label">Cómo funciona, en orden</div>
+      <div class="flow-steps">
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">El anuncio pasa un identificador: <b>ctwa_clid</b> en Click-to-WhatsApp, <b>campaign_id / adset_id / ad_id</b> en Lead Ads, <b>utm_*</b> en tráfico web.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">La ingesta lo guarda en el contacto apenas entra — si no se captura en ese primer momento, se pierde para siempre.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">El dato viaja con el deal hasta que se cierra; el monto final queda ligado al <b>ad_id</b> que lo originó.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Una consulta agrega ventas e ingreso por campaña y calcula el ROI real, no solo el costo por lead.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Conversions API (opcional):</b> cuando un deal se cierra, el backend le avisa a Meta — el algoritmo optimiza por clientes que pagan, no solo por leads.</div></div>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="cp-label">Consulta de ROI por campaña</div>
+      <pre><span class="kw">select</span> campaign_id,
+       count(*) <span class="kw">filter</span> (<span class="kw">where</span> stage = <span class="cmt">'ganado'</span>) <span class="kw">as</span> ventas,
+       sum(monto) <span class="kw">filter</span> (<span class="kw">where</span> stage = <span class="cmt">'ganado'</span>) <span class="kw">as</span> ingreso
+<span class="kw">from</span> deals <span class="kw">join</span> contacts <span class="kw">using</span> (contact_id)
+<span class="kw">group by</span> campaign_id;</pre>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip">Meta Ads (conector disponible)</span>
+      <span class="chip">Meta Conversions API</span>
+      <span class="chip">Campos utm_* / ad_id en contacts</span>
+      <span class="chip">Tabla events</span>
+      <span class="chip">Vista SQL de ROI por campaña</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">Depende de los dos pasos anteriores</div>
+      <ul>
+        <li>Sin el modelo de datos (Paso 01) no hay dónde guardar los campos de atribución.</li>
+        <li>Sin el Router (Paso 02) clasificando correctamente el pipeline, el ROI mezclaría deals de $15 con deals de $18,000.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ===================== PASO 04 — NORMALIZACIÓN ===================== -->
+  <article class="tool-step" id="paso-04">
+    <div class="tool-head">
+      <div class="tool-num">04</div>
+      <div class="tool-titles">
+        <h3>Normalización de mensajes</h3>
+        <div class="tool-tag">ARQUITECTURA · CAPA 2 (INGESTA → NORMALIZACIÓN → ROUTER) · TRADUCE TODO A UN SOLO ESQUEMA</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      WhatsApp, un formulario web, Instagram y el email <strong>no mandan la información con la misma
+      estructura</strong>. La normalización es el código que traduce cada formato de entrada a un solo
+      esquema interno, para que el Router, los agentes y los reportes nunca tengan que saber de dónde vino el mensaje.
+    </p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="k">Sin normalización</div>
+        <div class="v">Cada agente y cada reporte tendría que entender el formato particular de cada canal por separado.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Sin normalización</div>
+        <div class="v">Agregar un canal nuevo (Telegram, LinkedIn) obliga a reescribir la lógica en todos los puntos que leen mensajes.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Sin deduplicación</div>
+        <div class="v">Si Ana escribe por WhatsApp y luego llena el formulario con el mismo correo, se crean dos contactos en vez de uno.</div>
+      </div>
+    </div>
+
+    <div class="code-panel">
+      <div class="cp-label">Mismo mensaje, dos formatos de entrada distintos</div>
+      <pre><span class="cmt">// Lo que manda WhatsApp Cloud API</span>
+{
+  <span class="kw">"messages"</span>: [{
+    <span class="kw">"from"</span>: <span class="cmt">"573001234567"</span>,
+    <span class="kw">"type"</span>: <span class="cmt">"text"</span>,
+    <span class="kw">"text"</span>: { <span class="kw">"body"</span>: <span class="cmt">"Hola, necesito info"</span> },
+    <span class="kw">"timestamp"</span>: <span class="cmt">"1724175600"</span>
+  }]
+}
+
+<span class="cmt">// Lo que manda un formulario web</span>
+{
+  <span class="kw">"name"</span>: <span class="cmt">"Ana Gómez"</span>,
+  <span class="kw">"email"</span>: <span class="cmt">"ana@edifica.com"</span>,
+  <span class="kw">"message"</span>: <span class="cmt">"Hola, necesito info"</span>
+}</pre>
+    </div>
+
+    <div class="code-panel">
+      <div class="cp-label">Lo que se guarda en `messages` después de normalizar — un solo esquema, siempre</div>
+      <pre>{
+  <span class="kw">"canal"</span>: <span class="cmt">"whatsapp"</span>,
+  <span class="kw">"contact_id"</span>: <span class="cmt">"uuid-del-contacto"</span>,
+  <span class="kw">"direccion"</span>: <span class="cmt">"entrante"</span>,
+  <span class="kw">"contenido"</span>: <span class="cmt">"Hola, necesito info"</span>,
+  <span class="kw">"timestamp"</span>: <span class="cmt">"2026-08-20T10:00:00Z"</span>
+}</pre>
+    </div>
+
+    <div class="flow-mini">
+      <div class="label">Dónde vive, en la arquitectura por capas</div>
+      <div class="flow-steps">
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capa 1 — Ingesta:</b> cada canal llega con su propio formato (webhook de WhatsApp, POST del formulario, etc.).</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capa 2 — Normalización (esta pieza):</b> traduce todo al esquema único y hace la deduplicación de contactos por teléfono/email.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capa 3 — Router:</b> ya solo lee el formato normalizado, nunca el original del canal.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>Capas 4 y 5 — Core CRM + API, Frontend:</b> consumen datos ya limpios y predecibles.</div></div>
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip">Supabase Edge Function (por canal)</span>
+      <span class="chip">Esquema JSON único (tabla messages)</span>
+      <span class="chip">Deduplicación por teléfono/email</span>
+      <span class="chip">Tabla contacts</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">Va antes que el Router, aunque se definió después</div>
+      <ul>
+        <li>En orden de construcción real, la normalización corre primero: el Router necesita el mensaje ya en formato único para poder aplicar sus reglas.</li>
+        <li>Esta hoja de ruta lista las piezas en el orden en que se van definiendo, no en el orden en que se instalan — por eso aparece como Paso 04 aunque en la arquitectura antecede al Router.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ===================== PASO 05 — ORQUESTACIÓN DE AGENTES ===================== -->
+  <article class="tool-step" id="paso-05">
+    <div class="tool-head">
+      <div class="tool-num">05</div>
+      <div class="tool-titles">
+        <h3>Orquestación de agentes</h3>
+        <div class="tool-tag">ARQUITECTURA · CAPA 3 · "EL CEREBRO" — DECIDE QUÉ AGENTE ATIENDE QUÉ</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      El error típico es construir un solo bot gigante. Este proyecto se divide en <strong>8 agentes con
+      roles específicos</strong> — 5 conversan con el cliente, 3 trabajan en segundo plano sobre los datos.
+      El detalle completo de cada uno (función, dónde se activa, nivel de uso) vive en un documento aparte:
+      <a href="catalogo-de-agentes.html" style="color:var(--teal);border-bottom:1px dashed var(--teal-dim);text-decoration:none;">catalogo-de-agentes.html</a>.
+    </p>
+
+    <table class="roi-table">
+      <caption>Resumen — 8 agentes, ordenados por nivel de uso</caption>
+      <thead><tr><th>Agente</th><th>Tipo</th><th>Pipeline</th><th>Nivel de uso</th></tr></thead>
+      <tbody>
+        <tr><td>Router</td><td>Orquestación</td><td class="num">Todos</td><td class="num hl">Alto</td></tr>
+        <tr><td>Bot de Catálogo</td><td>Ventas</td><td class="num">A</td><td class="num hl">Alto</td></tr>
+        <tr><td>SDR / Calificador</td><td>Ventas</td><td class="num">B</td><td class="num hl">Alto</td></tr>
+        <tr><td>Soporte / FAQ</td><td>Atención</td><td class="num">A y B</td><td class="num hl good">Medio</td></tr>
+        <tr><td>Enriquecedor</td><td>Backend</td><td class="num">B</td><td class="num hl good">Medio</td></tr>
+        <tr><td>Agendador</td><td>Ventas</td><td class="num">B</td><td class="num hl good">Medio</td></tr>
+        <tr class="bad"><td>Analista</td><td>Backend</td><td class="num">B y C</td><td class="num hl">Bajo</td></tr>
+        <tr class="bad"><td>Agente de Recuperación</td><td>Ventas</td><td class="num">A</td><td class="num hl">Bajo</td></tr>
+      </tbody>
+    </table>
+
+    <div class="chip-row">
+      <span class="chip">Grafo de agentes (LangGraph / Claude Agent SDK)</span>
+      <span class="chip">Tools por agente</span>
+      <span class="chip">Handoff a humano</span>
+      <span class="chip">Observabilidad (Langfuse)</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">Quién asigna a cuál agente le toca responder</div>
+      <ul>
+        <li>Solo el <b>Router</b> (Paso 02) decide el pipeline y, con eso, qué agente conversacional entra.</li>
+        <li>Ningún agente conversacional se auto-asigna un pipeline — el Bot de Catálogo y el SDR solo ejecutan una vez que el Router ya decidió.</li>
+      </ul>
+    </div>
+  </article>
+
+  <!-- ===================== PASO 06 — CORE CRM + API ===================== -->
+  <article class="tool-step" id="paso-06">
+    <div class="tool-head">
+      <div class="tool-num">06</div>
+      <div class="tool-titles">
+        <h3>Core CRM + API</h3>
+        <div class="tool-tag">ARQUITECTURA · CAPA 4 · FUENTE DE VERDAD — PARTE AUTOMÁTICA, PARTE POR CONFIGURAR</div>
+      </div>
+      <span class="status-badge">Definido</span>
+    </div>
+
+    <p class="tool-what">
+      Es la capa que guarda y expone los datos reales del negocio: contactos, deals, pipelines, productos.
+      No conversa ni decide nada — todos los demás componentes (Router, agentes, frontend, integraciones)
+      la consultan y actualizan. La confusión más común: <strong>parte de esto viene automático con
+      Supabase, y parte no.</strong>
+    </p>
+
+    <div class="why-grid">
+      <div class="why-card">
+        <div class="k">Viene automático</div>
+        <div class="v">En cuanto creas una tabla en Postgres, PostgREST genera solo los endpoints REST (GET/POST/PATCH/DELETE) — sin escribir backend.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">Viene automático</div>
+        <div class="v">También expone GraphQL y suscripciones en tiempo real sobre esas mismas tablas.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">NO viene automático</div>
+        <div class="v">Row Level Security (RLS): sin activarla, cualquiera con la API key pública puede leer o modificar <b>todas</b> las filas.</div>
+      </div>
+      <div class="why-card">
+        <div class="k">NO viene automático</div>
+        <div class="v">Reglas de negocio (ej. "un deal no pasa a Ganado sin monto") — se escriben como constraints, triggers o funciones.</div>
+      </div>
+    </div>
+
+    <div class="flow-mini">
+      <div class="label">Cómo separarlo mentalmente</div>
+      <div class="flow-steps">
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>La API</b> — el "cómo se accede" — sí viene resuelta por Supabase al crear cada tabla.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext"><b>El Core</b> — las reglas de qué es válido y quién puede hacer qué — no viene resuelto; es trabajo de configuración explícito.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Sin políticas de RLS, no hay separación entre lo que puede tocar un cliente, un vendedor, o el Router.</div></div>
+        <div class="flow-item"><div class="fdot"></div><div class="ftext">Lógica que cruza varias tablas a la vez (mover un deal Y registrar el evento) tampoco existe sola — se escribe como función de Postgres o Edge Function.</div></div>
+      </div>
+    </div>
+
+    <div class="chip-row">
+      <span class="chip">PostgREST (automático)</span>
+      <span class="chip">Row Level Security — se configura</span>
+      <span class="chip">Constraints y triggers — se configuran</span>
+      <span class="chip">Edge Functions para lógica multi-tabla</span>
+    </div>
+
+    <div class="risk-callout">
+      <div class="rk-label">La trampa más común</div>
+      <ul>
+        <li>Activar Supabase y empezar a meter datos reales <b>sin haber configurado RLS</b> deja la base técnicamente abierta.</li>
+        <li>La clave pública (<code style="font-family:var(--mono)">anon key</code>) vive expuesta en el frontend y en los bots — por eso RLS no es opcional, es la barrera real de seguridad.</li>
+      </ul>
+    </div>
+  </article>
+
+  <div class="pending-slot">
+    <div class="p-label">Próximo paso — pendiente de definir</div>
+    <div class="p-hint">// se agrega aquí cuando se indique cuál es la siguiente herramienta</div>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>Hoja de Ruta de Construcción · CRM Ventas + Agentes IA</span>
+  <span>Última actualización: 20 ago 2026</span>
+</footer>
+
+</body>
+</html>

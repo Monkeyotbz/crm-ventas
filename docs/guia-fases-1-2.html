@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Guía de ejecución — Fase 1 y Fase 2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a; --ink-raised:#161a23; --panel:#171c26; --panel-hi:#1e2430;
+    --border:#2b3244; --border-soft:#212636;
+    --copper:#cc7a42; --copper-dim:#8a5732;
+    --teal:#43c2ae; --teal-dim:#2c8577;
+    --slate:#7c8bb0; --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0; --text-dim:#8d96a8; --text-faint:#565f70;
+    --mono:'JetBrains Mono',monospace; --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;
+    font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(203,122,66,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(203,122,66,.035) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:1000px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:1000px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-faint);}
+  .top-bar-links{display:flex;gap:14px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  .hero{padding:76px 0 40px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.1;letter-spacing:-.01em;max-width:20ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:18px;max-width:64ch;font-size:16.5px;color:var(--text-dim);}
+
+  .phase-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:34px;}
+  .pc{background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:20px 22px;}
+  .pc.f1{border-top:3px solid var(--copper);}
+  .pc.f2{border-top:3px solid var(--teal);}
+  .pc .pck{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:8px;}
+  .pc.f1 .pck{color:var(--copper);}
+  .pc.f2 .pck{color:var(--teal);}
+  .pc h3{font-family:var(--display);font-weight:600;font-size:17px;margin-bottom:6px;}
+  .pc p{font-size:13.5px;color:var(--text-dim);}
+  .pc .pcm{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-top:10px;}
+
+  .phase-head{display:flex;align-items:center;gap:13px;padding:72px 0 8px;flex-wrap:wrap;}
+  .phase-head .ph-badge{font-family:var(--mono);font-weight:700;font-size:13px;padding:6px 13px;border-radius:7px;flex-shrink:0;}
+  .phase-head.f1 .ph-badge{background:rgba(204,122,66,.14);color:var(--copper);border:1px solid var(--copper-dim);}
+  .phase-head.f2 .ph-badge{background:rgba(67,194,174,.12);color:var(--teal);border:1px solid var(--teal-dim);}
+  .phase-head h2{font-family:var(--display);font-weight:700;font-size:26px;}
+  .phase-head .ph-time{font-family:var(--mono);font-size:11px;color:var(--text-faint);margin-left:auto;}
+  .phase-goal{color:var(--text-dim);font-size:14.5px;max-width:68ch;margin-bottom:10px;}
+
+  .step{border-top:1px solid var(--border-soft);padding:32px 0;scroll-margin-top:70px;}
+  .step:first-of-type{border-top:1px solid var(--border);}
+  .step-top{display:flex;align-items:flex-start;gap:15px;margin-bottom:14px;flex-wrap:wrap;}
+  .step-n{font-family:var(--mono);font-weight:700;font-size:13px;padding:7px 11px;border-radius:7px;background:var(--panel);border:1px solid var(--border);color:var(--text-dim);flex-shrink:0;}
+  .step.done .step-n{background:rgba(67,194,174,.12);color:var(--teal);border-color:var(--teal-dim);}
+  .step-titles{flex:1;min-width:200px;}
+  .step-titles h3{font-family:var(--display);font-weight:600;font-size:19px;}
+  .step-where{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.03em;margin-top:3px;text-transform:uppercase;}
+  .step-badge{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;padding:4px 10px;border-radius:11px;white-space:nowrap;align-self:flex-start;}
+  .step-badge.listo{background:rgba(67,194,174,.12);color:var(--teal);}
+  .step-badge.tuyo{background:rgba(204,122,66,.14);color:var(--copper);}
+  .step-badge.sig{background:rgba(124,139,176,.12);color:var(--slate);}
+
+  .step-body{font-size:14.5px;color:var(--text-dim);max-width:70ch;margin-bottom:16px;}
+  .step-body b{color:var(--text);font-weight:500;}
+  .step-body code{font-family:var(--mono);font-size:13px;color:var(--teal);}
+
+  .todo{background:var(--ink-raised);border:1px solid var(--border);border-radius:8px;padding:18px 22px;margin-bottom:14px;}
+  .todo .tk{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+  .todo ol{margin-left:19px;font-size:14px;color:var(--text-dim);}
+  .todo ol li{margin-bottom:8px;}
+  .todo ol li:last-child{margin-bottom:0;}
+  .todo ol b{color:var(--text);font-weight:500;}
+  .todo code{font-family:var(--mono);font-size:12.5px;color:var(--teal);background:var(--panel);padding:1px 5px;border-radius:3px;}
+
+  .code-panel{background:#0c0e13;border:1px solid var(--border);border-radius:8px;padding:20px 22px;overflow-x:auto;margin-bottom:14px;}
+  .code-panel .cpl{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+  .code-panel pre{font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .code-panel .kw{color:var(--teal);}
+  .code-panel .cmt{color:var(--text-faint);}
+  .code-panel .st{color:var(--copper);}
+
+  .check{border-left:3px solid var(--teal);background:rgba(67,194,174,.06);padding:15px 20px;border-radius:0 6px 6px 0;margin-bottom:14px;}
+  .check .ck{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:8px;}
+  .check p{font-size:13.5px;color:var(--text-dim);}
+
+  .warn{border-left:3px solid var(--lost);background:rgba(168,82,63,.07);padding:15px 20px;border-radius:0 6px 6px 0;}
+  .warn .wk{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--lost);margin-bottom:8px;}
+  .warn p{font-size:13.5px;color:var(--text-dim);}
+
+  .gate{background:var(--ink-raised);border:1px solid var(--copper-dim);border-radius:10px;padding:26px 30px;margin-top:40px;}
+  .gate .gk{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;}
+  .gate ul{margin-left:19px;font-size:14px;color:var(--text-dim);}
+  .gate li{margin-bottom:7px;}
+  .gate li b{color:var(--text);font-weight:500;}
+
+  /* prep section: cuentas + decisiones */
+  .prep{background:var(--ink-raised);border:1px solid var(--border);border-radius:10px;padding:28px 30px;margin:36px 0;}
+  .prep .pk{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;margin-bottom:16px;}
+  .prep.f1 .pk{color:var(--copper);}
+  .prep.f2 .pk{color:var(--teal);}
+  .prep h3{font-family:var(--display);font-weight:600;font-size:18px;margin-bottom:14px;}
+
+  .acc-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:8px;}
+  .acc-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:9px 13px;border-bottom:1px solid var(--border);background:var(--panel);}
+  .acc-table td{padding:11px 13px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;}
+  .acc-table td.acc-name{color:var(--text);font-weight:500;}
+  .acc-table td.acc-time{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);white-space:nowrap;}
+  .acc-table td.acc-time.crit{color:var(--lost);}
+  .acc-table tr:last-child td{border-bottom:none;}
+
+  .decision{padding:14px 0;border-top:1px solid var(--border-soft);}
+  .decision:first-of-type{border-top:none;padding-top:6px;}
+  .decision .dq{font-family:var(--display);font-weight:600;font-size:14.5px;margin-bottom:5px;}
+  .decision .da{font-size:13.5px;color:var(--text-dim);}
+  .decision .da i{color:var(--teal);font-style:normal;}
+
+  .week-list{display:flex;flex-direction:column;gap:10px;margin-top:8px;}
+  .wk-row{display:grid;grid-template-columns:90px 1fr;gap:14px;align-items:baseline;}
+  .wk-row .wn{font-family:var(--mono);font-size:11.5px;color:var(--copper);white-space:nowrap;}
+  .wk-row .wt{font-size:13.5px;color:var(--text-dim);}
+  .wk-row .wt b{color:var(--text);font-weight:500;}
+
+  .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  .split-grid .todo{margin-bottom:0;}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;margin-top:60px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (max-width:640px){ .step-top{flex-direction:column;} .split-grid{grid-template-columns:1fr;} }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">GUÍA DE EJECUCIÓN · FASE 1 Y 2</span>
+    <div class="top-bar-links">
+      <a href="hoja-de-ruta-construccion.html">hoja-de-ruta</a>
+      <a href="catalogo-de-agentes.html">agentes</a>
+      <a href="paneles-crm-mockups.html">paneles</a>
+      <a href="pipelines-por-tipo-de-lead.html">pipelines</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">De blueprint a sistema funcionando</div>
+    <h1>Guía de ejecución — <span>Fase 1 y Fase 2</span></h1>
+    <p class="hero-sub">
+      Cada paso indica dónde se ejecuta, qué hay que hacer exactamente, y cómo verificar
+      que quedó bien antes de avanzar. Los pasos marcados como <b style="color:var(--teal)">listo</b>
+      ya tienen el código entregado; el resto se construye en orden.
+    </p>
+
+    <div class="phase-cards">
+      <div class="pc f1">
+        <div class="pck">Fase 1</div>
+        <h3>Fundación operativa</h3>
+        <p>Modelo de datos, ingesta de WhatsApp y bandeja unificada. Al terminar, el equipo ya puede vender con el sistema — todavía sin IA.</p>
+        <div class="pcm">9 pasos · 4–6 semanas</div>
+      </div>
+      <div class="pc f2">
+        <div class="pck">Fase 2</div>
+        <h3>Primeros agentes</h3>
+        <p>Router, agente calificador y agendador trabajando sobre conversaciones reales, con handoff a humano.</p>
+        <div class="pcm">8 pasos · 4 semanas</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== PREPARACIÓN FASE 1 ==================== -->
+  <div class="prep f1" id="prep-f1">
+    <div class="pk">Bitácora de sesión</div>
+    <h2 style="font-family:var(--display);font-weight:700;font-size:24px;margin-bottom:6px;">Iniciamos ejecución — 23 de agosto</h2>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:30px;max-width:66ch;">Lo que quedó definido en esta sesión antes de abrir VS Code, organizado paso a paso.</p>
+
+    <!-- PASO 1 -->
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--copper);text-transform:uppercase;margin-bottom:8px;">Paso 1</div>
+    <h3 style="margin-bottom:14px;">Qué tener en cuenta para iniciar</h3>
+
+    <table class="acc-table">
+      <thead><tr><th>Qué</th><th>Para qué</th><th>Tiempo</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">Cuenta Supabase</td><td>Base de datos y backend</td><td class="acc-time">15 min</td></tr>
+        <tr><td class="acc-name">Meta Business Manager verificado</td><td>Requisito para WhatsApp API</td><td class="acc-time crit">días</td></tr>
+        <tr><td class="acc-name">Número de teléfono dedicado</td><td>Libre de WhatsApp/Business al momento de registrar — Paso 3</td><td class="acc-time">0–3 días</td></tr>
+        <tr><td class="acc-name">Cuenta Vercel (o similar)</td><td>Desplegar el frontend</td><td class="acc-time">15 min</td></tr>
+        <tr><td class="acc-name">Repositorio Git</td><td>Versionar migraciones y código</td><td class="acc-time">15 min</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--text-faint);margin-bottom:24px;">La verificación de Meta es el único paso que no controlas directamente. Arráncala primero, en paralelo con todo lo demás.</p>
+
+    <h3 style="margin-top:24px;">Decisiones que hay que tomar ahora, no después</h3>
+    <div class="decision">
+      <div class="dq">¿Multi-tenant o single-tenant?</div>
+      <div class="da">Se resuelve en el Paso 2: el CRM se va a usar en más de una empresa (Hellominus primero, y se vende como producto a otras después), así que <b style="color:var(--text)">sí</b>, y se define desde la primera migración.</div>
+    </div>
+    <div class="decision">
+      <div class="dq">¿Qué moneda(s) maneja el sistema?</div>
+      <div class="da">Si son varias, hay que guardar la moneda y la tasa de cambio en el momento del cierre del deal, o los reportes de ingreso van a mentir.</div>
+    </div>
+    <div class="decision">
+      <div class="dq">¿Quién es el "owner" de un deal?</div>
+      <div class="da">Vendedor fijo o rotativo — define si hace falta lógica de asignación desde ya.</div>
+    </div>
+    <div class="decision">
+      <div class="dq">¿Zona horaria?</div>
+      <div class="da">Todo en UTC en la base, conversión solo en el frontend. Suena obvio, se rompe seguido si no se fija como regla desde el inicio.</div>
+    </div>
+
+    <h3 style="margin-top:24px;">Orden de trabajo sugerido</h3>
+    <div class="week-list">
+      <div class="wk-row"><span class="wn">Semana 1</span><span class="wt"><b>Datos</b> — proyecto Supabase, migraciones aplicadas, seeds cargados, RLS verificado.</span></div>
+      <div class="wk-row"><span class="wn">Semana 2</span><span class="wt"><b>Ingesta</b> — webhook de WhatsApp recibiendo, normalización y deduplicación probadas.</span></div>
+      <div class="wk-row"><span class="wn">Semana 3</span><span class="wt"><b>Frontend base</b> — Vite + React (ya scaffoldeado), autenticación del equipo, bandeja leyendo conversaciones.</span></div>
+      <div class="wk-row"><span class="wn">Semana 4</span><span class="wt"><b>Bandeja completa</b> — envío de mensajes salientes, Realtime, panel de contexto.</span></div>
+      <div class="wk-row"><span class="wn">Semanas 5–6</span><span class="wt"><b>Pipeline visual y ajustes</b> — Kanban, ficha del deal, colchón para atrasos.</span></div>
+    </div>
+
+    <h3 style="margin-top:24px;">Los tres riesgos reales de esta fase</h3>
+    <div class="decision">
+      <div class="dq">Verificación de Meta</div>
+      <div class="da">Puede tumbar hasta dos semanas. Mitigación: empezarla el día 1 y, si se demora, construir primero con el widget web como canal de prueba.</div>
+    </div>
+    <div class="decision">
+      <div class="dq">La ventana de 24 horas de WhatsApp</div>
+      <div class="da">Fuera de ese margen solo se pueden enviar plantillas aprobadas por Meta. Se necesitan 2 o 3 aprobadas antes de terminar la fase — esa aprobación también tarda.</div>
+    </div>
+    <div class="decision">
+      <div class="dq">Scope creep hacia la IA</div>
+      <div class="da">La tentación de "ya que estamos, metámosle el bot" es fuerte. Hacerlo aquí produce un bot mediocre sobre datos sucios. Esta fase termina <b style="color:var(--text)">sin un solo agente</b>.</div>
+    </div>
+
+    <!-- PASO 2 -->
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--copper);text-transform:uppercase;margin:40px 0 8px;border-top:1px solid var(--border-soft);padding-top:28px;">Paso 2</div>
+    <h3 style="margin-bottom:14px;">Arquitectura multi-tenant</h3>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:16px;max-width:70ch;">
+      <b style="color:var(--text)">Qué es:</b> un solo CRM, un solo código, una sola base de datos —
+      pero los datos de cada empresa quedan completamente aislados entre sí. Es el mismo modelo que usa
+      cualquier SaaS: Shopify corre millones de tiendas independientes con el mismo código.
+    </p>
+
+    <div class="todo">
+      <div class="tk">Por qué se necesita — caso real: Hellominus hoy, más clientes del CRM después</div>
+      <ol>
+        <li>Hellominus es el primer tenant, usando el CRM para su propio pipeline de ventas. El CRM se construye para venderse como producto — cada empresa que lo compre es un <b>tenant nuevo</b>, con catálogos, pipelines y clientes sin relación entre sí. Mezclarlos en tablas sin separación sería un riesgo de seguridad, no una conveniencia.</li>
+        <li>Sin aislamiento, un bug o una consulta mal filtrada podría mostrarle a un vendedor de un tenant-cliente un deal de otro tenant-cliente — o de Hellominus mismo.</li>
+        <li>Cada tenant probablemente necesita su <b>propio pipeline</b>: uno puede ser consultivo B2B, otro transaccional. El multi-tenant permite que cada uno configure lo suyo sin tocar el código de los demás.</li>
+        <li>Construirlo desde el inicio cuesta poco. Agregarlo después, con datos reales de varios tenants ya mezclados en las mismas tablas, es una migración riesgosa y cara — por eso ya quedó así desde la primera versión de <code style="font-family:var(--mono)">setup.sql</code>, antes de tener un segundo tenant real.</li>
+      </ol>
+    </div>
+
+    <p style="font-size:13.5px;color:var(--text-dim);margin:22px 0 14px;max-width:70ch;">
+      <b style="color:var(--text)">Cómo se ejecuta:</b> no es principalmente código — es 70% base de datos, 30% código.
+      Si se resuelve solo filtrando en cada consulta, tarde o temprano se escapa una y se filtran datos entre empresas.
+      La base de datos tiene que ser la que lo impida. Son tres capas:
+    </p>
+
+    <div class="code-panel">
+      <div class="cpl">Capa 1 — La columna (base de datos)</div>
+      <pre><span class="kw">create table</span> tenants (
+  id uuid <span class="kw">primary key</span> <span class="kw">default</span> gen_random_uuid(),
+  nombre text <span class="kw">not null</span>,        <span class="cmt">-- "Hellominus", "Empresa Cliente 2", ...</span>
+  slug   text <span class="kw">unique not null</span>,
+  created_at timestamptz <span class="kw">default</span> now()
+);
+
+<span class="cmt">-- Cada tabla existente recibe esta columna:</span>
+<span class="kw">alter table</span> contacts       <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> deals          <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> pipelines      <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> products       <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> conversations  <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> messages       <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="kw">alter table</span> routing_rules  <span class="kw">add column</span> tenant_id uuid <span class="kw">references</span> tenants(id) <span class="kw">not null</span>;
+<span class="cmt">-- y así con el resto: organizations, events, stages...</span></pre>
+    </div>
+    <p style="font-size:13px;color:var(--text-faint);margin:-4px 0 20px;max-width:70ch;">Es solo una columna más, pero es la que hace posible todo lo demás.</p>
+
+    <div class="code-panel">
+      <div class="cpl">Capa 2 — La identidad del usuario (autenticación)</div>
+      <pre><span class="cmt">// Al crear el usuario, se le asigna su tenant en app_metadata</span>
+<span class="kw">await</span> supabase.auth.admin.createUser({
+  email: <span class="st">"vendedor@hellominus.com"</span>,
+  app_metadata: { tenant_id: <span class="st">"uuid-del-tenant-hellominus"</span> }   <span class="cmt">// ← aquí, NO en user_metadata</span>
+});
+
+<span class="cmt">// El token (JWT) del usuario ya lleva adentro a qué tenant pertenece</span></pre>
+    </div>
+    <div class="warn" style="margin:-4px 0 20px;">
+      <div class="wk">Por qué app_metadata y no user_metadata</div>
+      <p>El usuario <b style="color:var(--text)">no puede modificar</b> <code style="font-family:var(--mono);color:var(--teal)">app_metadata</code> desde el cliente. Si el tenant se guarda en <code style="font-family:var(--mono)">user_metadata</code>, alguien podría cambiarse el tenant y ver datos de otra empresa.</p>
+    </div>
+
+    <div class="code-panel">
+      <div class="cpl">Capa 3 — Las políticas de RLS (la que realmente protege)</div>
+      <pre><span class="kw">create policy</span> tenant_aislado <span class="kw">on</span> deals
+  <span class="kw">for all to</span> authenticated
+  <span class="kw">using</span> (tenant_id = (auth.jwt() -&gt; <span class="st">'app_metadata'</span> -&gt;&gt; <span class="st">'tenant_id'</span>)::uuid);
+
+<span class="cmt">-- Se repite para cada tabla: contacts, conversations, messages, products...</span></pre>
+    </div>
+    <p style="font-size:13.5px;color:var(--text-dim);margin:-4px 0 14px;max-width:70ch;">
+      Significa: <i>"para este usuario, la tabla deals solo contiene las filas de su tenant"</i>.
+      No es un filtro que el código agrega — es una regla que Postgres aplica siempre, en toda consulta, venga de donde venga.
+    </p>
+
+    <div class="check" style="margin-bottom:20px;">
+      <div class="ck">Por qué esto es tan poderoso</div>
+      <p>El código del frontend queda <b style="color:var(--text)">igual que si fuera single-tenant</b>: <code style="font-family:var(--mono);color:var(--teal)">supabase.from('deals').select('*')</code> — sin ningún <code style="font-family:var(--mono)">where tenant_id</code>. Postgres ya filtró. Si un desarrollador olvida el filtro, no pasa nada malo. Esa es la diferencia entre "seguro por diseño" y "seguro si nadie se equivoca".</p>
+    </div>
+
+    <div class="todo">
+      <div class="tk">Dónde sí interviene el código explícitamente</div>
+      <ol>
+        <li><b>Las Edge Functions</b> (Router, ingesta, agentes) usan la <code style="font-family:var(--mono);color:var(--teal)">service_role</code> key, que <b>salta RLS por diseño</b> — necesita ver todo para poder escribir en cualquier tenant. Aquí hay que pasar el <code style="font-family:var(--mono)">tenant_id</code> explícitamente en cada operación, porque nadie está protegiendo.</li>
+        <li><b>La ingesta de WhatsApp:</b> el webhook llega sin saber de qué empresa es. Se resuelve con una tabla que mapea número de WhatsApp → tenant. Si el mensaje llegó al número de Hellominus, entonces <code style="font-family:var(--mono)">tenant_id</code> = el de Hellominus.</li>
+        <li><b>Al crear un usuario nuevo:</b> asignarle su tenant en <code style="font-family:var(--mono)">app_metadata</code>.</li>
+      </ol>
+    </div>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">El error que hunde proyectos multi-tenant</div>
+      <p>Confiar en el filtro del código en vez de en RLS. Funciona en desarrollo, funciona en las pruebas, y un día una consulta sin filtrar expone los deals de un cliente a otro. Con RLS bien puesto, ese escenario es imposible aunque el código esté mal.</p>
+    </div>
+
+    <div class="split-grid">
+      <div class="todo">
+        <div class="tk">Se comparte — una sola vez, para todas</div>
+        <ol>
+          <li>El código: Edge Functions, Router, agentes, frontend</li>
+          <li>El motor de reglas y la arquitectura de pipelines</li>
+          <li>Las mejoras — un fix o una mejora al SDR beneficia a las tres al instante</li>
+        </ol>
+      </div>
+      <div class="todo">
+        <div class="tk">Es propio de cada tenant — vive en la base</div>
+        <ol>
+          <li>Sus pipelines y etapas</li>
+          <li>Su catálogo de productos</li>
+          <li>Sus <code style="font-family:var(--mono);color:var(--teal)">routing_rules</code></li>
+          <li>Su base de conocimiento RAG</li>
+          <li>Su propio número de WhatsApp — el webhook enruta según qué número recibió el mensaje</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">La excepción — cuándo SÍ conviene separar en instancias distintas</div>
+      <p>No es la regla, es el caso especial. Se justifica una base de datos (o infraestructura) dedicada por completo a un solo tenant cuando:</p>
+      <ul style="margin:10px 0 0 19px;font-size:13.5px;color:var(--text-dim);">
+        <li style="margin-bottom:6px;"><b style="color:var(--text)">Vecino ruidoso:</b> uno de los tenants crece tanto que su volumen de consultas empieza a afectar el rendimiento de los demás.</li>
+        <li style="margin-bottom:6px;"><b style="color:var(--text)">Residencia de datos:</b> requisitos legales distintos por país obligan a que los datos de un tenant no salgan de cierta región.</li>
+        <li><b style="color:var(--text)">Exigencia contractual enterprise:</b> un cliente grande exige infraestructura aislada por contrato, típicamente a cambio de pagar por ello.</li>
+      </ul>
+      <p style="margin-top:10px;">Para Hellominus y los tenants que se sumen en el corto plazo, ninguna aplica todavía — el camino correcto es una sola base con <code style="font-family:var(--mono);color:var(--teal)">tenant_id</code>.</p>
+    </div>
+
+    <!-- PASO 3 -->
+    <div style="font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--copper);text-transform:uppercase;margin:40px 0 8px;border-top:1px solid var(--border-soft);padding-top:28px;">Paso 3</div>
+    <h3 style="margin-bottom:14px;">Canales de entrada: WhatsApp con Meta Business y widget web</h3>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:16px;max-width:70ch;">
+      <b style="color:var(--text)">Primero, el número para WhatsApp Cloud API.</b> La regla de Meta es simple: el número <b style="color:var(--text)">no puede estar activo en WhatsApp normal ni en WhatsApp Business en el momento de registrarlo</b>. No tiene que ser un número que nunca haya tenido WhatsApp — solo tiene que estar libre en ese momento.
+    </p>
+
+    <div class="split-grid">
+      <div class="todo">
+        <div class="tk">Opción A — línea nueva</div>
+        <ol>
+          <li>Se activa directo en la Cloud API, sin pasos previos.</li>
+          <li>Sin espera, sin riesgo de perder nada.</li>
+          <li><b>Recomendado siempre que sea posible</b> — es la ruta que no atrasa el cronograma.</li>
+        </ol>
+      </div>
+      <div class="todo">
+        <div class="tk">Opción B — reutilizar una línea con WhatsApp</div>
+        <ol>
+          <li>En el celular: <code style="font-family:var(--mono);color:var(--teal)">Ajustes → Cuenta → Eliminar mi cuenta</code>. Cerrar sesión no es suficiente.</li>
+          <li>Esperar <b>24 a 72 horas</b> a que Meta libere el número.</li>
+          <li>Recién ahí registrarlo en Meta Business/Developers.</li>
+          <li><b>Se pierde todo</b> el historial de chats de esa cuenta — es irreversible.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">Por qué no se puede saltar el paso de eliminar</div>
+      <p>Si se intenta registrar el número mientras sigue activo en la app, Meta rechaza la verificación por SMS directamente — la eliminación no es opcional ni algo que el flujo de registro resuelva por detrás.</p>
+    </div>
+
+    <div class="check" style="margin-top:14px;">
+      <div class="ck">Cuándo sí conviene reutilizar en vez de una línea nueva</div>
+      <p>Solo si esa línea ya tiene reconocimiento importante con clientes reales (número que la gente ya tiene guardado) y no importa perder el historial de chats de la app. Si no hay esa razón de peso, mejor una línea nueva y evitar la ventana de espera.</p>
+    </div>
+
+    <h3 style="margin-top:32px;">Reglas de mensajería de Meta</h3>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:16px;max-width:70ch;">
+      No son detalles opcionales — determinan qué puede enviar el bot, cuándo, y a qué costo. Se agrupan en tres bloques.
+    </p>
+
+    <div class="acc-table" style="margin-bottom:6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);">Reglas de conversación</div>
+    <table class="acc-table">
+      <thead><tr><th>Regla</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">Ventana de 24 horas</td><td>Se abre cuando el cliente escribe. Dentro de ella se responde libre (texto, imágenes, botones). Fuera, solo con plantilla. Se reinicia con cada mensaje del cliente.</td></tr>
+        <tr><td class="acc-name">Plantillas (templates)</td><td>Todo mensaje iniciado por la empresa fuera de la ventana debe usar una plantilla pre-aprobada por Meta. Aprobación: minutos a días. Se necesitan 2-3 listas antes de cerrar la Fase 1.</td></tr>
+        <tr><td class="acc-name">Categorías de mensaje</td><td>Marketing (más caro), Utility, Authentication, Service. Cada una con tarifa distinta — ya contempladas en el modelo de datos (categoria_mensaje_t).</td></tr>
+        <tr><td class="acc-name">Solo plantilla para iniciar</td><td>Si el cliente nunca ha escrito, el primer mensaje de la empresa tiene que ser una plantilla aprobada. Nunca texto libre.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="acc-table" style="margin:20px 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);">Límites de volumen</div>
+    <table class="acc-table">
+      <thead><tr><th>Regla</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">Tiers de mensajería</td><td>250 → 1.000 → 10.000 → 100.000 → ilimitado usuarios únicos por 24h. Escalan solos según volumen y calidad. Las respuestas dentro de la ventana no cuentan.</td></tr>
+        <tr><td class="acc-name">Límite compartido</td><td>Se calcula a nivel de portafolio empresarial — todos los números bajo el mismo portafolio comparten el límite. Relevante en multi-tenant: separar portafolios por tenant si el volumen lo justifica.</td></tr>
+        <tr><td class="acc-name">Quality Rating</td><td>Alta / Media / Baja. Se calcula por bloqueos y reportes de spam. Dispara los ascensos de tier automáticos — o recorta los límites si cae.</td></tr>
+        <tr><td class="acc-name">Throughput</td><td>Velocidad de envío, distinto del tier de volumen. ~80 mensajes por segundo en cuentas estándar.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="acc-table" style="margin:20px 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);">Reglas de cuenta</div>
+    <table class="acc-table">
+      <thead><tr><th>Regla</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">Un número, una WABA</td><td>No puede estar en dos cuentas de WhatsApp Business API a la vez. Si viene de otro proveedor, ese proveedor debe liberarlo primero.</td></tr>
+        <tr><td class="acc-name">Verificación de negocio</td><td>Nombre legal, documento fiscal, dirección física verificable, sitio web activo. Sin web accesible, la cuenta puede desactivarse.</td></tr>
+        <tr><td class="acc-name">Consentimiento (opt-in)</td><td>Solo se puede escribir a quien aceptó recibir mensajes. Escribir sin consentimiento es la causa más común de caída del Quality Rating.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="acc-table" style="margin:20px 0 6px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);">Costos</div>
+    <table class="acc-table">
+      <thead><tr><th>Regla</th><th>Qué significa</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">Plataforma gratis, mensaje no</td><td>Cloud API no cobra hospedaje ni llamadas a la API. Se paga por mensaje entregado — no por enviado.</td></tr>
+        <tr><td class="acc-name">Precio por país</td><td>La tarifa depende del país del destinatario. Presupuestar con la tarifa de un solo mercado subestima el gasto real hasta 50% en operaciones multi-país.</td></tr>
+        <tr><td class="acc-name">Click-to-WhatsApp</td><td>Entrada por este tipo de anuncio da 72 horas gratis para todo tipo de mensaje — ventaja adicional del canal ya priorizado para adquisición.</td></tr>
+        <tr><td class="acc-name">Costo de BSP (si aplica)</td><td>Un intermediario (Twilio, 360dialog, etc.) cobra encima de la tarifa de Meta. Conectar directo a Cloud API evita ese margen.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">⚠️ Desde el 1 de octubre de 2026 — responder deja de ser gratis</div>
+      <p>Los mensajes de servicio (respuestas dentro de la ventana de 24h) pasan a cobrarse por mensaje, igual que utility y authentication, sin tramos por volumen. Cada respuesta del Agente SDR o del Bot de Catálogo va a tener costo — hay que revisar si el margen del Pipeline A lo aguanta antes de esa fecha.</p>
+    </div>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">⚠️ Desde el 1 de agosto de 2026 — Meta Business Agent cobra por tokens</div>
+      <p>$2.00 USD por millón de tokens. Solo aplica si se usa el agente nativo de Meta — como los agentes de este proyecto se construyen con Claude, no afecta directamente, pero conviene tenerlo presente si en algún punto se evalúa esa alternativa.</p>
+    </div>
+
+    <h3 style="margin-top:32px;">El segundo canal: widget web (independiente de Meta)</h3>
+    <p style="font-size:13.5px;color:var(--text-dim);margin-bottom:16px;max-width:70ch;">
+      El widget es la burbuja de chat que se incrusta en el sitio web. <b style="color:var(--text)">Meta no participa en absoluto</b> — no requiere verificación de negocio, ni número dedicado, ni plantillas aprobadas, ni ventana de 24 horas. Se construye y funciona.
+    </p>
+
+    <div class="split-grid">
+      <div class="todo">
+        <div class="tk">Widget web — captura</div>
+        <ol>
+          <li>Atrapa a alguien que está <b>ahora mismo</b> en el sitio, con la duda fresca.</li>
+          <li>Canal del momento de máxima intención.</li>
+          <li>Cero dependencias externas — se puede construir mientras se espera a Meta.</li>
+          <li><b>Debilidad:</b> el visitante llega anónimo. Si se va sin dejar dato, el lead se pierde.</li>
+        </ol>
+      </div>
+      <div class="todo">
+        <div class="tk">WhatsApp — sostiene</div>
+        <ol>
+          <li>Es el canal de la relación que continúa.</li>
+          <li>La conversación sobrevive al cierre del navegador.</li>
+          <li>El contacto llega identificado por su teléfono.</li>
+          <li><b>Dependencia:</b> todas las reglas de Meta descritas arriba.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="check" style="margin-top:14px;">
+      <div class="ck">No se dividen por función — se dividen por momento</div>
+      <p>No es "widget = soporte, WhatsApp = ventas". Los dos venden y atienden, usan los mismos agentes, el mismo Router y el mismo pipeline. La diferencia es en qué punto del recorrido está la persona: <b style="color:var(--text)">el widget captura, WhatsApp sostiene</b>.</p>
+    </div>
+
+    <div class="todo" style="margin-top:14px;">
+      <div class="tk">Qué hay que tener en cuenta al construir el widget</div>
+      <ol>
+        <li><b>Identificador de sesión anónimo:</b> WhatsApp da el teléfono automáticamente; el widget no da nada. Hay que generar un ID que persista en cookie o localStorage, para que al recargar la página la conversación no empiece de cero.</li>
+        <li><b>Pedir un dato de contacto real</b> en algún punto de la conversación, o ese lead no sirve para el pipeline.</li>
+        <li><b>El movimiento más valioso — puente a WhatsApp:</b> ofrecer <i>"para no perder el hilo si cierras la página, ¿seguimos por WhatsApp?"</i> con un botón que abra WhatsApp con el contexto ya cargado. Ahí el anónimo se convierte en contacto identificado.</li>
+        <li><b>Mismo esquema normalizado:</b> el widget escribe en las mismas tablas <code style="font-family:var(--mono);color:var(--teal)">conversations</code> y <code style="font-family:var(--mono);color:var(--teal)">messages</code> que WhatsApp. Nada de tablas paralelas.</li>
+        <li><b>Deduplicación entre canales:</b> si escribe primero por el widget y luego por WhatsApp con el mismo correo, deben unirse bajo un solo <code style="font-family:var(--mono)">contact_id</code>, con las dos conversaciones visibles en su ficha.</li>
+        <li><b>tenant_id en el script:</b> el widget debe declarar a qué empresa pertenece (<code style="font-family:var(--mono)">data-tenant="hellominus"</code>), igual que el número de WhatsApp mapea a su tenant.</li>
+      </ol>
+    </div>
+
+    <div class="warn" style="margin-top:14px;">
+      <div class="wk">Orden recomendado de construcción</div>
+      <p><b style="color:var(--text)">WhatsApp primero</b> — es donde está el mercado, sostiene el ciclo largo de los proyectos consultivos, y tiene dependencias externas que conviene arrancar temprano. <b style="color:var(--text)">Widget después</b>, en Fase 1 tardía o Fase 2: es más rápido porque toda la cadena (normalización → Router → agentes → bandeja) ya estará hecha y solo se agrega un canal de entrada más.</p>
+      <p style="margin-top:10px;"><b style="color:var(--text)">La excepción:</b> si la verificación de Meta se demora, invertir el orden. El widget permite probar el sistema completo mientras se espera — es la mitigación de riesgo anotada en el Paso 1.</p>
+    </div>
+  </div>
+
+  <!-- ==================== FASE 1 ==================== -->
+  <div class="phase-head f1">
+    <span class="ph-badge">FASE 1</span>
+    <h2>Fundación operativa</h2>
+    <span class="ph-time">4–6 semanas</span>
+  </div>
+  <p class="phase-goal">
+    <b style="color:var(--text)">Meta de salida:</b> un vendedor puede atender leads reales de WhatsApp
+    desde una sola pantalla, y cada conversación queda registrada con su atribución. Sin agentes IA todavía —
+    primero el riel, después el tren.
+  </p>
+
+  <!-- 1.1 -->
+  <div class="step done" id="p11">
+    <div class="step-top">
+      <span class="step-n">1.1</span>
+      <div class="step-titles">
+        <h3>Crear el proyecto Supabase</h3>
+        <div class="step-where">supabase.com · 15 minutos</div>
+      </div>
+      <span class="step-badge tuyo">Te toca a ti</span>
+    </div>
+    <div class="todo">
+      <div class="tk">Qué hacer</div>
+      <ol>
+        <li>Crear proyecto nuevo en Supabase. Región: la más cercana a tus clientes (para LATAM, <code>us-east-1</code> o <code>sa-east-1</code>).</li>
+        <li>Guardar en un gestor de contraseñas: <b>Project URL</b>, <b>anon key</b> y <b>service_role key</b>.</li>
+        <li>Instalar el CLI: <code>npm i -g supabase</code> y correr <code>supabase init</code> en la carpeta del proyecto.</li>
+        <li>Enlazar: <code>supabase link --project-ref TU_REF</code></li>
+      </ol>
+    </div>
+    <div class="warn">
+      <div class="wk">Crítico</div>
+      <p>La <code style="font-family:var(--mono)">service_role</code> key salta RLS por diseño. Nunca va en el frontend ni en el repositorio — solo en variables de entorno de las Edge Functions.</p>
+    </div>
+  </div>
+
+  <!-- 1.2 -->
+  <div class="step done" id="p12">
+    <div class="step-top">
+      <span class="step-n">1.2</span>
+      <div class="step-titles">
+        <h3>Aplicar el modelo de datos</h3>
+        <div class="step-where">supabase/migrations/ · SQL entregado</div>
+      </div>
+      <span class="step-badge listo">Código listo</span>
+    </div>
+    <div class="step-body">
+      El archivo <code>20260823000001_modelo_base.sql</code> crea las 11 tablas, los enums controlados,
+      los índices de deduplicación, los triggers y las políticas de RLS. Incluye las reglas de negocio
+      como <i>constraints</i>: un deal no se cierra como perdido sin motivo, ni se gana sin monto.
+    </div>
+    <div class="todo">
+      <div class="tk">Qué hacer</div>
+      <ol>
+        <li>Copiar el archivo a <code>supabase/migrations/</code> de tu proyecto.</li>
+        <li>Aplicar con <code>supabase db push</code>, o pegar el contenido en el <b>SQL Editor</b> de Supabase y ejecutar.</li>
+        <li>Verificar en <b>Table Editor</b> que aparezcan las 11 tablas.</li>
+      </ol>
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>En Table Editor, cada tabla debe mostrar el candado de <b>RLS enabled</b>. Si alguna aparece sin él, esa tabla está abierta a cualquiera con la anon key.</p>
+    </div>
+  </div>
+
+  <!-- 1.3 -->
+  <div class="step done" id="p13">
+    <div class="step-top">
+      <span class="step-n">1.3</span>
+      <div class="step-titles">
+        <h3>Cargar pipelines, etapas y catálogo</h3>
+        <div class="step-where">supabase/migrations/ · SQL entregado</div>
+      </div>
+      <span class="step-badge listo">Código listo</span>
+    </div>
+    <div class="step-body">
+      El archivo <code>20260823000002_seed_pipelines.sql</code> inserta los tres pipelines con sus etapas
+      y probabilidades (las mismas que definimos en el blueprint), los productos del catálogo, y las
+      6 reglas iniciales del Router.
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>Correr <code style="font-family:var(--mono)">select p.nombre, count(s.id) from pipelines p join stages s on s.pipeline_id = p.id group by 1;</code> — debe devolver A con 5 etapas, B con 7 y C con 5.</p>
+    </div>
+  </div>
+
+  <!-- 1.4 -->
+  <div class="step" id="p14">
+    <div class="step-top">
+      <span class="step-n">1.4</span>
+      <div class="step-titles">
+        <h3>Configurar WhatsApp Cloud API</h3>
+        <div class="step-where">developers.facebook.com · 1–2 días (incluye espera de verificación)</div>
+      </div>
+      <span class="step-badge tuyo">Te toca a ti</span>
+    </div>
+    <div class="todo">
+      <div class="tk">Qué hacer</div>
+      <ol>
+        <li>Crear una app de tipo <b>Business</b> en Meta for Developers y agregar el producto <b>WhatsApp</b>.</li>
+        <li>Verificar el negocio en Business Manager (este es el paso que puede tardar días — <b>empezarlo ya</b>).</li>
+        <li>Registrar un número de teléfono dedicado. No puede ser uno que ya use WhatsApp normal o Business.</li>
+        <li>Guardar: <b>Phone Number ID</b>, <b>WABA ID</b> y generar un <b>token permanente</b> de sistema.</li>
+      </ol>
+    </div>
+    <div class="warn">
+      <div class="wk">Planifica el tiempo</div>
+      <p>La verificación de negocio de Meta es el cuello de botella más común de esta fase. Arráncala en paralelo con el paso 1.2, no después.</p>
+    </div>
+  </div>
+
+  <!-- 1.5 -->
+  <div class="step" id="p15">
+    <div class="step-top">
+      <span class="step-n">1.5</span>
+      <div class="step-titles">
+        <h3>Edge Function de ingesta + normalización</h3>
+        <div class="step-where">supabase/functions/ingesta-whatsapp/</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Es la <b>Capa 2</b> de la arquitectura. Recibe el webhook de WhatsApp con su formato propio y lo
+      traduce al esquema único de la tabla <code>messages</code>. Hace tres cosas en una sola pasada:
+      normaliza, deduplica el contacto por teléfono, y captura la atribución del <code>ctwa_clid</code>
+      si el lead vino de un anuncio Click-to-WhatsApp.
+    </div>
+    <div class="code-panel">
+      <div class="cpl">Forma que tendrá — verificación del webhook y normalización</div>
+      <pre><span class="cmt">// GET: Meta verifica el endpoint una sola vez</span>
+<span class="kw">if</span> (req.method === <span class="st">"GET"</span>) {
+  <span class="kw">const</span> token = url.searchParams.get(<span class="st">"hub.verify_token"</span>);
+  <span class="kw">if</span> (token === Deno.env.get(<span class="st">"WA_VERIFY_TOKEN"</span>))
+    <span class="kw">return</span> <span class="kw">new</span> Response(url.searchParams.get(<span class="st">"hub.challenge"</span>));
+}
+
+<span class="cmt">// POST: llega un mensaje real → se normaliza</span>
+<span class="kw">const</span> normalizado = {
+  canal: <span class="st">"whatsapp"</span>,
+  contact_id: contacto.id,   <span class="cmt">// deduplicado por teléfono</span>
+  direccion: <span class="st">"entrante"</span>,
+  contenido: msg.text?.body,
+  externo_id: msg.id,        <span class="cmt">// idempotencia: evita duplicados</span>
+  payload_raw: msg           <span class="cmt">// el original, por si hay que depurar</span>
+};</pre>
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>Enviar un mensaje al número desde tu celular. Debe aparecer una fila nueva en <code style="font-family:var(--mono)">messages</code> y una en <code style="font-family:var(--mono)">contacts</code>. Enviar un segundo mensaje: <b>no</b> debe crear un contacto nuevo.</p>
+    </div>
+  </div>
+
+  <!-- 1.6 -->
+  <div class="step" id="p16">
+    <div class="step-top">
+      <span class="step-n">1.6</span>
+      <div class="step-titles">
+        <h3>Envío de mensajes salientes</h3>
+        <div class="step-where">supabase/functions/enviar-whatsapp/</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      La contraparte del paso anterior: toma un mensaje del CRM y lo envía por la API de WhatsApp,
+      registrándolo en <code>messages</code> con <code>direccion = 'saliente'</code>. Es lo que permite
+      que el vendedor responda desde la bandeja sin abrir WhatsApp.
+    </div>
+    <div class="warn">
+      <div class="wk">Ventana de 24 horas</div>
+      <p>WhatsApp solo permite mensajes libres dentro de las 24h siguientes al último mensaje del cliente. Fuera de esa ventana hay que usar plantillas aprobadas por Meta — conviene tener 2 o 3 aprobadas desde ya.</p>
+    </div>
+  </div>
+
+  <!-- 1.7 -->
+  <div class="step" id="p17">
+    <div class="step-top">
+      <span class="step-n">1.7</span>
+      <div class="step-titles">
+        <h3>Frontend — autenticación del equipo</h3>
+        <div class="step-where">Vite + React (ya scaffoldeado) + Tailwind</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="todo">
+      <div class="tk">Qué hacer</div>
+      <ol>
+        <li>El proyecto base ya existe desde Sprint 0 (<code>npm install</code>, <code>npm run dev</code>) — este paso no arranca de cero.</li>
+        <li>Confirmar <code>@supabase/supabase-js</code> instalado (ya está en <code>package.json</code>).</li>
+        <li>Configurar login con magic link para el equipo interno (Supabase Auth) — el scaffold ya trae la pantalla de login, falta la lógica de sesión completa.</li>
+        <li>Variables de entorno: solo <b>URL</b> y <b>anon key</b> — nunca la service_role.</li>
+      </ol>
+    </div>
+    <div class="check">
+      <div class="ck">Corrección sobre el documento original</div>
+      <p>Proponía Next.js + shadcn/ui + <code style="font-family:var(--mono)">@supabase/ssr</code> (paquete específico para SSR). El repo usa Vite + React — sin SSR, alcanza con el cliente normal de <code style="font-family:var(--mono)">@supabase/supabase-js</code>. Todavía no hay librería de ruteo elegida; los paths tipo <code style="font-family:var(--mono)">app/inbox/</code> de los pasos siguientes son la convención de Next.js del documento original.</p>
+    </div>
+  </div>
+
+  <!-- 1.8 -->
+  <div class="step" id="p18">
+    <div class="step-top">
+      <span class="step-n">1.8</span>
+      <div class="step-titles">
+        <h3>Bandeja unificada de conversaciones</h3>
+        <div class="step-where">el panel más importante de todos</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Las tres columnas del mockup: lista de conversaciones con filtros, hilo de mensajes, y panel de
+      contexto del contacto. Usa <b>Supabase Realtime</b> para que los mensajes nuevos aparezcan sin
+      recargar la página.
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>Escribir al número desde otro celular con la bandeja abierta: el mensaje debe aparecer solo, en menos de 2 segundos, sin refrescar.</p>
+    </div>
+  </div>
+
+  <!-- 1.9 -->
+  <div class="step" id="p19">
+    <div class="step-top">
+      <span class="step-n">1.9</span>
+      <div class="step-titles">
+        <h3>Kanban del pipeline y ficha del deal</h3>
+        <div class="step-where">ruta por definir (ver nota del paso 1.7)</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Cierra la Fase 1. Tarjetas arrastrables por etapa con filtro obligatorio por pipeline, y la ficha
+      con la línea de tiempo completa del deal. El trigger <code>deals_on_stage_change</code> que ya
+      quedó en la migración registra cada movimiento automáticamente en <code>events</code>.
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gk">Puerta de salida de la Fase 1 — no avanzar sin esto</div>
+    <ul>
+      <li><b>Un lead real entra por WhatsApp</b> y aparece en la bandeja en segundos.</li>
+      <li><b>El vendedor responde desde el CRM</b> y el cliente lo recibe en WhatsApp.</li>
+      <li><b>Un segundo mensaje del mismo número</b> no crea un contacto duplicado.</li>
+      <li><b>Un deal se puede mover de etapa</b> y el movimiento queda registrado en <code>events</code>.</li>
+      <li><b>La atribución llegó completa</b>: al menos un lead con <code>ctwa_clid</code> o UTM guardados.</li>
+    </ul>
+  </div>
+
+  <!-- ==================== PREPARACIÓN FASE 2 ==================== -->
+  <div class="prep f2" id="prep-f2">
+    <div class="pk">Antes de arrancar la Fase 2</div>
+
+    <h3>Cuentas y accesos adicionales</h3>
+    <table class="acc-table">
+      <thead><tr><th>Qué</th><th>Para qué</th><th>Tiempo</th></tr></thead>
+      <tbody>
+        <tr><td class="acc-name">API key de Anthropic (Claude)</td><td>El Router semántico y los agentes conversacionales</td><td class="acc-time">15 min</td></tr>
+        <tr><td class="acc-name">Cuenta Cal.com o Google Calendar API</td><td>Disponibilidad y agendamiento del Agente Agendador</td><td class="acc-time">30 min</td></tr>
+        <tr><td class="acc-name">Cuenta Langfuse (o equivalente)</td><td>Observabilidad — trazas de cada ejecución de agente</td><td class="acc-time">15 min</td></tr>
+        <tr><td class="acc-name">Plantillas de WhatsApp aprobadas</td><td>Mensajes fuera de la ventana de 24h</td><td class="acc-time crit">2–5 días</td></tr>
+      </tbody>
+    </table>
+    <p style="font-size:13px;color:var(--text-faint);">La aprobación de plantillas por parte de Meta es el nuevo cuello de botella de esta fase — igual que la verificación de negocio en la Fase 1, conviene enviarlas a revisión desde el primer día.</p>
+
+    <h3 style="margin-top:24px;">Requisito de entrada — no arrancar sin esto</h3>
+    <div class="decision">
+      <div class="dq">La puerta de salida de la Fase 1 debe estar cumplida</div>
+      <div class="da">El Router y los agentes se apoyan en datos limpios y en la bandeja funcionando. Construir agentes sobre un pipeline sin probar en producción es automatizar caos, no resolverlo.</div>
+    </div>
+  </div>
+
+  <!-- ==================== FASE 2 ==================== -->
+  <div class="phase-head f2">
+    <span class="ph-badge">FASE 2</span>
+    <h2>Primeros agentes</h2>
+    <span class="ph-time">4 semanas</span>
+  </div>
+  <p class="phase-goal">
+    <b style="color:var(--text)">Meta de salida:</b> el Router clasifica cada lead automáticamente y el
+    Agente Calificador atiende las conversaciones consultivas hasta dejarlas listas para el vendedor,
+    con handoff limpio a humano cuando corresponde.
+  </p>
+
+  <!-- 2.1 -->
+  <div class="step" id="p21">
+    <div class="step-top">
+      <span class="step-n">2.1</span>
+      <div class="step-titles">
+        <h3>Router — capa de reglas determinísticas</h3>
+        <div class="step-where">supabase/functions/router/</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Lee las reglas de <code>routing_rules</code> (ya sembradas en el paso 1.3) ordenadas por prioridad
+      y devuelve el pipeline sin gastar una sola llamada a un LLM. Rápido y gratis. Resuelve la mayoría
+      de los casos.
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>Escribir "quiero convertir un mp3 a midi" → debe clasificar Pipeline A. Escribir "necesito algo para gestionar las obras de mi constructora" → Pipeline B.</p>
+    </div>
+  </div>
+
+  <!-- 2.2 -->
+  <div class="step" id="p22">
+    <div class="step-top">
+      <span class="step-n">2.2</span>
+      <div class="step-titles">
+        <h3>Router — capa semántica con LLM</h3>
+        <div class="step-where">supabase/functions/router/ · fallback</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Solo se activa cuando las reglas no resuelven. Usa un modelo pequeño con <b>salida estructurada</b>
+      (pipeline, confianza, señales detectadas). Si la confianza baja del umbral, por defecto va a
+      Pipeline B — nunca a A.
+    </div>
+    <div class="code-panel">
+      <div class="cpl">Salida estructurada que devuelve</div>
+      <pre>{
+  <span class="kw">"pipeline"</span>: <span class="st">"B"</span>,
+  <span class="kw">"confidence"</span>: <span class="st">0.87</span>,
+  <span class="kw">"senales"</span>: [<span class="st">"menciona equipo"</span>, <span class="st">"dominio corporativo"</span>],
+  <span class="kw">"stage_sugerido"</span>: <span class="st">"lead_entrante"</span>
+}</pre>
+    </div>
+  </div>
+
+  <!-- 2.3 -->
+  <div class="step" id="p23">
+    <div class="step-top">
+      <span class="step-n">2.3</span>
+      <div class="step-titles">
+        <h3>Escalamiento A → B</h3>
+        <div class="step-where">supabase/functions/router/ · reevaluación por turno</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      El Router se ejecuta en <b>cada mensaje</b>, no solo en el primero. Cuando detecta señales de
+      empresa en una conversación que ya estaba en Pipeline A, cambia el <code>pipeline_id</code>, registra
+      la fila en <code>pipeline_transfers</code> y cambia el agente que atiende — sin perder el contexto.
+    </div>
+    <div class="check">
+      <div class="ck">Cómo saber que quedó bien</div>
+      <p>El caso de prueba es el de Ana Gómez: pedir el conversor de $15, y en el segundo mensaje decir "es para mi equipo, somos 200 en la constructora". Debe saltar a Pipeline B y quedar la fila en <code style="font-family:var(--mono)">pipeline_transfers</code>.</p>
+    </div>
+  </div>
+
+  <!-- 2.4 -->
+  <div class="step" id="p24">
+    <div class="step-top">
+      <span class="step-n">2.4</span>
+      <div class="step-titles">
+        <h3>Agente SDR / Calificador</h3>
+        <div class="step-where">supabase/functions/agente-sdr/</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      El primer agente conversacional. Aplica BANT en la conversación y llena los campos del deal.
+      Lo importante del diseño: <b>el prompt define el rol, las tools definen lo que puede hacer</b> —
+      nunca inventa precios ni promete plazos, esos vienen de la base de datos.
+    </div>
+    <div class="todo">
+      <div class="tk">Tools que expone</div>
+      <ol>
+        <li><code>buscar_producto(query)</code> — lee de <code>products</code>, la fuente de verdad</li>
+        <li><code>actualizar_deal(campos)</code> — monto estimado, dolor, tamaño de empresa</li>
+        <li><code>mover_etapa(stage)</code> — solo hacia "Calificado" cuando BANT está completo</li>
+        <li><code>escalar_a_humano(motivo)</code> — corta y avisa al vendedor</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- 2.5 -->
+  <div class="step" id="p25">
+    <div class="step-top">
+      <span class="step-n">2.5</span>
+      <div class="step-titles">
+        <h3>Handoff a humano y takeover</h3>
+        <div class="step-where">Edge Function + bandeja</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Criterios explícitos de corte: cliente molesto, monto por encima del umbral, tema fuera de alcance,
+      o petición directa de hablar con una persona. Al escalar, marca <code>conversations.tomada_por</code>
+      y el agente deja de responder — sin excepciones, o se pisan entre los dos.
+    </div>
+  </div>
+
+  <!-- 2.6 -->
+  <div class="step" id="p26">
+    <div class="step-top">
+      <span class="step-n">2.6</span>
+      <div class="step-titles">
+        <h3>Agente Agendador</h3>
+        <div class="step-where">supabase/functions/agente-agendador/</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Se activa solo con leads ya calificados. Consulta disponibilidad (Cal.com o Google Calendar),
+      propone horarios y confirma. Al agendar, mueve el deal a la etapa 03 · Diagnóstico automáticamente.
+    </div>
+  </div>
+
+  <!-- 2.7 -->
+  <div class="step" id="p27">
+    <div class="step-top">
+      <span class="step-n">2.7</span>
+      <div class="step-titles">
+        <h3>Observabilidad de agentes</h3>
+        <div class="step-where">Langfuse o equivalente</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Sin trazas no se depura un agente, se adivina. Cada ejecución debe quedar registrada: qué entró,
+      qué tools llamó, qué salió, cuánto costó. Es lo que alimenta el panel de rendimiento de agentes.
+    </div>
+  </div>
+
+  <!-- 2.8 -->
+  <div class="step" id="p28">
+    <div class="step-top">
+      <span class="step-n">2.8</span>
+      <div class="step-titles">
+        <h3>Pruebas con conversaciones reales</h3>
+        <div class="step-where">producción, con supervisión</div>
+      </div>
+      <span class="step-badge sig">Siguiente entrega</span>
+    </div>
+    <div class="step-body">
+      Arrancar con el agente en modo <b>sugerencia</b>: propone la respuesta pero un humano aprueba antes
+      de enviar. Después de ~50 conversaciones revisadas, soltarlo en automático solo para Pipeline A,
+      donde el riesgo por error es bajo.
+    </div>
+  </div>
+
+  <div class="gate">
+    <div class="gk">Puerta de salida de la Fase 2</div>
+    <ul>
+      <li><b>Cada lead nuevo queda clasificado</b> en un pipeline sin intervención humana.</li>
+      <li><b>El caso de escalamiento A→B funciona</b> y queda registrado en <code>pipeline_transfers</code>.</li>
+      <li><b>El Calificador llena los campos del deal</b> con datos extraídos de la conversación.</li>
+      <li><b>El handoff corta limpio</b>: cuando un humano toma la conversación, el agente se calla.</li>
+      <li><b>Hay trazas</b> de cada ejecución para poder depurar.</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>Guía de ejecución · Fase 1 y 2 · CRM Ventas + Agentes IA</span>
+  <span>Última actualización: 23 ago 2026</span>
+</footer>
+
+</body>
+</html>

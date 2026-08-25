@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Indicadores para el Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a; --ink-raised:#161a23; --panel:#171c26; --panel-hi:#1e2430;
+    --border:#2b3244; --border-soft:#212636;
+    --copper:#cc7a42; --copper-dim:#8a5732;
+    --teal:#43c2ae; --teal-dim:#2c8577;
+    --slate:#7c8bb0; --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0; --text-dim:#8d96a8; --text-faint:#565f70;
+    --mono:'JetBrains Mono',monospace; --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;
+    font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(203,122,66,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(203,122,66,.035) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:980px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-faint);}
+  .top-bar-links{display:flex;gap:14px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  .hero{padding:76px 0 40px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.1;letter-spacing:-.01em;max-width:20ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:18px;max-width:64ch;font-size:16px;color:var(--text-dim);}
+  .hero-meta{margin-top:26px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+  .hero-meta b{color:var(--text-dim);font-weight:500;}
+
+  /* group header con subtítulo */
+  .group-section{padding:56px 0 8px;}
+  .group-section:first-of-type{padding-top:16px;}
+  .group-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--teal);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .group-eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--teal);box-shadow:0 0 0 3px rgba(67,194,174,.16);}
+  .group-section h2{font-family:var(--display);font-weight:700;font-size:24px;margin-bottom:8px;}
+  .group-section .g-desc{font-size:14px;color:var(--text-dim);max-width:66ch;}
+
+  /* numbered indicator item */
+  .ind{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--border-soft);scroll-margin-top:70px;}
+  .ind:first-of-type{border-top:1px solid var(--border);}
+  .ind-n{font-family:var(--mono);font-weight:700;font-size:18px;color:var(--teal);line-height:1.3;}
+  .ind-body h3{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:10px;}
+  .ind-row{margin-bottom:8px;}
+  .ind-row:last-child{margin-bottom:0;}
+  .ind-row .ik{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px;}
+  .ind-row .iv{font-size:13.5px;color:var(--text-dim);max-width:66ch;}
+  .ind-row.tells{background:rgba(67,194,174,.05);border-left:2px solid var(--teal-dim);padding:9px 13px;border-radius:0 5px 5px 0;}
+  .ind-row.tells .ik{color:var(--teal);}
+  .ind-row.uses .ik{color:var(--copper);}
+
+  .pending-group{
+    margin-top:56px;border:1px dashed var(--border);border-radius:10px;
+    padding:26px 28px;color:var(--text-faint);
+  }
+  .pending-group .pg-label{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+  .pending-group ul{margin:10px 0 0 19px;font-size:13px;color:var(--text-faint);}
+  .pending-group li{margin-bottom:5px;}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;margin-top:50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (max-width:600px){ .ind{grid-template-columns:30px 1fr;gap:12px;} }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">INDICADORES · PANEL ANALÍTICO</span>
+    <div class="top-bar-links">
+      <a href="paneles-crm-mockups.html">paneles-mockups</a>
+      <a href="tener-en-cuenta-base-de-datos.html">base-de-datos</a>
+      <a href="hoja-de-ruta-construccion.html">hoja-de-ruta</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Documento vivo — se sigue alimentando por grupo</div>
+    <h1>Indicadores para el <span>Dashboard</span></h1>
+    <p class="hero-sub">
+      Los indicadores que alimentan el panel analítico del CRM, organizados por grupo. Cada uno con
+      qué te diría al mirarlo y para qué serviría esa lectura en una decisión real.
+    </p>
+    <div class="hero-meta">
+      <span><b>Grupos definidos:</b> 1</span>
+      <span><b>Indicadores en este grupo:</b> 15</span>
+    </div>
+  </section>
+
+  <!-- ===================== GRUPO 1 ===================== -->
+  <div class="group-section" id="grupo-origen">
+    <div class="group-eyebrow">Grupo 1</div>
+    <h2>Origen y atribución del lead</h2>
+    <p class="g-desc">De dónde viene cada lead, por qué ruta llegó, y cuántos toques tomó antes de escribir. Es la capa que le dice al negocio dónde está sembrando y dónde está cosechando.</p>
+  </div>
+
+  <div class="ind" id="ind-1">
+    <div class="ind-n">1</div>
+    <div class="ind-body">
+      <h3>Canal de entrada</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Por dónde llegó: WhatsApp, widget web, Instagram, email.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Dónde poner esfuerzo operativo y cuál canal está creciendo o muriendo.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-2">
+    <div class="ind-n">2</div>
+    <div class="ind-body">
+      <h3>Fuente / source</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Si vino de anuncio pagado, orgánico, referido, outbound o evento.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Separa lo que compras de lo que ganas — la base para saber cuánto de tu demanda depende de pagar publicidad.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-3">
+    <div class="ind-n">3</div>
+    <div class="ind-body">
+      <h3>Campaña específica (campaign_id, ad_id)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué anuncio exacto lo trajo.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Calcular ROI real por campaña y apagar las que no cierran ventas, aunque traigan muchos leads.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-4">
+    <div class="ind-n">4</div>
+    <div class="ind-body">
+      <h3>Referrer (URL de origen)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">De qué sitio venía exactamente: un foro, un directorio, un blog ajeno, LinkedIn.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Distingue "llegó de un foro de constructores" de "llegó de un comparador de software" — dos audiencias con intención muy distinta que hoy se agrupan como "orgánico".</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-5">
+    <div class="ind-n">5</div>
+    <div class="ind-body">
+      <h3>Landing page de entrada</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Por qué página del sitio entró.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Revela la intención inicial: quien aterriza en "/erp-construccion" viene decidido; quien entra por el blog está explorando.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-6">
+    <div class="ind-n">6</div>
+    <div class="ind-body">
+      <h3>Búsquedas que traen tráfico (Search Console)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué términos usó la gente para encontrarte.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Muestra qué problema está buscando resolver tu mercado, y qué contenido te falta escribir.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-7">
+    <div class="ind-n">7</div>
+    <div class="ind-body">
+      <h3>Visitas antes de contactar</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Si escribió en la primera visita o volvió cuatro veces antes.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Muestra el ciclo real de decisión, casi siempre más largo de lo que se asume, y ayuda a no descartar leads "fríos" prematuramente.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-8">
+    <div class="ind-n">8</div>
+    <div class="ind-body">
+      <h3>Ruta completa de toques (multi-touch)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">La secuencia de interacciones antes de contactar: vio un anuncio → buscó en Google → leyó un artículo → escribió.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Muestra cómo se construye realmente una decisión, en vez de darle todo el crédito al último clic.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-9">
+    <div class="ind-n">9</div>
+    <div class="ind-body">
+      <h3>Canal que descubre vs. canal que cierra</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuál trae gente nueva y cuál convierte.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Casi nunca son el mismo. Confundirlos lleva a recortarle presupuesto justo al canal que está sembrando todo el pipeline.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-10">
+    <div class="ind-n">10</div>
+    <div class="ind-body">
+      <h3>Tiempo desde el primer toque hasta el contacto</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto pasa entre que te descubren y que te escriben.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Dimensiona el ciclo real de tu mercado y ayuda a saber cuánto tiempo debe seguir corriendo una campaña antes de juzgarla.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-11">
+    <div class="ind-n">11</div>
+    <div class="ind-body">
+      <h3>Toques promedio antes de comprar, por tipo de producto</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántas interacciones necesita cerrar cada tipo de venta.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">El conversor probablemente cierra en uno; el ERP en seis. Dimensiona el esfuerzo comercial real de cada línea de producto.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-12">
+    <div class="ind-n">12</div>
+    <div class="ind-body">
+      <h3>Contenido que precede una venta</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué artículo o página visitó quien terminó comprando.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Separa el contenido que genera ingresos del que solo genera tráfico.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-13">
+    <div class="ind-n">13</div>
+    <div class="ind-body">
+      <h3>"¿Cómo nos conociste?" (declarado por el cliente)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Respuesta que el Agente SDR pregunta durante la calificación.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es la única forma de capturar referidos, voz a voz y eventos — canales sin rastro digital que suelen traer los mejores clientes.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-14">
+    <div class="ind-n">14</div>
+    <div class="ind-body">
+      <h3>Dispositivo y ubicación aproximada</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Móvil o escritorio, y ciudad de origen.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">El dispositivo cambia el comportamiento de compra; la ciudad revela concentraciones geográficas que pueden orientar dónde vender o hacer presencia.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-15">
+    <div class="ind-n">15</div>
+    <div class="ind-body">
+      <h3>Origen cruzado con pipeline (A vs. B)</h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué canales traen compradores de gadgets y cuáles traen leads consultivos.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Evita optimizar todo hacia volumen barato cuando el dinero real está en el canal que trae menos leads pero más grandes.</div></div>
+    </div>
+  </div>
+
+  <!-- ANCLA: el próximo grupo de indicadores se agrega aquí -->
+
+  <div class="pending-group">
+    <div class="pg-label">Próximo grupo — pendiente de definir</div>
+    <div style="font-size:13px;">Grupos que ya se discutieron y están listos para agregarse cuando se indique:</div>
+    <ul>
+      <li>Rendimiento por producto (ventas, ticket promedio, conversión, abandono)</li>
+      <li>Financieras (ingreso, margen, LTV, costo de mensajería)</li>
+      <li>Funnel y pipeline por producto</li>
+      <li>Comparativo multi-tenant</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>Indicadores para el Dashboard · CRM Ventas + Agentes IA</span>
+  <span>23 ago 2026</span>
+</footer>
+
+</body>
+</html>

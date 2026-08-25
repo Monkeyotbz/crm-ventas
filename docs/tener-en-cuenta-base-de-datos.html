@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Tener en cuenta para construir la base de datos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a; --ink-raised:#161a23; --panel:#171c26; --panel-hi:#1e2430;
+    --border:#2b3244; --border-soft:#212636;
+    --copper:#cc7a42; --copper-dim:#8a5732;
+    --teal:#43c2ae; --teal-dim:#2c8577;
+    --slate:#7c8bb0; --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0; --text-dim:#8d96a8; --text-faint:#565f70;
+    --mono:'JetBrains Mono',monospace; --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;
+    font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(203,122,66,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(203,122,66,.035) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:980px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-faint);}
+  .top-bar-links{display:flex;gap:14px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  .hero{padding:76px 0 40px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,4.4vw,44px);line-height:1.12;letter-spacing:-.01em;max-width:22ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:18px;max-width:66ch;font-size:16px;color:var(--text-dim);}
+  .hero-meta{margin-top:26px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+  .hero-meta b{color:var(--text-dim);font-weight:500;}
+
+  /* group header */
+  .group-head{display:flex;align-items:center;gap:12px;padding:56px 0 18px;flex-wrap:wrap;}
+  .group-head:first-of-type{padding-top:20px;}
+  .group-head .gh-dot{width:9px;height:9px;border-radius:50%;background:var(--copper);flex-shrink:0;}
+  .group-head h2{font-family:var(--display);font-weight:700;font-size:19px;}
+  .group-head .gh-origin{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-left:auto;text-transform:uppercase;letter-spacing:.04em;}
+
+  /* numbered item */
+  .item{display:grid;grid-template-columns:52px 1fr;gap:18px;padding:22px 0;border-top:1px solid var(--border-soft);scroll-margin-top:70px;}
+  .item:first-of-type{border-top:1px solid var(--border);}
+  .item-n{font-family:var(--mono);font-weight:700;font-size:20px;color:var(--copper);line-height:1.3;}
+  .item-body h3{font-family:var(--mono);font-size:14.5px;color:var(--text);font-weight:600;background:var(--panel);display:inline-block;padding:3px 10px;border-radius:5px;border:1px solid var(--border);margin-bottom:10px;}
+  .item-tag{display:inline-block;font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--slate);background:rgba(124,139,176,.1);padding:2px 8px;border-radius:9px;margin:0 0 10px 8px;}
+
+  .item-row{margin-bottom:10px;}
+  .item-row:last-child{margin-bottom:0;}
+  .item-row .ik{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px;}
+  .item-row .iv{font-size:14px;color:var(--text-dim);max-width:66ch;}
+  .item-row .iv code{font-family:var(--mono);font-size:12.5px;color:var(--teal);}
+  .item-row.logic .iv{color:var(--text);}
+  .item-row.logic{background:rgba(67,194,174,.05);border-left:2px solid var(--teal-dim);padding:10px 14px;border-radius:0 5px 5px 0;margin-top:12px;}
+  .item-row.logic .ik{color:var(--teal);}
+
+  .priority-legend{display:flex;gap:18px;flex-wrap:wrap;margin:26px 0 6px;font-family:var(--mono);font-size:11px;color:var(--text-faint);}
+  .priority-legend span{display:inline-flex;align-items:center;gap:6px;}
+  .priority-legend .dot{width:7px;height:7px;border-radius:50%;}
+  .dot.alta{background:var(--copper);}
+  .dot.media{background:var(--teal);}
+  .dot.baja{background:var(--slate);}
+  .item.alta .item-n{color:var(--copper);}
+  .item.media .item-n{color:var(--teal);}
+  .item.baja .item-n{color:var(--slate);}
+  .prio-badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:9px;margin-left:8px;}
+  .item.alta .prio-badge{background:rgba(204,122,66,.14);color:var(--copper);}
+  .item.media .prio-badge{background:rgba(67,194,174,.12);color:var(--teal);}
+  .item.baja .prio-badge{background:rgba(124,139,176,.12);color:var(--slate);}
+
+  .summary{background:var(--ink-raised);border:1px solid var(--border);border-radius:10px;padding:26px 28px;margin-top:56px;}
+  .summary .sk{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--copper);margin-bottom:14px;}
+  .sum-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  .sum-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:8px 12px;border-bottom:1px solid var(--border);}
+  .sum-table td{padding:9px 12px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);}
+  .sum-table td:first-child{font-family:var(--mono);font-size:11px;}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;margin-top:50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (max-width:600px){ .item{grid-template-columns:32px 1fr;gap:12px;} }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">BASE DE DATOS · A PARTIR DE LAS REGLAS DE META</span>
+    <div class="top-bar-links">
+      <a href="guia-fases-1-2.html">guía fases 1-2</a>
+      <a href="hoja-de-ruta-construccion.html">hoja-de-ruta</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Documento vivo — sin ejecutar, solo referencia</div>
+    <h1>Tener en cuenta para <span>construir la base de datos</span></h1>
+    <p class="hero-sub">
+48 elementos que las reglas de mensajería de Meta y la revisión de indicadores obligan a agregar al modelo de datos ya entregado. Cada uno con la lógica exacta de qué resuelve dentro del chatbot y del proyecto — no son campos decorativos, cada uno destraba algo específico.
+    </p>
+    <div class="hero-meta">
+      <span><b>Elementos:</b> 48</span>
+      <span><b>Grupos:</b> 18</span>
+      <span><b>Origen:</b> reglas de mensajería de WhatsApp</span>
+    </div>
+
+    <div class="priority-legend">
+      <span><span class="dot alta"></span>Alta — bloquea operación hoy</span>
+      <span><span class="dot media"></span>Media — antes de octubre 2026</span>
+      <span><span class="dot baja"></span>Baja — se agrega sin dolor después</span>
+    </div>
+  </section>
+
+  <!-- GRUPO 1 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por la ventana de 24 horas</h2>
+    <span class="gh-origin">Regla: ventana de servicio</span>
+  </div>
+
+  <div class="item alta" id="item-1">
+    <div class="item-n">1</div>
+    <div class="item-body">
+      <h3>conversations.ventana_abierta_hasta</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Columna <code>timestamptz</code> que se actualiza con cada mensaje entrante del cliente.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la que le dice al agente y al vendedor si pueden responder libre o si necesitan una plantilla aprobada. Sin esta columna, cualquiera de los dos puede intentar un envío que Meta va a rechazar, sin saber por qué falló.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-2">
+    <div class="item-n">2</div>
+    <div class="item-body">
+      <h3>conversations.ventana_horas</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Columna <code>integer</code>, valor por defecto 24.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">No siempre son 24 horas: un lead que entra por Click-to-WhatsApp Ads tiene 72. Si el sistema asume 24 fijo en todos los casos, cierra la ventana antes de tiempo y el bot deja de poder responder libre cuando en realidad todavía podía.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 2 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por las plantillas (templates)</h2>
+    <span class="gh-origin">Regla: plantillas aprobadas</span>
+  </div>
+
+  <div class="item alta" id="item-3">
+    <div class="item-n">3</div>
+    <div class="item-body">
+      <h3>message_templates <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Tabla con nombre, categoría, idioma, estado (pendiente/aprobada/rechazada), cuerpo, variables y el ID que le asigna Meta a cada plantilla.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la fuente de verdad de lo que el bot puede enviar fuera de la ventana de 24h. Sin esta tabla, el sistema no tiene ninguna forma de saber qué plantillas existen ni cuáles ya están aprobadas — no puede iniciar ninguna conversación por su cuenta.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-4">
+    <div class="item-n">4</div>
+    <div class="item-body">
+      <h3>messages.template_id</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Referencia (foreign key) hacia <code>message_templates</code>, nula cuando el mensaje no usó plantilla.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Deja registro de qué plantilla exacta se usó en cada envío. Sirve para depurar cuando una plantilla específica empieza a fallar, y para calcular el costo real por plantilla más adelante.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-5">
+    <div class="item-n">5</div>
+    <div class="item-body">
+      <h3>Validación "solo plantilla para iniciar"</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">No es una columna — es una regla (constraint o función de validación) antes de insertar un mensaje saliente sin ventana abierta y sin <code>template_id</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Evita que el agente intente iniciar una conversación con texto libre cuando el cliente nunca ha escrito. Ponerlo como regla de base de datos, y no solo como algo que el código "debería recordar", hace que sea imposible que se rompa por un descuido en una Edge Function.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 3 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por las categorías de mensaje</h2>
+    <span class="gh-origin">Regla: marketing / utility / auth / service</span>
+  </div>
+
+  <div class="item media" id="item-6">
+    <div class="item-n">6</div>
+    <div class="item-body">
+      <h3>categoria_mensaje_t + messages.categoria</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Enum (marketing / utility / authentication / service) y la columna en <code>messages</code> que lo usa.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Cada categoría tiene tarifa distinta. Sin este campo, ningún reporte de costos puede separar cuánto gastó el Bot de Catálogo en confirmaciones (utility) versus cuánto gastó una campaña de reactivación (marketing).</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 4 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por los tiers de volumen y el Quality Rating</h2>
+    <span class="gh-origin">Regla: límites de mensajería y calidad</span>
+  </div>
+
+  <div class="item media" id="item-7">
+    <div class="item-n">7</div>
+    <div class="item-body">
+      <h3>whatsapp_numbers <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Un registro por número real conectado: <code>tenant_id</code>, <code>phone_number_id</code> (de Meta), <code>waba_id</code>, <code>tier_actual</code>, <code>quality_rating</code>, <code>throughput_limite</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Con varios tenants (Hellominus y los que se sumen después) hay varios números, cada uno con su propio estado. Sin esta tabla no hay dónde consultar si el número de una empresa está por chocar contra su límite diario antes de que el Router siga enviándole mensajes.</div></div>
+    </div>
+  </div>
+
+  <div class="item baja" id="item-8">
+    <div class="item-n">8</div>
+    <div class="item-body">
+      <h3>quality_rating_history <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Un registro por cada cambio de calificación de calidad, con fecha.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Permite que el Agente Analista correlacione una caída de calidad con qué se envió esa semana — por ejemplo, si un agente empezó a escribir a números sin consentimiento reciente.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 5 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por el límite compartido de portafolio</h2>
+    <span class="gh-origin">Regla: límite a nivel de business portfolio</span>
+  </div>
+
+  <div class="item baja" id="item-9">
+    <div class="item-n">9</div>
+    <div class="item-body">
+      <h3>whatsapp_numbers.business_portfolio_id</h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Columna que agrupa qué números comparten el mismo límite de mensajería en Meta.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Directo al caso multi-tenant: si dos tenants-cliente comparten portafolio, uno puede consumirle la capacidad de envío al otro sin que se note hasta que empiezan a fallar los mensajes. Esta columna es la que permite ver ese riesgo antes de que ocurra.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 6 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por la verificación de negocio y "un número, una WABA"</h2>
+    <span class="gh-origin">Regla: verificación + unicidad de número</span>
+  </div>
+
+  <div class="item baja" id="item-10">
+    <div class="item-n">10</div>
+    <div class="item-body">
+      <h3>tenants.meta_business_verificado / verified_at</h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Booleano + fecha en la tabla <code>tenants</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Permite mostrarle al equipo, tenant por tenant, cuál ya tiene su cuenta verificada y cuál sigue bloqueado esperando a Meta — sin tener que ir a revisar Business Manager manualmente cada vez.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-11">
+    <div class="item-n">11</div>
+    <div class="item-body">
+      <h3>whatsapp_numbers.waba_id (único)</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Constraint de unicidad sobre el <code>waba_id</code> dentro de la tabla del punto 7.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">La base de datos misma impide (o al menos detecta de inmediato) que un número quede mal vinculado a dos cuentas de WhatsApp Business API — el error que Meta rechaza a nivel de plataforma, pero que conviene no descubrir tarde.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 7 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por el consentimiento (opt-in)</h2>
+    <span class="gh-origin">Regla: consentimiento obligatorio</span>
+  </div>
+
+  <div class="item alta" id="item-12">
+    <div class="item-n">12</div>
+    <div class="item-body">
+      <h3>contacts.opt_in_at / opt_in_source / opt_out_at</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Tres columnas en <code>contacts</code>: cuándo dio el consentimiento, de dónde vino, y cuándo (si aplica) lo retiró.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la regla que más rápido tumba el Quality Rating de un número si no se respeta. El Router y los agentes deben poder verificar, antes de escribirle a alguien, si hay consentimiento vigente — y el sistema necesita poder demostrar cuándo y cómo se dio, si Meta lo pide.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 8 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por los costos y el cambio de octubre 2026</h2>
+    <span class="gh-origin">Regla: cobro por mensaje entregado</span>
+  </div>
+
+  <div class="item media" id="item-13">
+    <div class="item-n">13</div>
+    <div class="item-body">
+      <h3>messages.costo_estimado / moneda_costo / entregado</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Numeric, texto y booleano en <code>messages</code>. <code>entregado</code> importa porque Meta cobra al entregar, no al enviar.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">A partir del 1 de octubre de 2026, cada respuesta del Bot de Catálogo o del Agente SDR tiene costo. Sin estos campos, la factura de Meta llega sin forma de saber a qué conversación, campaña o producto atribuirla — y sin eso no se puede saber si el margen del Pipeline A aguanta.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-14">
+    <div class="item-n">14</div>
+    <div class="item-body">
+      <h3>whatsapp_pricing <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Tabla con tarifa por país + categoría: <code>pais</code>, <code>categoria</code>, <code>tarifa</code>, <code>vigente_desde</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Permite calcular el <code>costo_estimado</code> del punto 13 en el momento del envío, no adivinarlo después. Como Meta actualiza tarifas hasta 4 veces al año, tener esto en tabla (no en código) es lo que permite ajustarlo sin redeployar nada — el mismo principio que ya se aplicó con <code>routing_rules</code>.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 9 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por la distinción entre producto de catálogo y a medida</h2>
+    <span class="gh-origin">Origen: Hello Minus / Hello My — dos tipos de producto</span>
+  </div>
+
+  <div class="item alta" id="item-15">
+    <div class="item-n">15</div>
+    <div class="item-body">
+      <h3>products.tipo_venta</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Enum: <code>catalogo</code> | <code>a_medida</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es el campo que le dice al Router y al Bot de Catálogo si un producto se puede vender solo o necesita humano. Sin él, el bot no tiene forma de saber que el conversor sí lo puede cerrar pero el ERP no.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-16">
+    <div class="item-n">16</div>
+    <div class="item-body">
+      <h3>products.pipeline_default_id</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Referencia de cada producto hacia el pipeline que le corresponde por defecto.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Permite que el Router, al identificar "conversor MP3", ya sepa que eso va a Pipeline A sin necesidad de razonar — la decisión vive en el dato del producto, no en la lógica del agente.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-17">
+    <div class="item-n">17</div>
+    <div class="item-body">
+      <h3>products.requiere_cotizacion</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Booleano — verdadero para todo producto a medida.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Los productos a medida no tienen precio fijo. Este campo evita que el bot intente enviar un link de pago de un ERP — el error que rompería la experiencia de un lead de $18.000.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-18">
+    <div class="item-n">18</div>
+    <div class="item-body">
+      <h3>products.precio_desde / precio_hasta</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Rango orientativo interno de precio, solo para productos a medida.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Le permite al Agente SDR estimar el monto del deal durante la calificación, sin comprometer un precio con el cliente antes de la etapa de propuesta.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-22">
+    <div class="item-n">22</div>
+    <div class="item-body">
+      <h3>products.entregable_tipo + entregable_config</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Un tipo (archivo, licencia, acceso a plataforma) y un <code>jsonb</code> de configuración por producto.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">El conversor entrega un archivo; una suscripción entrega credenciales. Sin esto, la entrega automática del Pipeline A tendría que estar hardcodeada producto por producto en el código del Bot de Catálogo.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 10 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por el registro de ventas y pagos en Pipeline A</h2>
+    <span class="gh-origin">Origen: gadgets que el bot cobra y entrega solo</span>
+  </div>
+
+  <div class="item media" id="item-19">
+    <div class="item-n">19</div>
+    <div class="item-body">
+      <h3>deal_items <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Tabla intermedia entre <code>deals</code> y <code>products</code>: qué productos y en qué cantidad componen cada deal.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Un deal puede incluir varios productos (el ERP + capacitación + soporte). Hoy <code>deals</code> solo tiene un <code>monto</code> suelto — sin esta tabla no se puede saber qué se vendió exactamente en cada negocio, ni qué producto genera más ingreso.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-20">
+    <div class="item-n">20</div>
+    <div class="item-body">
+      <h3>payment_links <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Cada link de pago generado: monto, estado, fecha de expiración, ID en la pasarela.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es lo que permite que el Agente de Recuperación sepa a quién recordarle, y que el sistema detecte el abandono a las 24 horas — la etapa 05 del Pipeline A depende directamente de esta tabla.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-21">
+    <div class="item-n">21</div>
+    <div class="item-body">
+      <h3>payments <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">El pago confirmado que llega por webhook de la pasarela (Stripe, PayPal, etc.).</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es el disparador que mueve el deal a "Pagado" en Pipeline A, y el que alimenta el ingreso real para el cálculo de ROI por campaña — sin esta tabla, el pipeline transaccional no tiene forma de cerrarse solo.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 11 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por las cotizaciones en Pipeline B</h2>
+    <span class="gh-origin">Origen: soluciones a medida con propuesta versionada</span>
+  </div>
+
+  <div class="item media" id="item-23">
+    <div class="item-n">23</div>
+    <div class="item-body">
+      <h3>quotes <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Cada versión de propuesta enviada, con su alcance y monto — versionada, no un solo registro fijo.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">La etapa de Negociación implica ajustes de alcance y precio. Sin versionado se pierde el rastro de qué se ofreció originalmente vs. qué se terminó acordando — dato clave para que el Agente Analista entienda por qué se ganan o pierden negocios.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 12 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por el catálogo multi-tenant y su disponibilidad</h2>
+    <span class="gh-origin">Origen: mismo modelo, catálogos distintos por empresa</span>
+  </div>
+
+  <div class="item alta" id="item-24">
+    <div class="item-n">24</div>
+    <div class="item-body">
+      <h3>products.sku único por tenant_id</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">El <code>sku</code> ya existe, pero el constraint de unicidad debe aplicarse combinado con <code>tenant_id</code>, no de forma global.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Si Hellominus y otro tenant-cliente quieren ambos un SKU llamado "BASICO", la base no debe impedirlo — son catálogos independientes que conviven en las mismas tablas.</div></div>
+    </div>
+  </div>
+
+  <div class="item baja" id="item-25">
+    <div class="item-n">25</div>
+    <div class="item-body">
+      <h3>products.disponible_desde / disponible_hasta</h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Dos columnas de fecha, junto al <code>activo</code> que ya existe.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Permiten productos de temporada o promociones limitadas sin tener que acordarse de desactivarlos a mano — el Bot de Catálogo deja de ofrecerlos solo cuando la fecha vence.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 13 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por origen y atribución multi-touch</h2>
+    <span class="gh-origin">Origen: indicadores-dashboard.html · Grupo 1</span>
+  </div>
+
+  <div class="item alta" id="item-26">
+    <div class="item-n">26</div>
+    <div class="item-body">
+      <h3>contact_touchpoints <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Un registro por cada interacción del contacto antes de escribir: fecha, canal, campaña.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Habilita la ruta multi-touch y el canal que descubre vs. el que cierra. Hoy solo se guarda un <code>source</code> en <code>contacts</code>, que colapsa toda la historia en un solo campo y le da todo el crédito al último toque.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-27">
+    <div class="item-n">27</div>
+    <div class="item-body">
+      <h3>contact_touchpoints.referrer / landing_page</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">URL de origen exacta y página de entrada al sitio, por cada toque.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Sin estos campos, un lead que llegó de un foro de constructores y uno que llegó de un comparador de software se ven idénticos como "orgánico" — se pierde la señal de intención más rica que existe.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-28">
+    <div class="item-n">28</div>
+    <div class="item-body">
+      <h3>contact_touchpoints.dispositivo / ciudad</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Móvil o escritorio, y ubicación aproximada del toque.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">El dispositivo cambia el comportamiento de compra; la ciudad revela concentraciones geográficas que pueden orientar dónde vender o hacer presencia.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-29">
+    <div class="item-n">29</div>
+    <div class="item-body">
+      <h3>contacts.como_nos_conocio</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Enum controlado, respuesta declarada por el cliente durante la calificación.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la única forma de capturar referidos, voz a voz y eventos — canales sin rastro digital que suelen traer los mejores clientes. Lo pregunta el Agente SDR en la conversación.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-30">
+    <div class="item-n">30</div>
+    <div class="item-body">
+      <h3>contacts.visitas_antes_contacto</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Contador entero, materializado a partir de <code>contact_touchpoints</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Revela el ciclo real de decisión — casi siempre más largo de lo que se asume. Materializarlo evita recalcularlo en cada consulta del dashboard.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 14 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por rendimiento de agentes</h2>
+    <span class="gh-origin">Origen: indicadores-internos-plataforma.html · Grupo 1</span>
+  </div>
+
+  <div class="item alta" id="item-31">
+    <div class="item-n">31</div>
+    <div class="item-body">
+      <h3>agent_executions <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Una fila por cada ejecución de agente: qué agente, qué conversación, tokens consumidos, latencia, resultado.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la base de la mitad de los indicadores internos: % resuelto por IA, turnos hasta resolver, tiempo de primera respuesta, costo por conversación. Hoy no existe nada equivalente — sin esto no se puede mejorar ningún agente, se adivina.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-32">
+    <div class="item-n">32</div>
+    <div class="item-body">
+      <h3>agent_executions.escalado + motivo_escalamiento</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Booleano y enum controlado (monto alto, cliente molesto, fuera de alcance, no supo responder).</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Distingue el escalamiento sano (correcto por diseño) del escalamiento por falla del agente. Solo el segundo es un problema que hay que arreglar — sin el enum, los dos se ven igual en el dashboard.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-33">
+    <div class="item-n">33</div>
+    <div class="item-body">
+      <h3>agent_executions.tokens_entrada / tokens_salida / costo_tokens</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Consumo de tokens y su costo estimado, por ejecución.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Detecta agentes con prompts inflados o que arrastran demasiado contexto. Se recomendó fusionarlo con el costo total por conversación en vez de tratarlo como panel independiente.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-34">
+    <div class="item-n">34</div>
+    <div class="item-body">
+      <h3>router_decisions <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Qué decidió el Router, con qué confianza, por qué regla, y si fue corregido después.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es la única forma de medir la precisión del Router — la pieza más upstream del sistema. Sin el registro de corrección manual, no hay forma de saber qué reglas ajustar en <code>routing_rules</code>.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-35">
+    <div class="item-n">35</div>
+    <div class="item-body">
+      <h3>messages.corregido_por_humano + motivo_correccion</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Booleano y texto, marcados desde la bandeja cuando un vendedor corrige algo que dijo el agente.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Mide la tasa de alucinación — el indicador de riesgo reputacional. Requiere además un botón en el frontend para que el vendedor marque la corrección, no es solo una columna.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 15 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por la plataforma como producto (SaaS)</h2>
+    <span class="gh-origin">Origen: indicadores-internos-plataforma.html · Grupo 2</span>
+  </div>
+
+  <div class="item media" id="item-36">
+    <div class="item-n">36</div>
+    <div class="item-body">
+      <h3>subscriptions <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Plan, precio, estado y fecha de renovación por tenant.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Alimenta el MRR y la detección de expansión de cuenta. Hoy <code>tenants</code> solo tiene nombre y slug — no hay ningún dato comercial de la relación con cada cliente.</div></div>
+    </div>
+  </div>
+
+  <div class="item baja" id="item-37">
+    <div class="item-n">37</div>
+    <div class="item-body">
+      <h3>tenants.onboarding_completado_at + primer_deal_cerrado_at</h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Dos timestamps por tenant.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Alimenta time-to-value. Con pocos tenants conocidos, esto se sabe por conversación directa — cobra sentido cuando el onboarding deje de ser algo que se acompaña personalmente.</div></div>
+    </div>
+  </div>
+
+  <div class="item baja" id="item-38">
+    <div class="item-n">38</div>
+    <div class="item-body">
+      <h3>feature_usage <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Qué funcionalidad usó qué tenant y cuándo.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Alimenta adopción por funcionalidad. Con pocos tenants y un producto nuevo, van a usar prácticamente todo lo que exista — la métrica cobra sentido cuando haya funciones viejas compitiendo con nuevas.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-39">
+    <div class="item-n">39</div>
+    <div class="item-body">
+      <h3>tenants.ultimo_login_at + deals_movidos_ultimos_30d</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Timestamp de último acceso y contador de actividad reciente.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Son las señales tempranas de churn. Recuperar una cuenta antes de que se vaya es mucho más barato que conseguir una nueva — estas columnas dan margen de reacción de semanas.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 16 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por salud técnica</h2>
+    <span class="gh-origin">Origen: indicadores-internos-plataforma.html · Grupo 4</span>
+  </div>
+
+  <div class="item alta" id="item-40">
+    <div class="item-n">40</div>
+    <div class="item-body">
+      <h3>webhook_errors <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Errores de entrega o procesamiento de webhooks, con su causa.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Un mensaje perdido es un lead perdido que nadie reclama, porque nadie sabe que existió. Es el fallo más silencioso y más caro del sistema.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-41">
+    <div class="item-n">41</div>
+    <div class="item-body">
+      <h3>whatsapp_numbers.tier_actual + quality_rating + histórico</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Ya listado en los puntos 7 y 8 — confirmación de que sigue siendo necesario tras revisar los indicadores internos.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Si la calidad de un número cae, Meta puede suspenderlo y ese tenant se queda sin canal — es riesgo operativo directo, no analítica.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 17 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Por separación de roles cliente / interno</h2>
+    <span class="gh-origin">Origen: indicadores-internos-plataforma.html · confidencialidad</span>
+  </div>
+
+  <div class="item alta" id="item-42">
+    <div class="item-n">42</div>
+    <div class="item-body">
+      <h3>Rol admin_plataforma <span class="item-tag">capa de autenticación</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv"><b>Ya implementado (24 ago 2026)</b>, con una variante: en vez de un claim en <code>app_metadata</code>, es la tabla <code>platform_admins</code> + la función <code>is_platform_admin()</code>.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es lo que hace posible que los 21 indicadores internos existan sin que ningún cliente los vea, y además habilita el soporte multi-tenant (el equipo de Hellominus se para sobre otro tenant con el header <code>X-Acting-Tenant</code>, solo con una sesión de soporte abierta y auditada en <code>support_sessions</code>). Se cambió a tabla porque un claim en el JWT sigue vigente hasta que el token expira, y revocar el rol más privilegiado del sistema tiene que cortar el acceso en la consulta siguiente.</div></div>
+    </div>
+  </div>
+
+  <!-- GRUPO 18 -->
+  <div class="group-head">
+    <div class="gh-dot"></div>
+    <h2>Huecos detectados al cruzar indicadores contra el modelo</h2>
+    <span class="gh-origin">Origen: revisión final de ambos archivos de indicadores</span>
+  </div>
+
+  <div class="item alta" id="item-43">
+    <div class="item-n">43</div>
+    <div class="item-body">
+      <h3>conversations.resuelta_por + resuelta_at</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Quién cerró la conversación (agente IA o humano) y cuándo.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">El indicador imprescindible "% resuelto por IA sin intervención humana" no se puede calcular sin esto. <code>agent_executions</code> registra ejecuciones sueltas, pero nadie marca si la <b>conversación completa</b> terminó resuelta y por quién — es la métrica que justifica todo el proyecto.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-44">
+    <div class="item-n">44</div>
+    <div class="item-body">
+      <h3>pipeline_transfers.detectado_por + detectado_tarde</h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Si el salto A→B lo detectó el Router automáticamente o un humano al revisar, y si se descubrió tarde.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Hoy solo se guarda que el salto ocurrió. Sin distinguir detección automática de hallazgo tardío, solo se pueden contar los aciertos y nunca las fallas — que son justamente el dinero perdido: un deal de miles atendido como uno de quince.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-45">
+    <div class="item-n">45</div>
+    <div class="item-body">
+      <h3>conversations.primera_respuesta_at</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Timestamp materializado del primer mensaje saliente de cada conversación.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Es derivable de <code>messages</code>, pero recalcularlo en cada carga del dashboard sobre millones de filas es caro. Materializarlo cuesta una columna y ahorra el cálculo repetido.</div></div>
+    </div>
+  </div>
+
+  <div class="item alta" id="item-46">
+    <div class="item-n">46</div>
+    <div class="item-body">
+      <h3>metrics_snapshots <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Alta</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Agregado diario por tenant: conversaciones, resueltas, costo, deals cerrados.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Ningún dashboard sirve sin series de tiempo — "¿el % resuelto por IA está subiendo o bajando?" no se responde con el dato de hoy. Es la diferencia entre un panel que carga en un segundo y uno que se vuelve inusable a los seis meses.</div></div>
+    </div>
+  </div>
+
+  <div class="item media" id="item-48">
+    <div class="item-n">48</div>
+    <div class="item-body">
+      <h3>products.costo</h3><span class="prio-badge">Media</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Costo unitario o de producción de cada producto, junto al precio de venta que ya existe.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Sin costo registrado, el dashboard muestra ingreso pero nunca margen real por producto — y el indicador interno de margen por tenant queda incompleto por la misma razón.</div></div>
+    </div>
+  </div>
+
+  <div class="item baja" id="item-47">
+    <div class="item-n">47</div>
+    <div class="item-body">
+      <h3>search_console_data <span class="item-tag">tabla nueva</span></h3><span class="prio-badge">Baja</span>
+      <div class="item-row"><div class="ik">Qué es</div><div class="iv">Importación de datos de Google Search Console: consultas, página de destino, impresiones, clics.</div></div>
+      <div class="item-row logic"><div class="ik">Lógica en el chatbot / proyecto</div><div class="iv">Alimenta el indicador de búsquedas que traen tráfico. Es dato externo de Google, no una carencia del modelo propio — se puede dejar para después sin bloquear nada.</div></div>
+    </div>
+  </div>
+
+  <div class="summary">
+    <div class="sk">Resumen por prioridad</div>
+    <table class="sum-table">
+      <thead><tr><th>Prioridad</th><th>Elementos</th><th>Por qué</th></tr></thead>
+      <tbody>
+        <tr><td>Alta</td><td>1, 2, 3, 4, 5, 12, 15, 16, 17, 20, 21, 22, 24, 26, 27, 28, 29, 30, 31, 32, 34, 40, 41, 42, 43, 44, 46</td><td>Bloquean la operación hoy, protegen la cuenta de una suspensión, o son la barrera real de separación cliente/interno.</td></tr>
+        <tr><td>Media</td><td>6, 7, 11, 13, 14, 18, 19, 23, 33, 35, 36, 39, 45, 48</td><td>Necesarios antes del cambio de cobro del 1 de octubre de 2026, o alimentan indicadores clasificados como importantes.</td></tr>
+        <tr><td>Baja</td><td>8, 9, 10, 25, 37, 38, 47</td><td>Se agregan sin dolor después — alimentan indicadores que hoy se resuelven hablando directamente con Hellominus (el único tenant real por ahora), o dependen de servicios externos.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>Tener en cuenta para construir la base de datos · CRM Ventas + Agentes IA</span>
+  <span>23 ago 2026</span>
+</footer>
+
+</body>
+</html>

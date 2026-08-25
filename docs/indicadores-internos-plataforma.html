@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Indicadores internos — Dueños de la plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a; --ink-raised:#161a23; --panel:#171c26; --panel-hi:#1e2430;
+    --border:#2b3244; --border-soft:#212636;
+    --copper:#cc7a42; --copper-dim:#8a5732;
+    --teal:#43c2ae; --teal-dim:#2c8577;
+    --slate:#7c8bb0; --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0; --text-dim:#8d96a8; --text-faint:#565f70;
+    --mono:'JetBrains Mono',monospace; --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;
+    font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(203,122,66,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(203,122,66,.035) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:980px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--copper);}
+  .top-bar-links{display:flex;gap:14px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  /* banner de confidencialidad — elemento distintivo de este documento */
+  .confidential{
+    background:rgba(168,82,63,.09);border:1px solid var(--lost);
+    border-radius:9px;padding:18px 22px;margin-top:26px;
+  }
+  .confidential .ck{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--lost);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .confidential p{font-size:14px;color:var(--text-dim);max-width:70ch;}
+  .confidential p b{color:var(--text);font-weight:500;}
+
+  .hero{padding:76px 0 30px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,4.6vw,46px);line-height:1.1;letter-spacing:-.01em;max-width:20ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:18px;max-width:64ch;font-size:16px;color:var(--text-dim);}
+  .hero-meta{margin-top:26px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+  .hero-meta b{color:var(--text-dim);font-weight:500;}
+
+  /* tabla comparativa cliente vs interno */
+  .split-table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:16px;}
+  .split-table th{font-family:var(--mono);font-size:10px;letter-spacing:.05em;text-transform:uppercase;text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--panel);}
+  .split-table th.cli{color:var(--teal);}
+  .split-table th.int{color:var(--copper);}
+  .split-table td{padding:12px 14px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;width:50%;}
+  .split-table tr:last-child td{border-bottom:none;}
+
+  .group-section{padding:56px 0 8px;}
+  .group-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;color:var(--copper);text-transform:uppercase;display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+  .group-eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.16);}
+  .group-section h2{font-family:var(--display);font-weight:700;font-size:23px;margin-bottom:8px;}
+  .group-section .g-desc{font-size:14px;color:var(--text-dim);max-width:66ch;}
+
+  /* clasificación por relevancia */
+  .rel-badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 9px;border-radius:10px;margin-left:9px;vertical-align:middle;white-space:nowrap;}
+  .rel-badge.imprescindible{background:rgba(204,122,66,.16);color:var(--copper);}
+  .rel-badge.importante{background:rgba(67,194,174,.14);color:var(--teal);}
+  .rel-badge.prescindible{background:rgba(124,139,176,.14);color:var(--slate);}
+  .rel-badge.dudoso{background:rgba(168,82,63,.16);color:var(--lost);}
+
+  .rel-summary{background:var(--ink-raised);border:1px solid var(--border);border-radius:10px;padding:28px 30px;margin-top:36px;}
+  .rel-summary .rs-eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;color:var(--text-faint);text-transform:uppercase;margin-bottom:6px;}
+  .rel-summary h2{font-family:var(--display);font-weight:700;font-size:22px;margin-bottom:6px;}
+  .rel-summary .rs-desc{font-size:13.5px;color:var(--text-dim);max-width:68ch;margin-bottom:24px;}
+
+  .rel-group{padding:18px 0;border-top:1px solid var(--border-soft);}
+  .rel-group:first-of-type{border-top:1px solid var(--border);padding-top:6px;}
+  .rel-group-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+  .rel-group-head .rg-dot{width:8px;height:8px;border-radius:50%;}
+  .rel-group.imprescindible .rg-dot{background:var(--copper);}
+  .rel-group.importante .rg-dot{background:var(--teal);}
+  .rel-group.prescindible .rg-dot{background:var(--slate);}
+  .rel-group.dudoso .rg-dot{background:var(--lost);}
+  .rel-group-head h3{font-family:var(--display);font-weight:600;font-size:16.5px;}
+  .rel-group-head .rg-count{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);margin-left:auto;}
+  .rel-group .rg-why{font-size:13px;color:var(--text-dim);margin-bottom:12px;max-width:68ch;}
+  .rel-list{display:flex;flex-wrap:wrap;gap:8px;}
+  .rel-list a{
+    font-family:var(--mono);font-size:11.5px;color:var(--text-dim);
+    background:var(--panel);border:1px solid var(--border);
+    padding:5px 11px;border-radius:14px;text-decoration:none;
+  }
+  .rel-list a:hover{color:var(--text);border-color:var(--text-faint);}
+  .rel-list a b{color:var(--text);font-weight:500;}
+
+  .ind{display:grid;grid-template-columns:48px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--border-soft);scroll-margin-top:70px;}
+  .ind:first-of-type{border-top:1px solid var(--border);}
+  .ind-n{font-family:var(--mono);font-weight:700;font-size:18px;color:var(--copper);line-height:1.3;}
+  .ind-body h3{font-family:var(--display);font-weight:600;font-size:16px;margin-bottom:10px;}
+  .ind-row{margin-bottom:8px;}
+  .ind-row:last-child{margin-bottom:0;}
+  .ind-row .ik{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px;}
+  .ind-row .iv{font-size:13.5px;color:var(--text-dim);max-width:66ch;}
+  .ind-row.tells{background:rgba(204,122,66,.06);border-left:2px solid var(--copper-dim);padding:9px 13px;border-radius:0 5px 5px 0;}
+  .ind-row.tells .ik{color:var(--copper);}
+  .ind-row.uses .ik{color:var(--teal);}
+
+  .never{background:var(--ink-raised);border:1px solid var(--lost);border-radius:10px;padding:26px 28px;margin-top:56px;}
+  .never .nk{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--lost);margin-bottom:14px;}
+  .never ul{margin-left:19px;font-size:14px;color:var(--text-dim);}
+  .never li{margin-bottom:8px;}
+  .never li b{color:var(--text);font-weight:500;}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;margin-top:50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (max-width:600px){ .ind{grid-template-columns:30px 1fr;gap:12px;} .split-table td,.split-table th{padding:9px 10px;font-size:12.5px;} }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">◆ INTERNO · NO VISIBLE PARA CLIENTES</span>
+    <div class="top-bar-links">
+      <a href="indicadores-dashboard.html">indicadores del cliente</a>
+      <a href="catalogo-de-agentes.html">agentes</a>
+      <a href="paneles-crm-mockups.html">paneles</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Documento vivo — panel de plataforma</div>
+    <h1>Indicadores <span>internos</span> de la plataforma</h1>
+    <p class="hero-sub">
+      Los indicadores que miden cómo funciona el CRM como producto — el rendimiento de los agentes,
+      la salud de cada cuenta y la rentabilidad real de operar la plataforma. Son la materia prima
+      para mejorar el sistema, no para que el cliente tome decisiones sobre su negocio.
+    </p>
+
+    <div class="confidential">
+      <div class="ck">◆ Confidencial — solo rol interno</div>
+      <p>
+        Estos indicadores <b>no se exponen a los clientes del CRM</b>. Viven bajo un rol de plataforma —
+        <b>ya implementado (24 ago 2026)</b> como la tabla <code style="font-family:var(--mono);color:var(--copper)">platform_admins</code>
+        (no un claim en <code style="font-family:var(--mono)">app_metadata</code>, para poder revocarlo al
+        instante) — separado del rol de usuario cliente que ya filtra por <code style="font-family:var(--mono);color:var(--copper)">tenant_id</code> vía RLS.
+      </p>
+    </div>
+
+    <div class="hero-meta">
+      <span><b>Indicadores:</b> 21</span>
+      <span><b>Grupos:</b> 4</span>
+      <span><b>Audiencia:</b> equipo dueño de la plataforma</span>
+    </div>
+  </section>
+
+  <!-- ===== LA DIVISIÓN ===== -->
+  <div class="group-section" style="padding-top:24px;">
+    <div class="group-eyebrow">La división</div>
+    <h2>Qué ve el cliente y qué vemos nosotros</h2>
+    <p class="g-desc">
+      El cliente compró un CRM para gestionar <em>su</em> negocio — negarle visibilidad sobre sus propias
+      ventas sería venderle una caja negra. Pero hay una capa que es de la plataforma, no de él.
+    </p>
+    <table class="split-table">
+      <thead>
+        <tr>
+          <th class="cli">Para el cliente — cada tenant ve solo lo suyo</th>
+          <th class="int">◆ Solo interno — dueños de la plataforma</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rendimiento de su pipeline: conversión por etapa, forecast, tiempo de ciclo</td>
+          <td>Rendimiento de los agentes IA: cuánto resuelve el bot solo, dónde falla, costo por conversación</td>
+        </tr>
+        <tr>
+          <td>Ventas por producto de su propio catálogo</td>
+          <td>Comparativo entre tenants: quién usa más, quién factura más, quién está en riesgo de irse</td>
+        </tr>
+        <tr>
+          <td>Origen de sus leads y ROI de sus campañas</td>
+          <td>Costos de infraestructura y mensajería agregados — lo que cuesta operar la plataforma</td>
+        </tr>
+        <tr>
+          <td>Análisis de pérdidas: por qué se van sus clientes</td>
+          <td>Salud técnica: errores, latencia, uptime</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ===== CLASIFICACIÓN POR RELEVANCIA ===== -->
+  <div class="rel-summary" id="clasificacion">
+    <div class="rs-eyebrow">Vista transversal</div>
+    <h2>Clasificación por relevancia</h2>
+    <p class="rs-desc">Los mismos 21 indicadores, agrupados ahora por qué tan imprescindibles son hoy — con Hellominus como único tenant activo y sin volumen todavía. El criterio: algo es imprescindible si su ausencia lleva a una mala decisión sin que se note; es prescindible si hoy se resuelve hablando directamente con quien dirige la cuenta.</p>
+
+    <div class="rel-group imprescindible">
+      <div class="rel-group-head"><span class="rg-dot"></span><h3>Imprescindibles</h3><span class="rg-count">7 indicadores</span></div>
+      <p class="rg-why">Sin esto el sistema opera a ciegas: son deals reales perdidos, riesgo de suspensión del canal, o la base de cualquier decisión de precio.</p>
+      <div class="rel-list">
+        <a href="#ind-1"><b>1</b> · % resuelto por IA sin humano</a>
+        <a href="#ind-4"><b>4</b> · Precisión del Router</a>
+        <a href="#ind-5"><b>5</b> · Escalamientos A→B perdidos</a>
+        <a href="#ind-11"><b>11</b> · Margen real por tenant</a>
+        <a href="#ind-16"><b>16</b> · Costo de mensajería por categoría</a>
+        <a href="#ind-19"><b>19</b> · Quality Rating por número</a>
+        <a href="#ind-20"><b>20</b> · Errores de webhook</a>
+      </div>
+    </div>
+
+    <div class="rel-group importante">
+      <div class="rel-group-head"><span class="rg-dot"></span><h3>Importantes</h3><span class="rg-count">8 indicadores</span></div>
+      <p class="rg-why">Mejoran decisiones, pero el sistema no se cae sin ellos — son diagnóstico y refinamiento, no alarma.</p>
+      <div class="rel-list">
+        <a href="#ind-2"><b>2</b> · Escalamiento por agente</a>
+        <a href="#ind-3"><b>3</b> · Motivo de escalamiento</a>
+        <a href="#ind-6"><b>6</b> · Turnos promedio hasta resolver</a>
+        <a href="#ind-7"><b>7</b> · Tiempo de primera respuesta</a>
+        <a href="#ind-8"><b>8</b> · Tasa de alucinación</a>
+        <a href="#ind-10"><b>10</b> · MRR por tenant</a>
+        <a href="#ind-12"><b>12</b> · Churn y señales tempranas</a>
+        <a href="#ind-17"><b>17</b> · Costo por conversación cerrada</a>
+      </div>
+    </div>
+
+    <div class="rel-group prescindible">
+      <div class="rel-group-head"><span class="rg-dot"></span><h3>Prescindibles</h3><span class="rg-count">5 indicadores</span></div>
+      <p class="rg-why">No compensan el esfuerzo de construirlos todavía — resuelven problemas de escala que no existen con un solo tenant, o duplican algo que Supabase/Vercel ya dan gratis.</p>
+      <div class="rel-list">
+        <a href="#ind-13"><b>13</b> · Time-to-value</a>
+        <a href="#ind-14"><b>14</b> · Adopción por funcionalidad</a>
+        <a href="#ind-15"><b>15</b> · Expansión de cuenta</a>
+        <a href="#ind-18"><b>18</b> · Consumo de infraestructura</a>
+        <a href="#ind-21"><b>21</b> · Latencia y uptime</a>
+      </div>
+    </div>
+
+    <div class="rel-group dudoso">
+      <div class="rel-group-head"><span class="rg-dot"></span><h3>Caso aparte</h3><span class="rg-count">1 indicador</span></div>
+      <p class="rg-why">No encaja limpio en ninguna categoría: valioso en teoría, pero mejor absorbido dentro de otro indicador que como panel propio.</p>
+      <div class="rel-list">
+        <a href="#ind-9"><b>9</b> · Costo de tokens — mejor fusionarlo dentro del costo total por conversación (17), no como indicador independiente</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== GRUPO 1 ===== -->
+  <div class="group-section" id="grupo-agentes">
+    <div class="group-eyebrow">Grupo funcional</div>
+    <h2>Grupo 1 — Rendimiento de los agentes IA</h2>
+    <p class="g-desc">Sin estos indicadores no se pueden mejorar los agentes — se adivina. Son los que convierten "el bot anda raro" en un problema concreto y localizable.</p>
+  </div>
+
+  <div class="ind" id="ind-1">
+    <div class="ind-n">1</div>
+    <div class="ind-body">
+      <h3>% resuelto por IA sin intervención humana<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué proporción de conversaciones cierra el agente solo, sin que un humano tenga que entrar.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es la métrica que justifica todo el proyecto. Si no sube con el tiempo, los agentes no están aprendiendo ni mejorando — y el ahorro prometido no existe.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-2">
+    <div class="ind-n">2</div>
+    <div class="ind-body">
+      <h3>Tasa de escalamiento a humano, por agente<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuál agente escala más y cuál menos: el SDR puede escalar 36% mientras el Bot de Catálogo solo 9%.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Localiza dónde está el cuello de botella. Un agente que escala demasiado necesita mejores tools o mejor prompt, no más conversaciones.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-3">
+    <div class="ind-n">3</div>
+    <div class="ind-body">
+      <h3>Motivo de escalamiento<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Por qué se escaló: cliente molesto, monto alto, tema fuera de alcance, petición directa.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Distingue el escalamiento sano (monto alto, correcto por diseño) del escalamiento por falla (el agente no supo responder). Solo el segundo hay que arreglarlo.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-4">
+    <div class="ind-n">4</div>
+    <div class="ind-body">
+      <h3>Precisión del Router<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántas clasificaciones de pipeline tuvieron que corregirse manualmente después.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">El Router es la pieza más crítica del sistema: si clasifica mal, todo lo que sigue está mal. Las correcciones manuales son la señal de qué reglas ajustar en <code style="font-family:var(--mono);color:var(--teal)">routing_rules</code>.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-5">
+    <div class="ind-n">5</div>
+    <div class="ind-body">
+      <h3>Escalamientos A→B detectados vs. perdidos<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántos leads corporativos disfrazados de compra pequeña detectó el Router — y cuántos se descubrieron tarde, revisando manualmente.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es el caso que más dinero deja sobre la mesa. Cada escalamiento perdido es un deal de miles de dólares que se atendió como uno de quince.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-6">
+    <div class="ind-n">6</div>
+    <div class="ind-body">
+      <h3>Turnos promedio hasta resolver<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántos mensajes necesita cada agente para cerrar o calificar.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">A partir del 1 de octubre de 2026 cada mensaje cuesta dinero. Reducir turnos deja de ser elegancia de diseño y pasa a ser margen directo.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-7">
+    <div class="ind-n">7</div>
+    <div class="ind-body">
+      <h3>Tiempo de primera respuesta<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto tarda el sistema en responder el primer mensaje de un lead.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es el argumento de venta más concreto del CRM frente a un competidor. Si se degrada, hay un problema de infraestructura antes que de agentes.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-8">
+    <div class="ind-n">8</div>
+    <div class="ind-body">
+      <h3>Tasa de alucinación o respuesta corregida<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántas veces un humano tuvo que corregir o desmentir algo que dijo el agente.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es el indicador de riesgo reputacional. Un agente que inventa precios o promete plazos es peor que no tener agente — este número debe tender a cero antes de soltar el bot en automático.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-9">
+    <div class="ind-n">9</div>
+    <div class="ind-body">
+      <h3>Costo de tokens por conversación y por agente<span class="rel-badge dudoso">Caso aparte</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto cuesta en LLM cada conversación, desglosado por agente.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Detecta agentes con prompts inflados o que arrastran demasiado contexto. Es una de las dos palancas de costo variable del negocio, junto con la mensajería.</div></div>
+    </div>
+  </div>
+
+  <!-- ===== GRUPO 2 ===== -->
+  <div class="group-section" id="grupo-ventas">
+    <div class="group-eyebrow">Grupo funcional</div>
+    <h2>Grupo 2 — Ventas de la plataforma — el CRM como producto</h2>
+    <p class="g-desc">Aquí el "cliente" no es el lead: es la empresa que compra el CRM. Estos indicadores miden el negocio de vender el CRM, no las ventas que el CRM gestiona.</p>
+  </div>
+
+  <div class="ind" id="ind-10">
+    <div class="ind-n">10</div>
+    <div class="ind-body">
+      <h3>Ingreso recurrente por tenant (MRR)<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto factura cada cuenta al mes y cuánto suma el total.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es la línea base del negocio de plataforma. Sin esto no hay forma de saber si el CRM como producto está creciendo o solo acumulando trabajo.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-11">
+    <div class="ind-n">11</div>
+    <div class="ind-body">
+      <h3>Margen real por tenant<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Lo que factura cada cuenta menos lo que cuesta atenderla (mensajería + tokens + infraestructura).</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Revela al cliente que parece rentable y no lo es: uno que paga poco pero genera un volumen enorme de conversaciones puede estar costando más de lo que deja.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-12">
+    <div class="ind-n">12</div>
+    <div class="ind-body">
+      <h3>Churn y señales tempranas de abandono<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántas cuentas se van, y cuáles muestran señales antes: caída de uso, menos logins, deals sin mover.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Recuperar una cuenta antes de que se vaya es mucho más barato que conseguir una nueva. Las señales dan margen de reacción de semanas.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-13">
+    <div class="ind-n">13</div>
+    <div class="ind-body">
+      <h3>Tiempo hasta el primer valor (time-to-value)<span class="rel-badge prescindible">Prescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto tarda una cuenta nueva desde que firma hasta que cierra su primer deal en el sistema.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es el mejor predictor de retención. Una cuenta que tarda meses en ver resultados es una cuenta que se va a ir — y señala dónde arreglar el onboarding.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-14">
+    <div class="ind-n">14</div>
+    <div class="ind-body">
+      <h3>Adopción por funcionalidad<span class="rel-badge prescindible">Prescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Qué partes del CRM se usan de verdad y cuáles nadie abre.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Orienta el roadmap con datos en vez de intuición: una función que nadie usa no necesita mejoras, necesita entenderse o eliminarse.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-15">
+    <div class="ind-n">15</div>
+    <div class="ind-body">
+      <h3>Expansión de cuenta<span class="rel-badge prescindible">Prescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántos tenants suben de plan, agregan usuarios o piden módulos nuevos.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">El crecimiento más barato viene de clientes que ya están adentro. Este indicador dice si el producto tiene camino de crecimiento propio o si cada peso nuevo exige un cliente nuevo.</div></div>
+    </div>
+  </div>
+
+  <!-- ===== GRUPO 3 ===== -->
+  <div class="group-section" id="grupo-costos">
+    <div class="group-eyebrow">Grupo funcional</div>
+    <h2>Grupo 3 — Costos operativos de la plataforma</h2>
+    <p class="g-desc">Las dos palancas de costo variable del negocio — mensajería y modelos — más la infraestructura. Es lo que determina si el precio del CRM tiene sentido.</p>
+  </div>
+
+  <div class="ind" id="ind-16">
+    <div class="ind-n">16</div>
+    <div class="ind-body">
+      <h3>Costo de mensajería por tenant y por categoría<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto se gasta en WhatsApp por cuenta, separado en marketing, utility, authentication y service.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Con el cambio del 1 de octubre de 2026, responder deja de ser gratis. Este indicador es el que va a decidir si el modelo de precios actual aguanta o hay que ajustarlo.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-17">
+    <div class="ind-n">17</div>
+    <div class="ind-body">
+      <h3>Costo total por conversación cerrada<span class="rel-badge importante">Importante</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Mensajería + tokens sumados, dividido entre las conversaciones que terminaron en venta.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Es la métrica que responde si vender un gadget de $15 con 8 mensajes de bot sigue siendo negocio. Aplica directo a la unidad económica del Pipeline A.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-18">
+    <div class="ind-n">18</div>
+    <div class="ind-body">
+      <h3>Consumo de infraestructura por tenant<span class="rel-badge prescindible">Prescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Filas en base de datos, storage de multimedia, invocaciones de Edge Functions por cuenta.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Detecta el "vecino ruidoso" antes de que afecte a los demás — el escenario que en algún momento justificaría separar ese tenant a infraestructura dedicada.</div></div>
+    </div>
+  </div>
+
+  <!-- ===== GRUPO 4 ===== -->
+  <div class="group-section" id="grupo-salud">
+    <div class="group-eyebrow">Grupo funcional</div>
+    <h2>Grupo 4 — Salud técnica y de cuentas</h2>
+    <p class="g-desc">Lo que avisa antes de que un problema llegue al cliente. Son indicadores de prevención, no de análisis.</p>
+  </div>
+
+  <div class="ind" id="ind-19">
+    <div class="ind-n">19</div>
+    <div class="ind-body">
+      <h3>Quality Rating y tier por número de WhatsApp<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">El estado de calidad de cada número conectado y qué tan cerca está de su límite diario.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Si la calidad de un número cae, Meta puede suspenderlo — y ese tenant se queda sin canal. Es un indicador de riesgo operativo directo, no de análisis.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-20">
+    <div class="ind-n">20</div>
+    <div class="ind-body">
+      <h3>Errores de webhook y mensajes fallidos<span class="rel-badge imprescindible">Imprescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuántos mensajes no se entregaron o no se procesaron, y por qué.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Un mensaje perdido es un lead perdido que nadie reclama, porque nadie sabe que existió. Es el error más silencioso y más caro del sistema.</div></div>
+    </div>
+  </div>
+
+  <div class="ind" id="ind-21">
+    <div class="ind-n">21</div>
+    <div class="ind-body">
+      <h3>Latencia del sistema y uptime<span class="rel-badge prescindible">Prescindible</span></h3>
+      <div class="ind-row tells"><div class="ik">Qué te dice</div><div class="iv">Cuánto tarda el Router en decidir, cuánto tarda la ingesta, y cuánto tiempo estuvo caído el sistema.</div></div>
+      <div class="ind-row uses"><div class="ik">Para qué sirve</div><div class="iv">Meta degrada números que responden lento a sus webhooks. La latencia no es solo experiencia de usuario: puede costar el canal completo.</div></div>
+    </div>
+  </div>
+
+  <div class="never">
+    <div class="nk">◆ Lo que nunca debe exponerse al cliente</div>
+    <ul>
+      <li><b>Costos de operación de su cuenta</b> — le revela tu margen. Ningún proveedor de SaaS expone eso.</li>
+      <li><b>Comparativo con otros tenants</b> — es información competitiva de terceros que no le corresponde.</li>
+      <li><b>Señales internas de churn</b> — decirle a un cliente que el sistema lo marcó como "en riesgo de irse" produce justo el efecto contrario.</li>
+      <li><b>Métricas de tokens y modelos</b> — es detalle de implementación, no valor para él.</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>◆ Indicadores internos · Uso exclusivo del equipo de plataforma</span>
+  <span>23 ago 2026</span>
+</footer>
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 # candyCRM (codename `crm-ventas`) — contexto para Claude
 
-CRM multicanal a medida para Hellominus (Kanban de oportunidades, bandeja unificada de conversaciones y panel copiloto con IA). Nombre y dominio confirmados: **candyCRM / getcandycrm.com**. Repo y deploy separados de [hellominus.com](https://github.com/Monkeyotbz/hellominus.com), sincronizados vía n8n — ver [README.md](README.md) para la arquitectura completa.
+CRM multicanal (Kanban de oportunidades, bandeja unificada de conversaciones y panel copiloto con IA), **multi-tenant desde el diseño de base de datos**: Hellominus es el primer tenant, usándolo para su propio pipeline de ventas, pero el mismo esquema está pensado para venderse como producto a otras empresas después — no es un caso hipotético, es el modelo de negocio real. Nombre y dominio confirmados: **candyCRM / getcandycrm.com**. Repo y deploy separados de [hellominus.com](https://github.com/Monkeyotbz/hellominus.com), sincronizados vía n8n — ver [README.md](README.md) para la arquitectura completa.
 
 ## Antes de tocar pantallas o estilos: revisar el canvas de diseño
 
@@ -19,7 +19,16 @@ No hay código de producción implementado todavía sobre esta dirección visual
 
 ## Estado del proyecto
 
-- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link.
+- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link. **El frontend es y sigue siendo Vite + React** — cualquier documento de `docs/` que mencione Next.js es una propuesta descartada del documento original, ya corregida ahí mismo.
 - Esquema de base de datos **rediseñado** en `supabase/setup.sql` a la luz de lo que reveló el canvas de diseño: los `domain` `canal_type`/`fuente_type` ahora incluyen `messenger`/`linkedin`, tabla nueva `conversation_insights` (estado actual del Copiloto IA por conversación: score, sentimiento, nivel de interés derivado, resumen, sugerencia, citas RAG), tabla nueva `meetings` (agenda de llamadas), `contacts.sector`, e índices en las columnas FK que antes no tenían ninguno. Detalle completo en [supabase/README.md](supabase/README.md).
+- **Multi-tenant (24 ago 2026):** `setup.sql` tiene tabla `tenants` y `tenant_id` en cada tabla de negocio, con RLS que aísla por tenant vía `current_tenant_id()` (lee `app_metadata.tenant_id` del JWT) antes de aplicar la regla de dueño/admin ya existente, y FK compuestas `(tenant_id, padre_id)` para que tampoco se pueda escribir una fila cruzada entre tenants. Hellominus está sembrado como primer tenant (`slug = 'hellominus'`). Motivo: el CRM se vende como producto a otras empresas, no solo lo usa Hellominus internamente — ver [`docs/guia-fases-1-2.md`](docs/guia-fases-1-2.md) para el detalle de la decisión.
+- **Soporte multi-tenant:** el equipo de Hellominus opera el SaaS de los tenants-cliente vía la tabla `platform_admins` (no vía membresías extra en `team_members`, que sigue siendo un tenant por persona). Para entrar al CRM de otro tenant hay que **abrir una sesión de soporte** (`support_sessions`, con motivo obligatorio y vencimiento a 60 min) y mandar el header `X-Acting-Tenant`; sin sesión activa el header no habilita nada. Las escrituras durante un soporte quedan en `audit_log` con fila anterior/posterior y su `support_session_id`, y el tenant auditado puede leer las sesiones abiertas sobre sus datos. **Las lecturas no se auditan una por una** — Postgres no dispara triggers en `SELECT`; la sesión declarada es el rastro. Detalle en [supabase/README.md](supabase/README.md).
+- **Verticales configurables:** `contacts.sector` dejó de ser un `check` hardcodeado; ahora es la tabla `sectors` por tenant (`contacts.sector_id`), con los 5 rubros de Hellominus sembrados con los mismos slugs de antes.
 - **Sigue sin existir un proyecto Supabase real** para este CRM — `setup.sql` todavía no se corrió contra ninguna base (y no se pudo probar con un Postgres local tampoco: no hay Docker instalado en la máquina de desarrollo). Es puramente planificación hasta que exista un proyecto real; cualquier cambio de esquema se sigue editando directo en `setup.sql`, no como migración incremental.
 - Próximo paso de código (no de planeación): Sprint 1 (Kanban funcional) recién puede arrancar después de crear ese proyecto Supabase real y correr el script. Ver los Sprints en [README.md](README.md).
+- `docs/` tiene cinco documentos de planeación traídos el 24 ago 2026 — son guías orientativas, no órdenes literales a seguir. Cada uno en HTML (snapshot original) + Markdown (copia de trabajo, la que se edita):
+  - `hoja-de-ruta-construccion` — mapa general de piezas a construir.
+  - `guia-fases-1-2` — detalle de ejecución de Fase 1 (fundación) y Fase 2 (primeros agentes).
+  - `tener-en-cuenta-base-de-datos` — 48 columnas/tablas que faltan en el esquema, por reglas de WhatsApp/Meta y por cruce con los dos documentos de indicadores.
+  - `indicadores-dashboard` — indicadores que vería cada tenant-cliente sobre su propio negocio (parcial, 1 de varios grupos).
+  - `indicadores-internos-plataforma` — indicadores confidenciales, solo para el equipo de Hellominus operando el SaaS (nunca visibles a un tenant-cliente).

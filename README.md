@@ -1,6 +1,6 @@
 # CRM de ventas — Hellominus (codename `crm-ventas`)
 
-CRM multicanal a medida (Kanban de oportunidades, bandeja unificada de conversaciones y panel copiloto con IA), construido sobre Supabase + n8n + React. Repo y deploy **separados** de [hellominus.com](../../README.md), sincronizados vía n8n.
+CRM multicanal (Kanban de oportunidades, bandeja unificada de conversaciones y panel copiloto con IA), construido sobre Supabase + n8n + React. **Multi-tenant desde el esquema de base de datos**: Hellominus es el primer tenant, pero el mismo CRM está pensado para venderse como producto a otras empresas — ver [supabase/README.md](supabase/README.md). Repo y deploy **separados** de [hellominus.com](../../README.md), sincronizados vía n8n.
 
 > Nombre de marca y dominio `.com` todavía sin definir — se usa el codename `crm-ventas` para carpeta, repo y `package.json`. Renombrar después es un `git mv` + buscar/reemplazar, no bloquea nada de lo de abajo.
 
