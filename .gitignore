@@ -8,3 +8,6 @@ dist/
 # inline, ~2MB). No es código fuente: se re-genera desde design/*.dc.html +
 # design/canvas.json. Ver CLAUDE.md.
 design/crm-ventas-dashboard-direcciones.html
+
+# Temporales del CLI de Supabase (npx supabase ...)
+supabase/.temp/

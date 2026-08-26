@@ -2,6 +2,46 @@
 
 Proyecto Supabase **propio del CRM** — no es el mismo proyecto que usa hellominus.com (tabla `leads`) ni el de KAIROS (`agents/linkedin-agent`). La sincronización entre el `leads` de hellominus.com y este CRM se hace vía n8n (Flujo 1, ver README de la raíz), no compartiendo base de datos.
 
+## El proyecto real existe, y el esquema se cambia por migraciones
+
+**Creado el 25 ago 2026:** proyecto `crm-ventas`, ref `jrygtluycndiyvrxjmib`, región `us-east-1`.
+
+**`setup.sql` ya no existe.** Se convirtió en la primera migración
+([`migrations/20260825115320_setup_multitenant_completo.sql`](migrations/20260825115320_setup_multitenant_completo.sql))
+y se borró como archivo suelto, para que no quede la tentación de correrlo.
+
+El motivo del cambio es concreto: con datos reales de clientes adentro no se puede borrar la base
+y volver a correr un script para agregar una columna. Hace falta poder aplicar solo lo nuevo, y eso
+solo lo hacen las migraciones.
+
+**La regla que va con esto:** una migración ya aplicada **nunca se edita** — ni siquiera sus
+comentarios. Si hay un error, se corrige con una migración nueva encima. Detalle en
+[`migrations/README.md`](migrations/README.md).
+
+Para leer el esquema de un vistazo sin abrir 8 archivos: [`schema-referencia.md`](schema-referencia.md)
+— generado automáticamente, no ejecutable, no es fuente de verdad.
+
+Migraciones aplicadas, en orden:
+
+| # | Migración | Qué hizo |
+|---|---|---|
+| 1 | `setup_multitenant_completo` | El antiguo `setup.sql`: 19 tablas, RLS, multi-tenant, sesiones de soporte |
+| 2 | `hardening_search_path_y_extension_schema` | `search_path` fijo en las 8 funciones; `vector` movido a schema `extensions` |
+| 3 | `mover_funciones_internas_a_schema_private` | Las 8 funciones internas movidas a schema `private` — dejan de estar expuestas como endpoints RPC públicos |
+| 4 | `doc48_p1_pipelines_y_productos` | Tabla `pipelines`, `products`, `deal_items`, versionado de `quotes` |
+| 5 | `doc48_p2_whatsapp_meta` | Ventana de 24h, `message_templates`, `whatsapp_numbers`, opt-in, costos, idempotencia |
+| 6 | `doc48_p3_atribucion_agentes_saas` | `contact_touchpoints`, `agent_executions`, `router_decisions`, `pipeline_transfers`, `payment_links`, métricas SaaS |
+| 7 | `doc48_p4_rls_tablas_nuevas` | RLS en las 17 tablas nuevas |
+| 8 | `doc48_p5_auditoria_soporte_tablas_nuevas` | Auditoría de soporte extendida a las tablas nuevas con datos de tenant |
+
+Estado verificado: **36 tablas, todas con RLS activo**, 0 advertencias del linter de seguridad de Supabase. Datos sembrados: 1 tenant (Hellominus), 1 pipeline, 7 etapas, 5 sectores, 1 usuario `owner`.
+
+### Las funciones viven en `private`, no en `public`
+
+`is_admin()`, `is_platform_admin()`, `current_tenant_id()`, `active_support_session_id()`, `set_updated_at()`, `audit_deal_stage_change()`, `audit_support_write()` y `validar_plantilla_para_iniciar()` están en el schema `private`. Motivo: en `public` quedaban publicadas por PostgREST como `/rest/v1/rpc/<nombre>`, invocables con la anon key. Revocar `EXECUTE` no servía (las policies de RLS necesitan poder llamarlas), así que se movieron a un schema que PostgREST no expone.
+
+**Consecuencia práctica:** al escribir una policy nueva hay que calificarlas — `private.current_tenant_id()`, no `current_tenant_id()`. Sin el prefijo, la creación de la policy falla porque `private` no está en el `search_path`.
+
 ## Multi-tenant
 
 Un solo proyecto Supabase, un solo esquema — pero los datos de cada empresa cliente (cada **tenant**, tabla `tenants`) quedan completamente aislados entre sí por RLS. **Hellominus es el primer tenant** (usa el CRM para su propio pipeline de ventas), y ese mismo esquema es el que se vende como producto a otras empresas más adelante — no es un caso hipotético, es el modelo de negocio real de este CRM.
@@ -67,25 +107,41 @@ order by a.created_at;
 
 Antes `contacts.sector` era un `check` con los rubros de Hellominus (`construccion`, `derecho`, `ventas`, `cobranza`, `otro`). Eso no sirve para un tenant que venda a otro rubro, y cambiarlo obligaba a tocar el esquema. Ahora es la tabla `sectors` (por tenant) y `contacts.sector_id`; los cinco valores originales quedan sembrados para Hellominus con los mismos `slug`, así que el mapeo con `leads.sector` de hellominus.com se mantiene.
 
-## Configuración (una sola vez)
+## Levantar el esquema en un proyecto nuevo
+
+Solo hace falta para un proyecto **nuevo** (un staging, por ejemplo). El de producción ya está
+creado y con las 8 migraciones aplicadas.
 
 ### 1. Crear el proyecto
 
-1. [supabase.com](https://supabase.com) → **New project** → nombralo algo como `crm-ventas`.
-2. Guardá la contraseña de la base que pide crear.
+1. [supabase.com](https://supabase.com) → **New project**.
+2. Guardá la contraseña de la base que pide crear — hace falta para `supabase db push` y para
+   `supabase db dump`, y no se puede recuperar después (solo resetear).
 
-### 2. Habilitar `pgvector` y crear el esquema
+### 2. Aplicar las migraciones
 
-En el **SQL Editor** del proyecto, pegá y corré [setup.sql](setup.sql) completo. Crea:
-- La tabla `tenants` y el tenant Hellominus sembrado (`slug = 'hellominus'`), más `platform_admins` (vacía: el alta es manual, ver arriba) y `support_sessions`.
-- Todas las tablas (contactos, sectores, canales de contacto, conversaciones, mensajes, insights de IA por conversación, pipeline de deals, cotizaciones, pagos, actividades, reuniones agendadas, auditoría, embeddings de RAG), cada una con su `tenant_id` y con FK compuestas hacia su tabla padre.
-- Tres `domain` compartidos (`canal_type`, `fuente_type`, `sentimiento_type`) para no repetir la lista de canales/sentimientos en cada columna que los usa.
-- RLS activo en todas las tablas de negocio: primero aísla por tenant (`tenant_id = current_tenant_id()`), y dentro de un mismo tenant, por dueño del registro o rol admin/owner en `team_members`.
-- Realtime activado en `messages`, `deals` y `conversation_insights`.
-- Índices en todas las columnas FK que se consultan en el día a día (antes no tenían ninguno), incluidos los `tenant_id` nuevos.
-- Las 7 etapas iniciales del Kanban y los 5 sectores iniciales, sembrados para el tenant Hellominus.
+**No** hay un script suelto que correr: el esquema son los archivos de
+[`migrations/`](migrations/), en orden de timestamp.
 
-El script es **re-ejecutable**: las policies se borran y recrean, y las tablas/vistas/publicaciones usan `if not exists` o capturan el duplicado. Se puede editar `setup.sql` y volver a correrlo entero — que es como se trabaja mientras no haya datos reales.
+```bash
+npx supabase link --project-ref <ref-del-proyecto-nuevo>
+npx supabase db push
+```
+
+Si no se quiere usar el CLI, se pueden pegar los 8 archivos en el SQL Editor **en orden de
+nombre** — el orden importa: la migración 4 crea tablas que la 7 necesita para su RLS.
+
+Lo que queda al terminar:
+
+- 36 tablas, **todas con RLS activo**, y FK compuestas hacia cada tabla padre.
+- Las funciones internas en el schema `private` (no expuestas por PostgREST).
+- 7 `domain` compartidos, para no repetir listas de valores en cada columna que las usa.
+- Realtime en `messages`, `deals` y `conversation_insights`.
+- Sembrado: el tenant Hellominus, su pipeline con 7 etapas, y 5 sectores.
+
+Verificar con `get_advisors(type: "security")` — debería dar 0 hallazgos — y con el chequeo de
+tablas sin RLS que está al final de
+[`../scripts/generar-schema-referencia.sql`](../scripts/generar-schema-referencia.sql).
 
 #### `conversation_insights` — estado actual del Copiloto IA
 
