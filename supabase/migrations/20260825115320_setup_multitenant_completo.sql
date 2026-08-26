@@ -1,6 +1,11 @@
--- Ejecutar en el SQL Editor de un proyecto Supabase NUEVO y dedicado al CRM
--- de ventas (no el de hellominus.com ni el de KAIROS). Ver supabase/README.md
--- para el paso a paso.
+-- Primera migracion del CRM de ventas. Crea el esquema base multi-tenant.
+--
+-- NO correr este archivo suelto: es parte de una secuencia de migraciones y
+-- hay 7 mas encima. Para levantar el esquema en un proyecto nuevo se aplican
+-- todas en orden (npx supabase db push). Ver supabase/README.md.
+--
+-- Va en un proyecto Supabase dedicado al CRM: no el de hellominus.com ni el
+-- de KAIROS.
 
 -- ============================================================
 -- Extensiones
