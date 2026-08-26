@@ -11,7 +11,7 @@
 > los pasos se ajustan con lo que vayamos aprendiendo en el camino.
 >
 > ✅ **Decisiones ya tomadas y sincronizadas con el repo (24 ago 2026):**
-> - **Multi-tenant, confirmado.** [`supabase/setup.sql`](../supabase/setup.sql) ya tiene la tabla
+> - **Multi-tenant, confirmado.** [el esquema real](../supabase/schema-referencia.md) ya tiene la tabla
 >   `tenants` y `tenant_id` en cada tabla de negocio. **Hellominus es el primer tenant** (usa el CRM
 >   para su propio pipeline de ventas) — el mismo esquema es el que se vende como CRM a otras empresas
 >   más adelante. Los ejemplos de este documento con "acero, ropa y tecnología" eran genéricos, para
@@ -70,11 +70,11 @@ La verificación de Meta es el único paso que no se controla directamente. Arra
 1. Hellominus es el primer tenant, usando el CRM para su propio pipeline de ventas. El CRM se construye para venderse como producto — cada empresa que lo compre es un tenant nuevo, con catálogos, pipelines y clientes sin relación entre sí. Mezclarlos en tablas sin separación sería un riesgo de seguridad, no una conveniencia.
 2. Sin aislamiento, un bug o una consulta mal filtrada podría mostrarle a un vendedor de un tenant-cliente un deal de otro tenant-cliente — o de Hellominus mismo.
 3. Cada tenant probablemente necesita su propio pipeline: uno puede ser consultivo B2B, otro transaccional. El multi-tenant permite que cada uno configure lo suyo sin tocar el código de los demás.
-4. Construirlo desde el inicio cuesta poco. Agregarlo después, con datos reales de varios tenants ya mezclados en las mismas tablas, es una migración riesgosa y cara — por eso ya quedó así desde la primera versión de `setup.sql`, antes de tener un segundo tenant real.
+4. Construirlo desde el inicio cuesta poco. Agregarlo después, con datos reales de varios tenants ya mezclados en las mismas tablas, es una migración riesgosa y cara — por eso ya quedó así desde la primera migración, antes de tener un segundo tenant real.
 
 **Cómo se ejecuta:** no es principalmente código — es 70% base de datos, 30% código. Si se resuelve solo filtrando en cada consulta, tarde o temprano se escapa una y se filtran datos entre empresas. La base de datos tiene que ser la que lo impida. Son tres capas:
 
-**Capa 1 — La columna (base de datos):** ya aplicada en [`supabase/setup.sql`](../supabase/setup.sql) con los nombres reales del esquema (`contacts`, `conversations`, `deals`, `quotes`, `activities`, `meetings`, `pipeline_stages`, `kb_chunks`, `audit_log`, `team_members`). Versión ilustrativa del documento original, con los nombres genéricos que traía:
+**Capa 1 — La columna (base de datos):** ya aplicada en el esquema real (ver [`supabase/schema-referencia.md`](../supabase/schema-referencia.md)) con los nombres reales del esquema (`contacts`, `conversations`, `deals`, `quotes`, `activities`, `meetings`, `pipeline_stages`, `kb_chunks`, `audit_log`, `team_members`). Versión ilustrativa del documento original, con los nombres genéricos que traía:
 ```sql
 create table tenants (
   id uuid primary key default gen_random_uuid(),

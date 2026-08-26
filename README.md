@@ -60,7 +60,7 @@ Sin las variables de Supabase configuradas, la pantalla de login se muestra igua
 
 ## Pendientes (pasos manuales, no automatizables desde acá)
 
-- Crear el proyecto Supabase del CRM y correr `supabase/setup.sql` (ver [supabase/README.md](supabase/README.md)).
+- ~~Crear el proyecto Supabase del CRM~~ — **hecho el 25 ago 2026** (`crm-ventas`, us-east-1). El esquema se aplica por migraciones, ver [supabase/README.md](supabase/README.md).
 - Elegir nombre de marca/dominio final.
 - Crear cuenta/proyecto de n8n (Cloud o self-host) cuando se llegue al Sprint 2.
 - Crear el repo remoto en GitHub y hacer el push inicial.

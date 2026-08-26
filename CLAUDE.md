@@ -17,18 +17,64 @@ Ahí están las direcciones visuales exploradas y la que quedó elegida. Resumen
 
 No hay código de producción implementado todavía sobre esta dirección visual (el scaffold de Sprint 0 es solo login + estructura). Cuando se traduzca el sistema Candy + Aero a componentes reales de React, este archivo es el lugar para documentar los tokens finales (colores, radios, tipografía) una vez que dejen de vivir solo en el canvas.
 
+## Excepción a la convención del laboratorio: `DECISIONES.md`
+
+En este proyecto (y **solo** en este proyecto — la regla general del laboratorio sigue en la
+raíz para el resto) `DECISIONES.md` vive en [`docs/DECISIONES.md`](docs/DECISIONES.md), no en la
+raíz. Se movió ahí el 25 ago 2026 a pedido explícito del usuario, porque hay otro participante en
+este proyecto. Si invocás `seleccionar-forma` acá, buscá el archivo en `docs/`, no en la raíz — por
+default esperaría encontrarlo en la raíz y, si no lo encuentra, puede asumir que no existe y tratar
+la sesión como modo inicial de nuevo.
+
+## Regla del esquema: nunca editar una migración ya aplicada
+
+El esquema de base de datos vive en [`supabase/migrations/`](supabase/migrations/) y se cambia
+**solo agregando migraciones nuevas**. `supabase/setup.sql` ya no existe: se convirtió en la
+primera migración.
+
+> **Nunca editar una migración ya aplicada en producción.** Si te equivocaste, se corrige con una
+> migración nueva encima. En cuanto alguien edita una vieja, el historial deja de reconstruir la
+> base correctamente y el sistema pierde el sentido.
+
+Esto aplica **también a los comentarios**. Es tentador arreglar uno desactualizado, pero en cuanto
+se acepta "editar un poquito" la regla deja de ser una regla. Hay un caso concreto ya en el repo:
+`20260825115320_setup_multitenant_completo.sql` arranca diciendo *"Ejecutar en el SQL Editor de un
+proyecto Supabase NUEVO"* — hoy es engañoso y **aun así no se corrige**; la aclaración está en
+[`supabase/migrations/README.md`](supabase/migrations/README.md).
+
+El motivo de fondo: hay bases de producción con datos reales de clientes. No se puede borrar la
+base y volver a correr un script para agregar una columna — hace falta poder aplicar solo lo nuevo,
+y eso solo lo hacen las migraciones.
+
+Al escribir una migración nueva:
+- **Calificar las funciones internas**: `private.current_tenant_id()`, no `current_tenant_id()`.
+- **RLS en toda tabla nueva** — sin policy queda abierta a cualquiera con la anon key.
+- **FK compuestas `(tenant_id, padre_id)`**, no FK simples: RLS aísla la lectura, pero solo la FK
+  compuesta impide *escribir* una fila que cruce tenants.
+- Correr `get_advisors(type: "security")` después de aplicar; debería dar 0 hallazgos.
+- **Guardar el archivo en `supabase/migrations/`** con el nombre exacto que quedó registrado — si
+  no, la base y el repo se separan.
+
+Para leer el esquema de un vistazo sin abrir las 8 migraciones:
+[`supabase/schema-referencia.md`](supabase/schema-referencia.md) — generado, no ejecutable, y **no
+es fuente de verdad**: si contradice a una migración, manda la migración.
+
 ## Estado del proyecto
 
 - Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link. **El frontend es y sigue siendo Vite + React** — cualquier documento de `docs/` que mencione Next.js es una propuesta descartada del documento original, ya corregida ahí mismo.
-- Esquema de base de datos **rediseñado** en `supabase/setup.sql` a la luz de lo que reveló el canvas de diseño: los `domain` `canal_type`/`fuente_type` ahora incluyen `messenger`/`linkedin`, tabla nueva `conversation_insights` (estado actual del Copiloto IA por conversación: score, sentimiento, nivel de interés derivado, resumen, sugerencia, citas RAG), tabla nueva `meetings` (agenda de llamadas), `contacts.sector`, e índices en las columnas FK que antes no tenían ninguno. Detalle completo en [supabase/README.md](supabase/README.md).
-- **Multi-tenant (24 ago 2026):** `setup.sql` tiene tabla `tenants` y `tenant_id` en cada tabla de negocio, con RLS que aísla por tenant vía `current_tenant_id()` (lee `app_metadata.tenant_id` del JWT) antes de aplicar la regla de dueño/admin ya existente, y FK compuestas `(tenant_id, padre_id)` para que tampoco se pueda escribir una fila cruzada entre tenants. Hellominus está sembrado como primer tenant (`slug = 'hellominus'`). Motivo: el CRM se vende como producto a otras empresas, no solo lo usa Hellominus internamente — ver [`docs/guia-fases-1-2.md`](docs/guia-fases-1-2.md) para el detalle de la decisión.
+- Esquema de base de datos **rediseñado** (en lo que hoy es la primera migración) a la luz de lo que reveló el canvas de diseño: los `domain` `canal_type`/`fuente_type` ahora incluyen `messenger`/`linkedin`, tabla nueva `conversation_insights` (estado actual del Copiloto IA por conversación: score, sentimiento, nivel de interés derivado, resumen, sugerencia, citas RAG), tabla nueva `meetings` (agenda de llamadas), `contacts.sector`, e índices en las columnas FK que antes no tenían ninguno. Detalle completo en [supabase/README.md](supabase/README.md).
+- **Multi-tenant (24 ago 2026):** el esquema tiene tabla `tenants` y `tenant_id` en cada tabla de negocio, con RLS que aísla por tenant vía `current_tenant_id()` (lee `app_metadata.tenant_id` del JWT) antes de aplicar la regla de dueño/admin ya existente, y FK compuestas `(tenant_id, padre_id)` para que tampoco se pueda escribir una fila cruzada entre tenants. Hellominus está sembrado como primer tenant (`slug = 'hellominus'`). Motivo: el CRM se vende como producto a otras empresas, no solo lo usa Hellominus internamente — ver [`docs/guia-fases-1-2.md`](docs/guia-fases-1-2.md) para el detalle de la decisión.
 - **Soporte multi-tenant:** el equipo de Hellominus opera el SaaS de los tenants-cliente vía la tabla `platform_admins` (no vía membresías extra en `team_members`, que sigue siendo un tenant por persona). Para entrar al CRM de otro tenant hay que **abrir una sesión de soporte** (`support_sessions`, con motivo obligatorio y vencimiento a 60 min) y mandar el header `X-Acting-Tenant`; sin sesión activa el header no habilita nada. Las escrituras durante un soporte quedan en `audit_log` con fila anterior/posterior y su `support_session_id`, y el tenant auditado puede leer las sesiones abiertas sobre sus datos. **Las lecturas no se auditan una por una** — Postgres no dispara triggers en `SELECT`; la sesión declarada es el rastro. Detalle en [supabase/README.md](supabase/README.md).
 - **Verticales configurables:** `contacts.sector` dejó de ser un `check` hardcodeado; ahora es la tabla `sectors` por tenant (`contacts.sector_id`), con los 5 rubros de Hellominus sembrados con los mismos slugs de antes.
-- **Sigue sin existir un proyecto Supabase real** para este CRM — `setup.sql` todavía no se corrió contra ninguna base (y no se pudo probar con un Postgres local tampoco: no hay Docker instalado en la máquina de desarrollo). Es puramente planificación hasta que exista un proyecto real; cualquier cambio de esquema se sigue editando directo en `setup.sql`, no como migración incremental.
-- Próximo paso de código (no de planeación): Sprint 1 (Kanban funcional) recién puede arrancar después de crear ese proyecto Supabase real y correr el script. Ver los Sprints en [README.md](README.md).
-- `docs/` tiene cinco documentos de planeación traídos el 24 ago 2026 — son guías orientativas, no órdenes literales a seguir. Cada uno en HTML (snapshot original) + Markdown (copia de trabajo, la que se edita):
+- **El proyecto Supabase real EXISTE desde el 25 ago 2026** (`crm-ventas`, ref `jrygtluycndiyvrxjmib`, us-east-1). 36 tablas, todas con RLS, 0 advertencias del linter de seguridad. Credenciales ya en `.env` (gitignored). Usuario `owner` dado de alta: `juansecode2026@gmail.com`.
+  - El esquema son 8 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba.
+  - **Las funciones internas viven en el schema `private`**, no en `public` (estaban expuestas como endpoints RPC públicos). Al escribir una policy nueva hay que calificarlas: `private.current_tenant_id()`, no `current_tenant_id()`.
+  - **Los 48 ítems de `docs/tener-en-cuenta-base-de-datos` están implementados** (25 ago 2026), con tres desvíos deliberados respecto del documento — ver ahí mismo.
+- Próximo paso de código: Sprint 1 (Kanban funcional), que ya no está bloqueado. El candidato [3] de `docs/DECISIONES.md` (webhook de ingesta de WhatsApp) cumplió la mitad de su condición de activación — falta el arranque del Sprint 1.5. Ver los Sprints en [README.md](README.md).
+- `docs/` tiene seis documentos de planeación traídos el 24-25 ago 2026 — son guías orientativas, no órdenes literales a seguir. Cada uno en HTML (snapshot original) + Markdown (copia de trabajo, la que se edita). También ahí vive `DECISIONES.md` (excepción a la convención del laboratorio, ver arriba):
   - `hoja-de-ruta-construccion` — mapa general de piezas a construir.
   - `guia-fases-1-2` — detalle de ejecución de Fase 1 (fundación) y Fase 2 (primeros agentes).
   - `tener-en-cuenta-base-de-datos` — 48 columnas/tablas que faltan en el esquema, por reglas de WhatsApp/Meta y por cruce con los dos documentos de indicadores.
   - `indicadores-dashboard` — indicadores que vería cada tenant-cliente sobre su propio negocio (parcial, 1 de varios grupos).
   - `indicadores-internos-plataforma` — indicadores confidenciales, solo para el equipo de Hellominus operando el SaaS (nunca visibles a un tenant-cliente).
+  - `configurar-webhook-meta` — detalle ejecutable del Paso 1.5 de `guia-fases-1-2` (registrar la Callback URL y el Verify Token en Meta for Developers). Corresponde al candidato [3] de `DECISIONES.md`, hoy APLAZADO — no cambia esa condición de activación, es solo referencia para cuando llegue el momento.

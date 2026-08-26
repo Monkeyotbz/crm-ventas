@@ -12,11 +12,39 @@
 > crear literalmente tal cual está escrita.
 >
 > ✅ **Multi-tenant, confirmado (24 ago 2026):** las tablas de acá que asumen `tenants`/`tenant_id`
-> (`whatsapp_numbers.tenant_id`, `products.sku` único por tenant, etc.) ya coinciden con la dirección
-> real — [`supabase/setup.sql`](../supabase/setup.sql) tiene `tenants` y `tenant_id` en cada tabla de
-> negocio desde esa fecha. Lo que **no** está sincronizado todavía son las ~40 tablas/columnas
-> específicas listadas más abajo (`message_templates`, `whatsapp_numbers`, `payment_links`,
-> `agent_executions`, etc.) — siguen siendo referencia para más adelante, no algo ya implementado.
+> ya coinciden con la dirección real.
+>
+> ## ✅ IMPLEMENTADO — los 48 ítems están en la base real (25 ago 2026)
+>
+> Aplicados al proyecto Supabase `crm-ventas` en las migraciones `doc48_p1` … `doc48_p5`. Este
+> documento pasa de ser una lista de pendientes a ser **la explicación de por qué existe cada
+> tabla/columna**. Ver [`supabase/README.md`](../supabase/README.md).
+>
+> **Tres desvíos deliberados respecto de lo que dice el documento** — no son omisiones, son
+> correcciones que hubo que hacer al chocar con el esquema real:
+>
+> 1. **Se creó una tabla `pipelines` que el documento no numera.** Los ítems [16]
+>    (`products.pipeline_default_id`) y [44] (`pipeline_transfers`, el salto A→B) la dan por
+>    existente, pero el esquema real solo tenía `pipeline_stages` planas por tenant, sin nada que
+>    las agrupara — sin `pipelines`, "transferir del pipeline A al B" no tiene referente.
+>    `pipeline_stages` ahora cuelga de un pipeline, y `deals` ganó `pipeline_id`.
+> 2. **[11] está mal como está escrito y se implementó distinto.** Pide `UNIQUE` sobre `waba_id`,
+>    pero una WABA legítimamente agrupa **varios** números; la regla real de Meta es "un número,
+>    una WABA". El único va sobre `phone_number_id` — implementarlo literal habría roto el caso
+>    válido de dos números en una misma cuenta.
+> 3. **[21] `payments` y [23] `quotes` ya existían**, listados acá como "tabla nueva" porque el
+>    documento se escribió contra otro modelo. Se ajustaron en vez de duplicarse: `quotes` ganó
+>    versionado, y `payments` pasó a aceptar pagos sin cotización (Pipeline A cobra por
+>    `payment_links`, no por cotización).
+>
+> **Además se agregó `messages.externo_id` + índice único**, que el documento no numera pero
+> [`configurar-webhook-meta.md`](configurar-webhook-meta.md) exige: Meta reintenta el mismo mensaje
+> si la función no confirma en 5 s, y sin esto se guarda duplicado.
+>
+> Verificado con pruebas reales contra la base: la validación [5] rechaza un saliente de WhatsApp
+> sin ventana ni plantilla, la ventana [1][2] lo acepta al abrirse, el `externo_id` duplicado se
+> rechaza, las FK compuestas bloquean un deal cruzado entre tenants, y el check de coherencia
+> producto ([15]/[17]) impide un `a_medida` sin `requiere_cotizacion`.
 
 **48 elementos, en 18 grupos**, cada uno originado en una regla concreta de Meta (o en un indicador que ya se había definido en otro documento). Prioridad: 🔴 **Alta** = bloquea operación hoy · 🟢 **Media** = antes de octubre 2026 · ⚪ **Baja** = se agrega sin dolor después.
 

@@ -18,12 +18,12 @@ Dos cosas puntuales a tener en cuenta:
   *instalar***. El propio documento original lo dice explícito para el Paso 04 (Normalización): aparece
   después del Router en esta lista, pero en la arquitectura real corre *antes*.
 - Este proyecto ya tiene su propio esquema de base de datos diseñado y documentado en
-  [`supabase/setup.sql`](../supabase/setup.sql) y [`supabase/README.md`](../supabase/README.md), pensado
+  [`supabase/migrations/`](../supabase/migrations/) y [`supabase/README.md`](../supabase/README.md), pensado
   específicamente para candyCRM/Hellominus (contactos, canales, conversaciones, `conversation_insights`,
   `meetings`, etc.). El "Paso 01 — Modelo de datos" de este roadmap usa nombres genéricos
   (`organizations`, `pipelines`, `stages`, `events`) que **no coinciden literalmente** con los nombres
-  reales de `setup.sql` (`tenants`, `pipeline_stages`, `deals`...) — son ilustrativos, no una migración a
-  copiar tal cual. El concepto de fondo que sí ya se sincronizó (24 ago 2026): `setup.sql` es
+  reales del esquema (`tenants`, `pipeline_stages`, `deals`...) — son ilustrativos, no una migración a
+  copiar tal cual. El concepto de fondo que sí ya se sincronizó (24 ago 2026): el esquema es
   **multi-tenant**, con Hellominus como primer tenant y el mismo esquema pensado para venderse a otras
   empresas — ver [`guia-fases-1-2.md`](guia-fases-1-2.md) para el detalle de esa decisión.
 
@@ -304,7 +304,7 @@ triggers — se configuran · Edge Functions para lógica multi-tabla
 - Activar Supabase y empezar a meter datos reales sin haber configurado RLS deja la base técnicamente abierta.
 - La clave pública (`anon key`) vive expuesta en el frontend y en los bots — por eso RLS no es opcional, es la barrera real de seguridad.
 
-> Nota de conciliación con este proyecto: `supabase/setup.sql` **ya tiene RLS activado en las 15 tablas
+> Nota de conciliación con este proyecto: el esquema real **ya tiene RLS activado en las 36 tablas
 > desde el diseño inicial**, no es algo pendiente acá — este paso del roadmap describe el riesgo genérico,
 > no el estado real de candyCRM.
 
