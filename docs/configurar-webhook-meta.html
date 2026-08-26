@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="color-scheme" content="dark">
+<title>Configurar el Webhook en Meta for Developers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10131a; --ink-raised:#161a23; --panel:#171c26; --panel-hi:#1e2430;
+    --border:#2b3244; --border-soft:#212636;
+    --copper:#cc7a42; --copper-dim:#8a5732;
+    --teal:#43c2ae; --teal-dim:#2c8577;
+    --slate:#7c8bb0; --slate-dim:#454f6b;
+    --lost:#a8523f;
+    --text:#e7eaf0; --text-dim:#8d96a8; --text-faint:#565f70;
+    --mono:'JetBrains Mono',monospace; --display:'Space Grotesk',sans-serif; --body:'Inter',sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;background:var(--ink);color-scheme:dark;}
+  body{
+    background:var(--ink);color:var(--text);font-family:var(--body);line-height:1.6;
+    font-size:16px;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(rgba(203,122,66,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(203,122,66,.035) 1px,transparent 1px);
+    background-size:48px 48px;
+  }
+  .wrap{max-width:980px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+  ::selection{background:var(--copper);color:#141414;}
+
+  .top-bar{position:sticky;top:0;z-index:50;background:rgba(16,19,26,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--border-soft);}
+  .top-bar-inner{max-width:980px;margin:0 auto;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .top-bar-brand{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--text-faint);}
+  .top-bar-links{display:flex;gap:14px;font-family:var(--mono);font-size:11px;flex-wrap:wrap;}
+  .top-bar-links a{color:var(--teal);text-decoration:none;border-bottom:1px dashed var(--teal-dim);}
+
+  .hero{padding:76px 0 40px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.14em;color:var(--copper);text-transform:uppercase;display:inline-flex;align-items:center;gap:8px;margin-bottom:20px;}
+  .eyebrow::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);box-shadow:0 0 0 3px rgba(204,122,66,.18);}
+  h1{font-family:var(--display);font-weight:700;font-size:clamp(29px,4.6vw,44px);line-height:1.12;letter-spacing:-.01em;max-width:20ch;}
+  h1 span{color:var(--copper);}
+  .hero-sub{margin-top:18px;max-width:64ch;font-size:16px;color:var(--text-dim);}
+  .hero-meta{margin-top:26px;display:flex;gap:24px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-faint);}
+  .hero-meta b{color:var(--text-dim);font-weight:500;}
+
+  .section-head{padding:60px 0 8px;}
+  .section-head h2{font-family:var(--display);font-weight:700;font-size:clamp(22px,3vw,27px);}
+  .section-head p{color:var(--text-dim);margin-top:8px;max-width:66ch;font-size:14px;}
+
+  /* prerrequisitos */
+  .todo{background:var(--ink-raised);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:14px;}
+  .todo .tk{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:12px;}
+  .todo ol,.todo ul{margin-left:19px;font-size:14px;color:var(--text-dim);}
+  .todo ol li,.todo ul li{margin-bottom:9px;}
+  .todo ol li:last-child,.todo ul li:last-child{margin-bottom:0;}
+  .todo b{color:var(--text);font-weight:500;}
+  .todo code{font-family:var(--mono);font-size:12.5px;color:var(--teal);background:var(--panel);padding:1px 5px;border-radius:3px;}
+
+  /* pasos */
+  .step{border-top:1px solid var(--border-soft);padding:30px 0;scroll-margin-top:70px;}
+  .step:first-of-type{border-top:1px solid var(--border);}
+  .step-top{display:flex;align-items:flex-start;gap:15px;margin-bottom:12px;flex-wrap:wrap;}
+  .step-n{font-family:var(--mono);font-weight:700;font-size:13px;padding:7px 11px;border-radius:7px;background:rgba(204,122,66,.12);border:1px solid var(--copper-dim);color:var(--copper);flex-shrink:0;}
+  .step-titles h3{font-family:var(--display);font-weight:600;font-size:18px;}
+  .step-where{font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:.03em;margin-top:3px;text-transform:uppercase;}
+  .step-body{font-size:14px;color:var(--text-dim);max-width:70ch;margin-bottom:14px;}
+  .step-body b{color:var(--text);font-weight:500;}
+  .step-body code{font-family:var(--mono);font-size:12.5px;color:var(--teal);}
+
+  .code-panel{background:#0c0e13;border:1px solid var(--border);border-radius:8px;padding:18px 20px;overflow-x:auto;margin-bottom:14px;}
+  .code-panel .cpl{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;}
+  .code-panel pre{font-family:var(--mono);font-size:12.5px;line-height:1.7;color:var(--text-dim);}
+  .code-panel .kw{color:var(--teal);}
+  .code-panel .cmt{color:var(--text-faint);}
+  .code-panel .st{color:var(--copper);}
+
+  .check{border-left:3px solid var(--teal);background:rgba(67,194,174,.06);padding:14px 18px;border-radius:0 6px 6px 0;margin-bottom:14px;}
+  .check .ck{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;}
+  .check p{font-size:13.5px;color:var(--text-dim);}
+
+  .warn{border-left:3px solid var(--lost);background:rgba(168,82,63,.07);padding:14px 18px;border-radius:0 6px 6px 0;margin-bottom:14px;}
+  .warn .wk{font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--lost);margin-bottom:6px;}
+  .warn p{font-size:13.5px;color:var(--text-dim);}
+
+  /* detalles técnicos como tarjetas */
+  .detail-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-bottom:14px;}
+  .detail-card .dk{font-family:var(--mono);font-size:11px;letter-spacing:.04em;color:var(--copper);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+  .detail-card .dk::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--copper);}
+  .detail-card p{font-size:13.5px;color:var(--text-dim);max-width:68ch;}
+  .detail-card p b{color:var(--text);font-weight:500;}
+
+  /* tabla de errores */
+  .err-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .err-table th{font-family:var(--mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);text-align:left;padding:10px 13px;border-bottom:1px solid var(--border);background:var(--panel);}
+  .err-table td{padding:11px 13px;border-bottom:1px solid var(--border-soft);color:var(--text-dim);vertical-align:top;}
+  .err-table tr:last-child td{border-bottom:none;}
+  .err-table td.sintoma{color:var(--lost);font-weight:500;}
+
+  /* checklist final */
+  .final-check{background:var(--ink-raised);border:1px solid var(--teal-dim);border-radius:10px;padding:26px 28px;margin-top:50px;}
+  .final-check .fk{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--teal);margin-bottom:16px;}
+  .final-check ul{list-style:none;}
+  .final-check li{display:flex;gap:10px;font-size:14px;color:var(--text-dim);margin-bottom:11px;align-items:flex-start;}
+  .final-check li:last-child{margin-bottom:0;}
+  .final-check li::before{content:"☐";color:var(--teal);flex-shrink:0;font-size:15px;line-height:1.5;}
+  .final-check li b{color:var(--text);font-weight:500;}
+
+  footer{border-top:1px solid var(--border-soft);padding:32px 0 56px;margin-top:50px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;font-family:var(--mono);font-size:11.5px;color:var(--text-faint);}
+
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  @media print{
+    *{-webkit-print-color-adjust:exact !important;print-color-adjust:exact !important;color-adjust:exact !important;}
+    body,html{background:var(--ink) !important;}
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <span class="top-bar-brand">WEBHOOK · META FOR DEVELOPERS</span>
+    <div class="top-bar-links">
+      <a href="guia-fases-1-2.html">guía fases 1-2</a>
+      <a href="hoja-de-ruta-construccion.html">hoja-de-ruta</a>
+    </div>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section class="hero">
+    <div class="eyebrow">Paso 1.5 de la guía — detalle ejecutable</div>
+    <h1>Registrar la URL y crear el <span>Webhook</span> en Meta</h1>
+    <p class="hero-sub">
+      Cómo conectar tu Edge Function de ingesta con Meta for Developers para que los mensajes de
+      WhatsApp empiecen a llegar. Es trabajo de dos lados: tu backend tiene que estar listo antes
+      de entrar a Meta.
+    </p>
+    <div class="hero-meta">
+      <span><b>Dónde:</b> developers.facebook.com</span>
+      <span><b>Quién lo ejecuta:</b> tú, con tu cuenta de Meta Business</span>
+      <span><b>Tiempo:</b> 10–15 minutos si el backend ya está desplegado</span>
+    </div>
+  </section>
+
+  <!-- ===== PRERREQUISITOS ===== -->
+  <div class="section-head" style="padding-top:20px;">
+    <h2>Antes de entrar a Meta</h2>
+    <p>Si falta cualquiera de estos cuatro puntos, la verificación del webhook va a fallar apenas la intentes.</p>
+  </div>
+
+  <div class="todo">
+    <div class="tk">Prerrequisitos</div>
+    <ol>
+      <li><b>App de tipo Business creada</b> en Meta for Developers, con el producto WhatsApp agregado.</li>
+      <li><b>La Edge Function de ingesta ya desplegada</b>, con una URL pública HTTPS (ej. <code>https://tuproyecto.supabase.co/functions/v1/ingesta-whatsapp</code>). No sirve una URL local.</li>
+      <li><b>Un Verify Token definido por ti</b> — cualquier cadena de texto que inventes, guardada como variable de entorno en la función (ej. <code>WA_VERIFY_TOKEN</code>). Meta te lo va a pedir en el formulario y debe coincidir exacto con lo que tu función espera.</li>
+      <li><b>El número de teléfono ya registrado</b> en la Cloud API (el paso de vinculación que vimos antes de esto).</li>
+    </ol>
+  </div>
+
+  <!-- ===== PASO A PASO ===== -->
+  <div class="section-head">
+    <h2>Paso a paso en Meta for Developers</h2>
+  </div>
+
+  <div class="step" id="paso-1">
+    <div class="step-top">
+      <span class="step-n">1</span>
+      <div class="step-titles">
+        <h3>Entrar a la app</h3>
+        <div class="step-where">developers.facebook.com → Mis apps</div>
+      </div>
+    </div>
+    <div class="step-body">Inicia sesión con la cuenta de Meta Business vinculada al número, y selecciona la app que creaste al momento de dar de alta WhatsApp.</div>
+  </div>
+
+  <div class="step" id="paso-2">
+    <div class="step-top">
+      <span class="step-n">2</span>
+      <div class="step-titles">
+        <h3>Ir a WhatsApp → Configuración</h3>
+        <div class="step-where">Menú lateral de la app</div>
+      </div>
+    </div>
+    <div class="step-body">En el menú lateral, entra al producto <b>WhatsApp</b> y luego a la pestaña <b>Configuration</b> (Configuración). Ahí vive la sección de Webhooks — no está en la configuración general de la app, es específica del producto.</div>
+  </div>
+
+  <div class="step" id="paso-3">
+    <div class="step-top">
+      <span class="step-n">3</span>
+      <div class="step-titles">
+        <h3>Editar el Webhook</h3>
+        <div class="step-where">Sección "Webhook" → botón Edit</div>
+      </div>
+    </div>
+    <div class="step-body">Vas a ver dos campos vacíos: <b>Callback URL</b> y <b>Verify Token</b>. Es la primera vez que se configuran si el número es nuevo.</div>
+  </div>
+
+  <div class="step" id="paso-4">
+    <div class="step-top">
+      <span class="step-n">4</span>
+      <div class="step-titles">
+        <h3>Pegar la Callback URL y el Verify Token</h3>
+        <div class="step-where">Los dos campos del formulario</div>
+      </div>
+    </div>
+    <div class="step-body">La <b>Callback URL</b> es la URL pública de tu Edge Function. El <b>Verify Token</b> es la cadena que inventaste en el prerrequisito 3 — debe ser idéntica, carácter por carácter, a la que tu función compara internamente.</div>
+    <div class="warn">
+      <div class="wk">El error más común aquí</div>
+      <p>Un espacio de más al copiar el token, o usar un token distinto al que quedó en la variable de entorno de la función. Meta compara el valor exacto — no hay margen de error tipográfico.</p>
+    </div>
+  </div>
+
+  <div class="step" id="paso-5">
+    <div class="step-top">
+      <span class="step-n">5</span>
+      <div class="step-titles">
+        <h3>Verificar y guardar</h3>
+        <div class="step-where">Botón "Verify and Save"</div>
+      </div>
+    </div>
+    <div class="step-body">Al hacer clic, Meta le manda a tu función una petición <code>GET</code> con tres parámetros, para confirmar que el servidor es real y que el token coincide.</div>
+    <div class="code-panel">
+      <div class="cpl">Lo que Meta envía, y lo que tu función debe responder</div>
+      <pre><span class="cmt">// Meta envía (GET):</span>
+?hub.mode=<span class="st">subscribe</span>
+&hub.verify_token=<span class="st">tu_token_inventado</span>
+&hub.challenge=<span class="st">1158201444</span>
+
+<span class="cmt">// Tu función debe responder, si el token coincide:</span>
+<span class="kw">return new</span> Response(<span class="st">"1158201444"</span>, { status: <span class="st">200</span> });
+<span class="cmt">// texto plano, exactamente el valor de hub.challenge — nada más</span></pre>
+    </div>
+    <div class="check">
+      <div class="ck">Si todo salió bien</div>
+      <p>El campo se pone en verde con la marca de verificado. Si falla, revisa primero que la función esté realmente desplegada (no en borrador) y que responda ese GET correctamente antes de reintentar.</p>
+    </div>
+  </div>
+
+  <div class="step" id="paso-6">
+    <div class="step-top">
+      <span class="step-n">6</span>
+      <div class="step-titles">
+        <h3>Suscribirse a los campos del webhook</h3>
+        <div class="step-where">Sección "Webhook fields"</div>
+      </div>
+    </div>
+    <div class="step-body">Verificar la URL no basta — hay que decirle a Meta <b>qué tipo de eventos</b> mandar a esa URL. Aparece una lista de campos; el mínimo indispensable es <code>messages</code>.</div>
+    <div class="todo">
+      <div class="tk">Campos relevantes para este proyecto</div>
+      <ul>
+        <li><code>messages</code> — obligatorio. Sin esto, ningún mensaje entrante llega, aunque la URL esté verificada.</li>
+        <li><code>message_template_status_update</code> — útil para saber cuándo Meta aprueba o rechaza una plantilla, sin tener que revisar manualmente.</li>
+        <li><code>account_update</code> — avisa cambios en el estado de la cuenta (por ejemplo, restricciones).</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="step" id="paso-7">
+    <div class="step-top">
+      <span class="step-n">7</span>
+      <div class="step-titles">
+        <h3>Confirmar la suscripción del número (WABA)</h3>
+        <div class="step-where">Verificación adicional, fácil de saltarse</div>
+      </div>
+    </div>
+    <div class="step-body">El webhook vive a nivel de la <b>app</b>, pero el número de teléfono tiene que estar suscrito a esa app para que sus mensajes efectivamente disparen el webhook. En cuentas nuevas suele quedar automático, pero si migraste un número o usaste un flujo distinto, conviene confirmarlo explícitamente.</div>
+  </div>
+
+  <!-- ===== DETALLES TÉCNICOS ===== -->
+  <div class="section-head">
+    <h2>Qué más tener en cuenta</h2>
+    <p>Cosas que no aparecen en el formulario de Meta, pero que determinan si el webhook sigue funcionando bien con el tiempo.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Responder rápido, siempre</div>
+    <p>Tu función debe devolver <b>200 OK en menos de 5 segundos</b>. Si procesas todo (guardar en base, correr el Router, generar respuesta) dentro del mismo webhook, corres el riesgo de que Meta declare timeout. La forma correcta: guardar el mensaje crudo de inmediato, responder <code style="font-family:var(--mono);color:var(--teal)">200</code>, y procesar el resto de forma asíncrona.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Verificar la firma de cada petición</div>
+    <p>Cualquiera que descubra tu URL podría mandarle payloads falsos si no validas su origen. Meta firma cada petición con un header <code style="font-family:var(--mono);color:var(--teal)">X-Hub-Signature-256</code>, calculado con tu <b>App Secret</b>. Tu función debe recalcular esa firma y compararla antes de confiar en el contenido.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Idempotencia — Meta reenvía si no confirmas a tiempo</div>
+    <p>Si tu función tarda o falla, Meta reintenta el mismo mensaje más de una vez. El índice único sobre <code style="font-family:var(--mono);color:var(--teal)">messages.externo_id</code> que ya está en el modelo de datos es lo que evita que el mismo mensaje se guarde duplicado.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Un webhook, varios números (multi-tenant)</div>
+    <p>Meta permite un solo webhook por app. Si varios tenants-cliente comparten la misma app de Meta, todos sus mensajes llegan al mismo endpoint — la función tiene que leer el <code style="font-family:var(--mono);color:var(--teal)">phone_number_id</code> que viene en cada payload para saber a qué <code style="font-family:var(--mono);color:var(--teal)">tenant_id</code> pertenece.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Usa la herramienta de prueba antes de escribir código real</div>
+    <p>En la misma sección de Webhooks, Meta tiene un botón para <b>enviar un payload de prueba</b> a tu URL sin necesidad de un mensaje real de WhatsApp. Sirve para probar el parseo de tu función antes de depender de que alguien te escriba de verdad.</p>
+  </div>
+
+  <div class="detail-card">
+    <div class="dk">Dónde ver los fallos</div>
+    <p>Si Meta no logra entregar un evento, queda registrado en la misma sección de configuración del webhook, con el código de error. Revisarlo ahí es más rápido que adivinar desde los logs de Supabase.</p>
+  </div>
+
+  <!-- ===== ERRORES COMUNES ===== -->
+  <div class="section-head">
+    <h2>Errores comunes</h2>
+  </div>
+
+  <table class="err-table">
+    <thead><tr><th>Síntoma</th><th>Causa probable</th><th>Solución</th></tr></thead>
+    <tbody>
+      <tr>
+        <td class="sintoma">"The URL couldn't be validated"</td>
+        <td>La función no está desplegada, responde con error, o el Verify Token no coincide exacto.</td>
+        <td>Probar la URL directo con curl simulando el GET de Meta antes de reintentar desde el panel.</td>
+      </tr>
+      <tr>
+        <td class="sintoma">Webhook verificado, pero no llegan mensajes</td>
+        <td>No se completó el Paso 6 (suscripción al campo <code style="font-family:var(--mono)">messages</code>), o el número no está vinculado a esta WABA.</td>
+        <td>Revisar "Webhook fields" y confirmar que <code style="font-family:var(--mono)">messages</code> tiene el toggle activado.</td>
+      </tr>
+      <tr>
+        <td class="sintoma">Meta desactivó el webhook solo</td>
+        <td>Demasiados fallos o timeouts consecutivos al entregar eventos.</td>
+        <td>Revisar el log de errores en la sección de Webhooks y confirmar que la función responde en menos de 5 segundos.</td>
+      </tr>
+      <tr>
+        <td class="sintoma">Mensajes duplicados en la base</td>
+        <td>Falta el índice único sobre <code style="font-family:var(--mono)">externo_id</code>, o Meta reintentó por timeout.</td>
+        <td>Confirmar el índice de idempotencia y revisar el tiempo de respuesta de la función.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ===== CHECKLIST FINAL ===== -->
+  <div class="final-check">
+    <div class="fk">Checklist final — el webhook está listo cuando...</div>
+    <ul>
+      <li>El campo de Callback URL aparece <b>verificado</b> en verde.</li>
+      <li>El campo <code style="font-family:var(--mono)">messages</code> está <b>suscrito</b> en Webhook fields.</li>
+      <li>Un mensaje de prueba enviado desde un celular real <b>aparece en la tabla <code style="font-family:var(--mono)">messages</code></b> de Supabase.</li>
+      <li>Un segundo mensaje del mismo número <b>no crea un contacto duplicado</b>.</li>
+      <li>La función responde en <b>menos de 5 segundos</b>, confirmado revisando los logs.</li>
+    </ul>
+  </div>
+
+</main>
+
+<footer class="wrap">
+  <span>Configurar el Webhook · Meta for Developers · CRM Ventas + Agentes IA</span>
+  <span>23 ago 2026</span>
+</footer>
+
+</body>
+</html>
