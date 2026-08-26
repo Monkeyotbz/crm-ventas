@@ -5,22 +5,30 @@ reconstruyen el esquema desde cero, en orden de timestamp.
 
 ## La regla que no se rompe
 
-> **Nunca editar una migracion ya aplicada.**
+> **Las migraciones aplicadas son inmutables en su DDL/DML.** Los comentarios o docstrings dentro
+> de un archivo de migracion pueden corregirse, siempre en un **commit aislado** que declare
+> explicitamente que no hay cambios funcionales.
 
-Si una migracion tiene un error, se corrige con **una migracion nueva encima** — nunca tocando la
-vieja. El motivo es concreto: la base de produccion ya ejecuto ese archivo tal como estaba. Si se
-lo edita, el historial deja de reconstruir la base correctamente y las migraciones dejan de servir
-para lo unico que sirven.
+Si una migracion tiene un error de logica, se corrige con **una migracion nueva encima** — nunca
+tocando la vieja. El motivo es concreto: la base de produccion ya ejecuto ese archivo tal como
+estaba. Si se edita el SQL, el historial deja de reconstruir la base correctamente y las
+migraciones dejan de servir para lo unico que sirven.
 
-Esto aplica **tambien a los comentarios**. Es tentador arreglar un comentario desactualizado, pero
-en cuanto se acepta "editar un poquito" la regla deja de ser una regla.
+### Por que los comentarios sí son una excepcion legitima
 
-### Caso concreto que ya existe acá
+Un comentario no se ejecuta. Corregir uno no cambia el esquema que reconstruye el archivo, asi que
+no toca lo que la regla protege. Dejar prosa engañosa dentro de una migracion tiene un costo real
+—alguien la lee y actua mal— sin ningun beneficio de integridad a cambio.
 
-`20260825115320_setup_multitenant_completo.sql` arranca con un comentario que dice *"Ejecutar en
-el SQL Editor de un proyecto Supabase NUEVO"*. Eso era cierto cuando el archivo se llamaba
-`setup.sql` y no habia base real. **Hoy es engañoso y aun asi no se corrige**, justamente por la
-regla de arriba. Este README es la aclaracion.
+Las dos condiciones que hacen que esto no erosione la regla:
+
+1. **Commit aislado.** Nada de mezclar el arreglo del comentario con otro cambio. Si el commit
+   toca una sola cosa, es auditable de un vistazo.
+2. **Declararlo en el mensaje.** El commit dice explicitamente "sin cambios funcionales". Quien
+   revise el historial no tiene que abrir el diff para confiar.
+
+Si alguna vez hay que elegir entre las dos, gana la regla: ante la duda de si un cambio es
+"solo un comentario", se trata como DDL y va en una migracion nueva.
 
 ## Por que migraciones y no un `setup.sql` re-ejecutable
 

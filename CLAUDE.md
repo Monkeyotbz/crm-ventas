@@ -36,11 +36,11 @@ primera migración.
 > migración nueva encima. En cuanto alguien edita una vieja, el historial deja de reconstruir la
 > base correctamente y el sistema pierde el sentido.
 
-Esto aplica **también a los comentarios**. Es tentador arreglar uno desactualizado, pero en cuanto
-se acepta "editar un poquito" la regla deja de ser una regla. Hay un caso concreto ya en el repo:
-`20260825115320_setup_multitenant_completo.sql` arranca diciendo *"Ejecutar en el SQL Editor de un
-proyecto Supabase NUEVO"* — hoy es engañoso y **aun así no se corrige**; la aclaración está en
-[`supabase/migrations/README.md`](supabase/migrations/README.md).
+**Única excepción, acotada:** los **comentarios** dentro de una migración sí pueden corregirse —
+no se ejecutan, así que no cambian el esquema que el archivo reconstruye. Con dos condiciones que
+no son negociables: va en un **commit aislado**, y el mensaje **declara que no hay cambios
+funcionales**. Ante la duda de si algo es "solo un comentario", se trata como DDL y va en una
+migración nueva. Detalle en [`supabase/migrations/README.md`](supabase/migrations/README.md).
 
 El motivo de fondo: hay bases de producción con datos reales de clientes. No se puede borrar la
 base y volver a correr un script para agregar una columna — hace falta poder aplicar solo lo nuevo,
