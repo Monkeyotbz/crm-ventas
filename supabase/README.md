@@ -33,6 +33,7 @@ Migraciones aplicadas, en orden:
 | 6 | `doc48_p3_atribucion_agentes_saas` | `contact_touchpoints`, `agent_executions`, `router_decisions`, `pipeline_transfers`, `payment_links`, métricas SaaS |
 | 7 | `doc48_p4_rls_tablas_nuevas` | RLS en las 17 tablas nuevas |
 | 8 | `doc48_p5_auditoria_soporte_tablas_nuevas` | Auditoría de soporte extendida a las tablas nuevas con datos de tenant |
+| 9 | `fk_compuestas_pendientes_atribucion` | Composición de 5 FK que habían quedado simples (`agent_executions`, `pipeline_transfers`, `router_decisions` → `conversations`; `payments` → `quotes`; `audit_log` → `support_sessions`), detectado por `scripts/validar-multitenant.sql` |
 
 Estado verificado: **36 tablas, todas con RLS activo**, 0 advertencias del linter de seguridad de Supabase. Datos sembrados: 1 tenant (Hellominus), 1 pipeline, 7 etapas, 5 sectores, 1 usuario `owner`.
 
