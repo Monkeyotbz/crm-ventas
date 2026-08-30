@@ -38,7 +38,7 @@ a decisión del usuario, y el usuario todavía no se pronunció sobre ella.
 ## Candidatos
 
 ### [1] Bloqueo de exposición de la service_role key
-Estado: APLAZADO
+Estado: ACEPTADO
 Procedencia: `supabase/README.md` (§ Credenciales) y `docs/guia-fases-1-2.md`
   (1.1, marcado "crítico")
 Mecanismo: guardrail — `.claude/settings.json` (deny)
@@ -46,31 +46,51 @@ Composición: no aplica
 Condición de activación: ninguna técnica — el agente `seleccionar-forma` lo
   identificó como candidato a ACEPTAR de inmediato (cumple la excepción de
   guardrails: prevención, no automatización, no espera evidencia de dolor).
-  Sigue APLAZADO porque el usuario todavía no dio el veredicto explícito.
+  Implementado el 28 ago 2026: deny sobre escritura/push de service_role keys,
+  ANON keys de Postgres, y passwords de bases de datos en texto plano.
 
 ### [2] Validador de aislamiento multi-tenant en el esquema
-Estado: APLAZADO
+Estado: ACEPTADO
 Procedencia: `docs/guia-fases-1-2.md` (Paso 2, "el error que hunde proyectos
   multi-tenant")
-Mecanismo: script (`scripts/`)
+Mecanismo: script (`scripts/validar-multitenant.sql`)
 Composición: no aplica
-Condición de activación: antes de la primera corrida del esquema contra un
-  proyecto Supabase real. Ver pregunta abierta 1 más abajo — no está resuelto
-  si esto se trata con la urgencia de guardrail o se espera al proyecto real.
+Condición de activación: ya cumplida — proyecto Supabase real existe (25 ago 2026).
+  Implementado el 29 ago 2026: SQL puro que verifica las tres capas (columna
+  `tenant_id`, FK compuestas, RLS con policy por tenant) contra la base real. Se
+  corre por el MCP de Supabase o el SQL Editor — no hay wrapper de shell porque
+  esta máquina no tiene `psql`. Ver `scripts/README.md`.
+  **Primera corrida (29 ago 2026): encontró 5 FK simples donde deberían ser
+  compuestas** (`agent_executions`, `pipeline_transfers`, `router_decisions` →
+  `conversations`; `payments` → `quotes`; `audit_log` → `support_sessions`).
+  **Corregido el mismo día** con la migración
+  `20260829205609_fk_compuestas_pendientes_atribucion` — agrega
+  `unique (tenant_id, id)` a `conversations` y `support_sessions` (les faltaba;
+  `quotes` ya lo tenía), pone `payments.tenant_id` en `not null` (hallazgo
+  adicional: era nullable, lo que habría dejado sin proteger cualquier fila con
+  `tenant_id` nulo bajo `MATCH SIMPLE`; la tabla estaba vacía, sin riesgo de
+  romper filas existentes), y recompone las 5 FK. Re-corrida del validador tras
+  aplicar: 0 hallazgos de Capa 2. `get_advisors(type: "security")`: 0
+  hallazgos nuevos (el único WARN pendiente, protección de passwords filtrados,
+  es preexistente y no relacionado).
 
 ### [3] Normalización de mensajes por canal + deduplicación de contacto
-Estado: APLAZADO
+Estado: ACEPTADO
 Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 04),
   `docs/guia-fases-1-2.md` (1.5)
-Mecanismo: script (`scripts/`, futura Edge Function sin llamada a Claude)
+Mecanismo: Edge Function de Supabase sin llamada a Claude
+  (`supabase/functions/ingesta-whatsapp/`)
 Composición: no aplica
-Condición de activación: proyecto Supabase real creado + arranque del
-  Sprint 1.5. **Actualización 25 ago 2026: la primera mitad se cumplió** — el
-  proyecto Supabase real existe, y su esquema ya tiene todo lo que la ingesta
-  necesita escribir (`whatsapp_numbers` para el mapeo número→tenant,
-  `messages.externo_id` para idempotencia, `conversations.ventana_abierta_hasta`,
-  `contacts.opt_in_*`, `webhook_errors`). Queda pendiente solo el arranque del
-  Sprint 1.5. Sigue APLAZADO: el usuario no dio veredicto sobre este candidato.
+Condición de activación: cumplida. La primera mitad ya lo estaba desde el 25 ago
+  2026 (proyecto Supabase real + esquema con todo lo que la ingesta escribe); el
+  usuario dio el veredicto de ACEPTADO el 29 ago 2026 y se escribió la función.
+  **Escrita, no desplegada:** el código está en el repo con verificación de firma
+  `X-Hub-Signature-256`, resolución de tenant por `phone_number_id`, dedup de
+  contacto por `contact_channels`, idempotencia por `messages.externo_id` y
+  ventana de 24 h. Falta —y depende de Meta, no de nosotros— sembrar
+  `whatsapp_numbers` con el Phone Number ID / WABA ID reales, setear los secrets
+  `WA_VERIFY_TOKEN` y `META_APP_SECRET`, desplegar, y registrar la Callback URL.
+  Ver `supabase/functions/ingesta-whatsapp/README.md`.
 
 ### [4] Vista de ROI por campaña (atribución Meta Ads)
 Estado: APLAZADO
