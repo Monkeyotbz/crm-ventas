@@ -11,3 +11,6 @@ design/crm-ventas-dashboard-direcciones.html
 
 # Temporales del CLI de Supabase (npx supabase ...)
 supabase/.temp/
+
+# Overrides locales de Claude Code (nunca se commitean)
+.claude/settings.local.json

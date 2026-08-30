@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/.claude/hooks/check-credentials.mjs\"",
+            "statusMessage": "Buscando credenciales en el contenido..."
+          }
+        ]
+      }
+    ]
+  }
+}
