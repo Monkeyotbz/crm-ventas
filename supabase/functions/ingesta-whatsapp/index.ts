@@ -298,25 +298,46 @@ async function procesar(payload: Record<string, any>) {
       const phoneNumberId = valor.metadata?.phone_number_id;
       let tenantId: string | null = null;
 
+      // Primero lo que es común a todo el lote. Si esto falla, ningún ítem del cambio
+      // se puede procesar, así que acá el error SÍ es del lote entero.
+      let perfiles = new Map<string, string | null>();
       try {
         if (!phoneNumberId) throw new Error("el cambio no trae metadata.phone_number_id");
         tenantId = await resolverTenant(phoneNumberId);
 
         // `contacts` viene aparte de `messages` en el payload de Meta: trae el nombre
         // de perfil, indexado por wa_id.
-        const perfiles = new Map<string, string | null>(
+        perfiles = new Map<string, string | null>(
           (valor.contacts ?? []).map((c: any) => [c.wa_id, c.profile?.name ?? null]),
         );
-
-        for (const msg of valor.messages ?? []) {
-          await guardarEntrante(tenantId, msg, perfiles.get(msg.from) ?? null);
-        }
-        for (const estado of valor.statuses ?? []) {
-          await guardarEstado(estado);
-        }
       } catch (err) {
-        console.error("[ingesta-whatsapp]", err);
+        console.error("[ingesta-whatsapp] lote:", err);
         await registrarError(err, cambio, tenantId, cambio.field ?? "messages");
+        continue;
+      }
+      if (!tenantId) continue; // inalcanzable: el catch de arriba corta. Es para el type checker.
+
+      // De acá en adelante, cada ítem falla solo. Meta ya recibió el 200 en el handler,
+      // así que NO reintenta: un mensaje que se pierda acá se pierde para siempre. Por eso
+      // un ítem roto no puede llevarse puestos a los que vienen detrás, y por eso cada
+      // error se registra con SU propio payload y no con el lote entero — si no, el
+      // diagnóstico no dice cuál de los mensajes falló.
+      for (const msg of valor.messages ?? []) {
+        try {
+          await guardarEntrante(tenantId, msg, perfiles.get(msg.from) ?? null);
+        } catch (err) {
+          console.error("[ingesta-whatsapp] mensaje:", err);
+          await registrarError(err, msg, tenantId, "mensaje");
+        }
+      }
+
+      for (const estado of valor.statuses ?? []) {
+        try {
+          await guardarEstado(estado);
+        } catch (err) {
+          console.error("[ingesta-whatsapp] status:", err);
+          await registrarError(err, estado, tenantId, "status");
+        }
       }
     }
   }
