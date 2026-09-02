@@ -1,0 +1,610 @@
+<title>Hallazgos candyCRM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style id="hoja">
+  :root {
+    --fondo: #f6f7f9;
+    --panel: #ffffff;
+    --panel-2: #eef0f4;
+    --borde: #dfe3ea;
+    --tinta: #1a1e26;
+    --tinta-media: #545c6b;
+    --tinta-tenue: #858da0;
+    --acento: #3a4a7a;
+    --bloq: #b3242c;
+    --bloq-fondo: #fdeceb;
+    --imp: #9a5800;
+    --imp-fondo: #fdf3e2;
+    --men: #5a6373;
+    --men-fondo: #eef0f4;
+    --ok: #17773f;
+    --ok-fondo: #e6f4ec;
+    --mono-fondo: #eef0f4;
+    --mono-tinta: #3a4a7a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #13161c;
+      --panel: #1b1f27;
+      --panel-2: #232833;
+      --borde: #2f3540;
+      --tinta: #e9ecf2;
+      --tinta-media: #b0b7c4;
+      --tinta-tenue: #7d8595;
+      --acento: #93a6dd;
+      --bloq: #ff7a7a;
+      --bloq-fondo: #2e1a1c;
+      --imp: #e3a95e;
+      --imp-fondo: #2c2318;
+      --men: #98a1b2;
+      --men-fondo: #232833;
+      --ok: #5cd98a;
+      --ok-fondo: #16291f;
+      --mono-fondo: #232833;
+      --mono-tinta: #a9bbe8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #13161c;
+    --panel: #1b1f27;
+    --panel-2: #232833;
+    --borde: #2f3540;
+    --tinta: #e9ecf2;
+    --tinta-media: #b0b7c4;
+    --tinta-tenue: #7d8595;
+    --acento: #93a6dd;
+    --bloq: #ff7a7a;
+    --bloq-fondo: #2e1a1c;
+    --imp: #e3a95e;
+    --imp-fondo: #2c2318;
+    --men: #98a1b2;
+    --men-fondo: #232833;
+    --ok: #5cd98a;
+    --ok-fondo: #16291f;
+    --mono-fondo: #232833;
+    --mono-tinta: #a9bbe8;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--fondo);
+    color: var(--tinta);
+    font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .envoltura { max-width: 62rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+
+  header.cabecera { margin-bottom: 2rem; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .72rem; letter-spacing: .09em; text-transform: uppercase;
+    color: var(--tinta-tenue); margin-bottom: .5rem;
+  }
+  h1 {
+    font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(1.6rem, 3.4vw, 2.15rem); line-height: 1.15;
+    margin: 0 0 .6rem; text-wrap: balance;
+  }
+  .subtitulo { color: var(--tinta-media); max-width: 46rem; margin: 0; }
+
+  .resumen {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+    gap: .75rem; margin: 1.75rem 0 1.25rem;
+  }
+  .metrica {
+    background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 9px; padding: .8rem .9rem;
+  }
+  .metrica .n {
+    font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.7rem;
+    line-height: 1; font-variant-numeric: tabular-nums; display: block;
+  }
+  .metrica .et {
+    font-size: .78rem; color: var(--tinta-tenue); text-transform: uppercase;
+    letter-spacing: .05em; margin-top: .3rem; display: block;
+  }
+  .metrica.b .n { color: var(--bloq); }
+  .metrica.i .n { color: var(--imp); }
+  .metrica.m .n { color: var(--men); }
+  .metrica.k .n { color: var(--ok); }
+
+  .barra-progreso {
+    height: 7px; background: var(--panel-2); border-radius: 99px;
+    overflow: hidden; margin: .4rem 0 1.5rem; border: 1px solid var(--borde);
+  }
+  .barra-progreso > i {
+    display: block; height: 100%; background: var(--ok);
+    transition: width .35s ease;
+  }
+  @media (prefers-reduced-motion: reduce) { .barra-progreso > i { transition: none; } }
+
+  .filtros { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.5rem; }
+  .filtros button {
+    font: inherit; font-size: .85rem; cursor: pointer;
+    background: var(--panel); color: var(--tinta-media);
+    border: 1px solid var(--borde); border-radius: 99px; padding: .3rem .75rem;
+  }
+  .filtros button[aria-pressed="true"] {
+    background: var(--acento); border-color: var(--acento); color: #fff;
+  }
+  :root:not([data-theme="light"]) .filtros button[aria-pressed="true"],
+  :root[data-theme="dark"] .filtros button[aria-pressed="true"] { color: #13161c; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .filtros button[aria-pressed="true"] { color: #13161c; }
+  }
+  .filtros button:focus-visible, .h input:focus-visible {
+    outline: 2px solid var(--acento); outline-offset: 2px;
+  }
+
+  .aviso {
+    background: var(--bloq-fondo); border: 1px solid var(--bloq);
+    border-left-width: 3px; border-radius: 0 9px 9px 0;
+    padding: .9rem 1.1rem; margin-bottom: 1.75rem; font-size: .93rem;
+  }
+  .aviso strong { color: var(--bloq); }
+  .aviso code { font-size: .85em; }
+
+  .grupo-titulo {
+    font-family: 'Archivo', sans-serif; font-weight: 600; font-size: 1.02rem;
+    margin: 2rem 0 .75rem; display: flex; align-items: center; gap: .55rem;
+  }
+  .grupo-titulo .cuenta {
+    font-family: 'JetBrains Mono', monospace; font-size: .78rem;
+    font-weight: 400; color: var(--tinta-tenue);
+  }
+
+  .h {
+    background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 10px; padding: .95rem 1.1rem; margin-bottom: .6rem;
+    display: grid; grid-template-columns: auto 1fr; gap: .2rem .8rem;
+    align-items: start;
+  }
+  .h.bloqueante { border-left: 3px solid var(--bloq); }
+  .h.importante { border-left: 3px solid var(--imp); }
+  .h.menor      { border-left: 3px solid var(--men); }
+  .h.hecho { opacity: .58; }
+  .h.hecho .titulo { text-decoration: line-through; text-decoration-thickness: 1px; }
+
+  .h input[type="checkbox"] {
+    grid-row: 1 / span 3; width: 1.05rem; height: 1.05rem; margin-top: .28rem;
+    accent-color: var(--ok); cursor: pointer;
+  }
+  .h input[type="checkbox"]:disabled { cursor: not-allowed; }
+
+  .linea-1 { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem; }
+  .id {
+    font-family: 'JetBrains Mono', monospace; font-size: .78rem; font-weight: 500;
+    color: var(--tinta-tenue);
+  }
+  .chip {
+    font-family: 'JetBrains Mono', monospace; font-size: .68rem;
+    text-transform: uppercase; letter-spacing: .05em;
+    padding: .1rem .42rem; border-radius: 4px;
+  }
+  .chip.bloqueante { background: var(--bloq-fondo); color: var(--bloq); }
+  .chip.importante { background: var(--imp-fondo); color: var(--imp); }
+  .chip.menor      { background: var(--men-fondo); color: var(--men); }
+  .chip.verificado { background: var(--ok-fondo); color: var(--ok); }
+  .titulo { font-weight: 600; }
+
+  .ubic {
+    font-family: 'JetBrains Mono', monospace; font-size: .79rem;
+    background: var(--mono-fondo); color: var(--mono-tinta);
+    padding: .08em .4em; border-radius: 4px;
+    display: inline-block; margin: .35rem 0 .1rem;
+    overflow-wrap: anywhere;
+  }
+  .porque { color: var(--tinta-media); font-size: .93rem; margin: .35rem 0 0; }
+  .arreglo {
+    font-size: .89rem; color: var(--tinta-media); margin: .5rem 0 0;
+    padding-top: .5rem; border-top: 1px dashed var(--borde);
+  }
+  .arreglo b { color: var(--tinta); font-weight: 600; }
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: .85em;
+    background: var(--mono-fondo); color: var(--mono-tinta);
+    padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere;
+  }
+
+  .bien {
+    background: var(--ok-fondo); border: 1px solid var(--ok);
+    border-left-width: 3px; border-radius: 0 9px 9px 0;
+    padding: 1rem 1.15rem; margin-top: 2.5rem; font-size: .93rem;
+  }
+  .bien h2 {
+    font-family: 'Archivo', sans-serif; font-size: 1rem; margin: 0 0 .5rem;
+    color: var(--ok);
+  }
+  .bien ul { margin: 0; padding-left: 1.15rem; color: var(--tinta-media); }
+  .bien li { margin-bottom: .3rem; }
+
+  footer.pie {
+    margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--borde);
+    font-size: .82rem; color: var(--tinta-tenue);
+  }
+  #estado-guardado {
+    font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+    color: var(--tinta-tenue); margin-left: .5rem;
+  }
+</style>
+
+<div class="envoltura">
+  <div id="app"></div>
+</div>
+
+<script type="application/json" id="estado">
+{
+  "hechos": [],
+  "hallazgos": [
+    {
+      "id": "H1", "sev": "bloqueante", "verificado": true,
+      "titulo": "El ON DELETE SET NULL rompe el borrado de conversaciones (y de contactos)",
+      "ubic": "supabase/migrations/20260829205609_fk_compuestas_pendientes_atribucion.sql:25-26, 32-33, 39-40",
+      "porque": "Las tres FK compuestas usan on delete set null sin lista de columnas, así que el SET NULL alcanza también a tenant_id, que es NOT NULL. Probado contra la base real: DELETE FROM conversations falla con 23502 (null value in column tenant_id of relation agent_executions). Como conversations cuelga en cascada de contacts, borrar un contacto también rompe. Está en producción hoy.",
+      "arreglo": "Migración nueva que recrea las tres FK con on delete set null (conversation_id) — la forma con lista de columnas, que ya se usaba correctamente en doc48_p3 línea 81."
+    },
+    {
+      "id": "H2", "sev": "bloqueante",
+      "titulo": "Un mensaje que falla mata todos los siguientes del mismo lote",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:301-320",
+      "porque": "El try envuelve el for entero. Como ya se respondió 200, Meta no reintenta: esos mensajes se pierden para siempre y solo queda una fila en webhook_errors con el lote completo. El README de la función afirma lo contrario ('sin tumbar el resto del lote').",
+      "arreglo": "Mover el try/catch adentro de cada iteración, registrando el ítem puntual (msg/estado) como payload en vez del cambio entero."
+    },
+    {
+      "id": "H3", "sev": "bloqueante",
+      "titulo": "Carrera en contactoDe: deja contactos duplicados y huérfanos",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:131-171",
+      "porque": "Es check-then-insert sin transacción. Dos webhooks concurrentes del mismo número leen 'no existe', ambos insertan en contacts, y el segundo revienta con 23505 en contact_channels. Queda un contacto sin canal, imposible de deduplicar después porque la identidad la define contact_channels. WhatsApp entrega webhooks en paralelo de forma rutinaria.",
+      "arreglo": "Mover a una RPC en private que haga insert ... on conflict (tenant_id, tipo, valor) do update ... returning contact_id en una sola sentencia atómica."
+    },
+    {
+      "id": "H4", "sev": "bloqueante",
+      "titulo": "Carrera en conversacionDe: rompe la idempotencia entera",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:174-204",
+      "porque": "No existe un unique (tenant_id, contact_id, canal) where estado='abierta'. Con dos conversaciones abiertas simultáneas, el mismo wamid reintentado por Meta contra la otra conversación NO da 23505 y se guarda duplicado — la red de seguridad desaparece justo en el escenario para el que fue puesta.",
+      "arreglo": "Migración: create unique index ... on conversations (tenant_id, contact_id, canal) where estado = 'abierta'. Y capturar 23505 en el insert, reintentando el SELECT."
+    },
+    {
+      "id": "H5", "sev": "bloqueante",
+      "titulo": "El validador multi-tenant tiene un falso negativo: hay un cruce abierto hoy",
+      "ubic": "scripts/validar-multitenant.sql:55-83",
+      "porque": "La Capa 2 solo mira FK donde hijo Y padre tienen tenant_id, así que no ve messages.template_id → message_templates (FK simple). Un tenant puede apuntar a la plantilla de otro y saltear la validación de ventana, porque validar_plantilla_para_iniciar solo chequea template_id is not null, nunca de quién es. Un validador que da 0 hallazgos sobre una base con un hueco es peor que no tenerlo.",
+      "arreglo": "Sumar un criterio (b): FK simple desde un hijo con tenant_id hacia cualquier tabla de negocio, incluidas las exentas por herencia. Y decidir si messages lleva tenant_id propio — es decisión de esquema, no un parche."
+    },
+    {
+      "id": "H6", "sev": "bloqueante",
+      "titulo": "El validador evalúa RLS por tabla, no por policy",
+      "ubic": "scripts/validar-multitenant.sql:101-113",
+      "porque": "Concatena todas las policies de la tabla y busca 'tenant' en el conjunto. Una tabla con tres policies correctas y una cuarta using (true) pasa limpia — que es literalmente el caso 'RLS activo pero no filtra nada'. Tampoco mira pg_policies.roles, así que una policy otorgada a anon es indistinguible de una buena.",
+      "arreglo": "Iterar policy por policy: ERROR cuando qual/with_check sea true literal, y una capa nueva que dé ERROR si anon o public están en p.roles."
+    },
+    {
+      "id": "H7", "sev": "importante",
+      "titulo": "guardarEstado escribe sin acotar al tenant, con service_role",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:263-272",
+      "porque": "Es la única escritura que no está acotada al tenant resuelto, y RLS no la frena. Hoy no cruza porque el wamid de Meta es único global, pero la garantía es de un tercero, no del esquema. Además el filtro por externo_id solo hace seq scan sobre la tabla más grande del sistema.",
+      "arreglo": "Pasar tenantId y resolver el mensaje por join contra conversations del tenant. Migración: índice sobre messages (externo_id) where externo_id is not null."
+    },
+    {
+      "id": "H8", "sev": "importante",
+      "titulo": "procesar no tiene try/catch de nivel superior: el fallo más silencioso posible",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:294-323, 369",
+      "porque": "Si payload.entry viene con forma no iterable, el for...of tira TypeError fuera de todo catch, dentro de un waitUntil cuya promesa nadie observa: unhandled rejection, cero rastro en webhook_errors, 200 ya devuelto. Además registrarError ignora el error de su propio insert.",
+      "arreglo": "try/catch de nivel superior que registre 'procesar_fallo_general', .catch() sobre el waitUntil, Array.isArray antes de cada for, y destructurar el error de registrarError."
+    },
+    {
+      "id": "H9", "sev": "importante",
+      "titulo": "Cero validación en runtime del payload de terceros",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:66, 207-212, 263, 294",
+      "porque": "Todo es Record<string, any> y va directo a inserts con service_role. msg.from ausente → violación de NOT NULL (dispara H2). msg.id ausente → externo_id null → el índice parcial no aplica → duplicados en cada reintento, en silencio. Viola el estándar del proyecto sobre validar toda entrada en el borde.",
+      "arreglo": "Tipos explícitos (MensajeWA, StatusWA, CambioWA) y una función parsearCambio que valide en runtime antes de tocar la base; saltear con registro el mensaje sin id en vez de insertarlo."
+    },
+    {
+      "id": "H10", "sev": "importante",
+      "titulo": "Un timestamp malformado lanza RangeError y tumba el lote",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:238-240, 268",
+      "porque": "new Date(Number(msg.timestamp) * 1000) con un valor no numérico da Invalid Date, y .toISOString() sobre eso lanza. Input de tercero sin guarda, combinado con H2 mata el resto del lote.",
+      "arreglo": "Helper fechaMeta(ts) que valide Number.isFinite y caiga a new Date() si no."
+    },
+    {
+      "id": "H11", "sev": "importante",
+      "titulo": "Si el isolate se recicla, el lote desaparece sin traza ni reintento",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:369",
+      "porque": "El 200 ya se emitió, así que Meta no reintenta. Y la función hace entre 4 y 6 round-trips secuenciales por mensaje (N+1 completo), lo que hace probable —no teórico— superar el wall-clock con lotes grandes.",
+      "arreglo": "Insertar el payload crudo firmado en una tabla de staging antes de responder 200, y que procesar marque procesado_at. Un cron reprocesa lo que quedó sin marcar."
+    },
+    {
+      "id": "H12", "sev": "importante",
+      "titulo": "El validador no mira la nulabilidad de tenant_id",
+      "ubic": "scripts/validar-multitenant.sql:38-50, 55-83",
+      "porque": "Con MATCH SIMPLE, una FK compuesta cuyo tenant_id sea nullable no se evalúa cuando ese campo es null: la protección es decorativa. Es exactamente el caso de payments.tenant_id, que se descubrió a mano durante la migración y no por el validador. Se va a repetir con la próxima tabla que agregue tenant_id con alter table (nace nullable).",
+      "arreglo": "Capa 1b: ERROR para toda columna tenant_id nullable en tablas no exentas. Capa 2b: ERROR para FK compuesta con tenant_id nullable del lado hijo."
+    },
+    {
+      "id": "H13", "sev": "importante",
+      "titulo": "El guardrail de credenciales no intercepta Bash",
+      "ubic": ".claude/settings.json:5 + .claude/hooks/check-credentials.mjs:28",
+      "porque": "El matcher es solo Write|Edit y el script solo lee content/new_string. Queda afuera cualquier Bash con redirección (echo \"eyJ...\" > .env, cp, curl -o), que es la vía más natural para volcar una key. También los edits[] de MultiEdit y new_source de NotebookEdit. Y el catch vacío falla abierto ante un payload que no parsea.",
+      "arreglo": "Ampliar el matcher a Write|Edit|MultiEdit|NotebookEdit|Bash, juntar el texto de todas las fuentes (incluido tool_input.command), y fallar cerrado ante payload ilegible."
+    },
+    {
+      "id": "H14", "sev": "importante",
+      "titulo": "El guardrail no cubre ninguno de los secretos propios de este proyecto",
+      "ubic": ".claude/hooks/check-credentials.mjs:10-19",
+      "porque": "No detecta META_APP_SECRET, WA_VERIFY_TOKEN, tokens de Meta (EAA...), Stripe (sk_live_), GitHub (ghp_), OpenAI, AWS (AKIA) ni el PAT de Supabase (sbp_, da acceso a la Management API). Atrapar solo JWT y sk-ant- da sensación de cobertura sin tenerla.",
+      "arreglo": "Sumar patrones por formato (EAA, sk_live_, ghp_, github_pat_, AKIA, sbp_) y uno por asignación para los secretos sin forma reconocible: (META_APP_SECRET|WA_VERIFY_TOKEN|SERVICE_ROLE_KEY)\\s*[:=]\\s*valor."
+    },
+    {
+      "id": "H15", "sev": "importante",
+      "titulo": "El guardrail bloquea .env — el único destino que él mismo recomienda",
+      "ubic": ".claude/hooks/check-credentials.mjs:36-43",
+      "porque": "El mensaje de bloqueo dice 'poné el secreto en .env', pero el hook no mira file_path. Además usa {continue:false}, que corta la sesión entera en vez de denegar solo la herramienta: el agente no puede corregirse y reintentar.",
+      "arreglo": "Exceptuar .env / .env.local / *.local.json por file_path, y cambiar la salida al protocolo permissionDecision: deny de PreToolUse."
+    },
+    {
+      "id": "H16", "sev": "importante",
+      "titulo": "El --no-verify-jwt solo vive en prosa del README",
+      "ubic": "supabase/ (falta supabase/config.toml)",
+      "porque": "Cualquier supabase functions deploy sin ese flag reactiva la verificación de JWT, y Meta pasa a recibir 401 en todo POST — sin error visible del lado nuestro. Es exactamente el modo de falla silencioso que el README documenta tres veces.",
+      "arreglo": "Crear supabase/config.toml commiteado con [functions.ingesta-whatsapp] verify_jwt = false, y sacar el flag del comando."
+    },
+    {
+      "id": "H17", "sev": "menor",
+      "titulo": "Marca entregado=true en mensajes ENTRANTES",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:228",
+      "porque": "Esa columna existe porque Meta cobra al entregar — es semántica de salientes. Contamina la tasa de entrega y el costo.",
+      "arreglo": "Quitar entregado/entregado_at del insert de entrantes."
+    },
+    {
+      "id": "H18", "sev": "menor",
+      "titulo": "La ventana de 24h puede RETROCEDER con un mensaje fuera de orden",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:249-257",
+      "porque": "ultimo_mensaje_at y ventana_abierta_hasta se pisan incondicionalmente. Un reintento tardío hace que el bot pierda la posibilidad de responder libre cuando todavía podía.",
+      "arreglo": "Update no regresivo: greatest(coalesce(columna, $1), $1)."
+    },
+    {
+      "id": "H19", "sev": "menor",
+      "titulo": "El error al leer ventana_horas se descarta en silencio",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:242-248",
+      "porque": "Cae al default 24. Un tenant con ventana de 72h (CTWA) queda silenciosamente cortado a 24 si esa lectura falla.",
+      "arreglo": "Destructurar el error y lanzar, o al menos console.warn con el conversationId."
+    },
+    {
+      "id": "H20", "sev": "menor",
+      "titulo": "Se descartan los status 'failed' y todo el pricing",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:264-271",
+      "porque": "Un mensaje que Meta rechazó queda como si nada. Y pricing/conversation.origin —la única fuente de messages.costo_estimado y categoria— nunca se captura, así que metrics_snapshots.costo_mensajes no tiene de dónde alimentarse.",
+      "arreglo": "Rama para status='failed' (entregado=false + motivo), y persistir estado.pricing en categoria/costo_estimado/moneda_costo."
+    },
+    {
+      "id": "H21", "sev": "menor",
+      "titulo": "EdgeRuntime no está declarado: deno check falla",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:369",
+      "porque": "Compila en el deploy porque el bundler no chequea tipos, pero el archivo no pasa una verificación de tipos — así que no se puede meter en CI tal como está.",
+      "arreglo": "declare const EdgeRuntime: { waitUntil(p: Promise<unknown>): void }; y un deno.json para que deno check sea corrible."
+    },
+    {
+      "id": "H22", "sev": "menor",
+      "titulo": "importKey y ownerPorDefecto se rehacen innecesariamente",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:35-41, 112-124",
+      "porque": "La clave HMAC se importa en cada request, y team_members se consulta una vez por contacto y otra por conversación. Ambas son cacheables por invocación.",
+      "arreglo": "Promesa memoizada a nivel módulo para la clave, y un Map para el owner del tenant."
+    },
+    {
+      "id": "H23", "sev": "menor",
+      "titulo": "webhook_errors guarda PII de clientes del cliente, sin retención",
+      "ubic": "supabase/functions/ingesta-whatsapp/index.ts:281-287",
+      "porque": "Guarda el cambio completo: teléfono y texto del mensaje. Esa tabla es de plataforma (la lee Hellominus, no el tenant), así que es PII de terceros en una tabla de observabilidad interna, sin política de borrado.",
+      "arreglo": "Redactar el payload (solo id, type, timestamp + el error) y definir retención con un cron de borrado a los 90 días."
+    },
+    {
+      "id": "H24", "sev": "menor",
+      "titulo": "La migración de FK no es re-ejecutable y no crea los índices que la FK ahora necesita",
+      "ubic": "supabase/migrations/20260829205609_fk_compuestas_pendientes_atribucion.sql:11-12, 21-54",
+      "porque": "add/drop constraint sin guardas: si falla a mitad de camino, el reintento falla por otra razón. Y los índices existentes son sobre conversation_id solo, que ya no cubren el chequeo de la FK compuesta nueva.",
+      "arreglo": "Envolver en do $$ ... exception when duplicate_object, usar drop constraint if exists, y crear índices (tenant_id, conversation_id) en las tres hijas más (tenant_id, quote_id) en payments."
+    },
+    {
+      "id": "H25", "sev": "menor",
+      "titulo": "El validador deja afuera vistas y tablas particionadas",
+      "ubic": "scripts/validar-multitenant.sql:30-34, 86-91",
+      "porque": "relkind='r' excluye particionadas ('p') y vistas: contact_latest_insight no se verifica, y su security_invoker=true es lo único que la salva sin que nada lo compruebe. Tampoco mira relforcerowsecurity.",
+      "arreglo": "relkind in ('r','p'), una capa que verifique security_invoker en vistas, y relforcerowsecurity como REVISAR."
+    },
+    {
+      "id": "H26", "sev": "menor",
+      "titulo": "Deriva de documentación en cuatro archivos",
+      "ubic": "README de la función:17,19 · scripts/README.md:58 · supabase/schema-referencia.md:17,155",
+      "porque": "El README dice 'upsert con onConflict' (ya no es cierto) y 'sin tumbar el resto del lote' (es falso, ver H2). scripts/README dice que las FK están sin corregir. Y schema-referencia sigue diciendo 36 tablas y lista payments sin tenant_id, que hoy es NOT NULL.",
+      "arreglo": "Cuatro ediciones puntuales en un commit de documentación aparte, y regenerar schema-referencia.md."
+    }
+  ]
+}
+</script>
+
+<script id="logica">
+(function () {
+  var raiz = document.getElementById("app");
+  var datos = JSON.parse(document.getElementById("estado").textContent);
+  var filtro = "todos";
+  var escribible = null;      // null = todavía no sabemos
+  var artefacto = null;
+
+  var SEV = {
+    bloqueante: { et: "Bloqueante", orden: 0 },
+    importante: { et: "Importante", orden: 1 },
+    menor:      { et: "Menor",      orden: 2 }
+  };
+
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function hecho(id) { return datos.hechos.indexOf(id) !== -1; }
+
+  function cuerpo() {
+    var todos = datos.hallazgos;
+    var n = { bloqueante: 0, importante: 0, menor: 0 };
+    todos.forEach(function (h) { if (!hecho(h.id)) n[h.sev]++; });
+    var listos = datos.hechos.length;
+    var pct = Math.round((listos / todos.length) * 100);
+
+    var visibles = todos.filter(function (h) {
+      if (filtro === "todos") return true;
+      if (filtro === "pendientes") return !hecho(h.id);
+      if (filtro === "corregidos") return hecho(h.id);
+      return h.sev === filtro;
+    });
+
+    var html = ''
+      + '<header class="cabecera">'
+      + '<p class="eyebrow">Revisión de código · candyCRM</p>'
+      + '<h1>Hallazgos de la auditoría</h1>'
+      + '<p class="subtitulo">26 hallazgos sobre la Edge Function de ingesta de WhatsApp, el validador multi-tenant, el guardrail de credenciales y la migración de FK compuestas. Tildá cada uno a medida que se corrija — el estado queda guardado para todos.</p>'
+      + '</header>'
+
+      + '<div class="resumen">'
+      + metrica("b", n.bloqueante, "Bloqueantes")
+      + metrica("i", n.importante, "Importantes")
+      + metrica("m", n.menor, "Menores")
+      + metrica("k", listos, "Corregidos")
+      + '</div>'
+      + '<div class="barra-progreso"><i style="width:' + pct + '%"></i></div>'
+
+      + '<div class="aviso"><strong>H1 está en producción y verificado empíricamente.</strong> '
+      + 'Se probó contra la base real: <code>DELETE FROM conversations</code> falla hoy con '
+      + '<code>23502</code>. Borrar un contacto también, por la cascada. Es el único hallazgo confirmado '
+      + 'con una prueba ejecutada; el resto salió de lectura de código.</div>'
+
+      + '<div class="filtros">'
+      + boton("todos", "Todos (" + todos.length + ")")
+      + boton("pendientes", "Pendientes (" + (todos.length - listos) + ")")
+      + boton("corregidos", "Corregidos (" + listos + ")")
+      + boton("bloqueante", "Bloqueantes")
+      + boton("importante", "Importantes")
+      + boton("menor", "Menores")
+      + '<span id="estado-guardado"></span>'
+      + '</div>';
+
+    ["bloqueante", "importante", "menor"].forEach(function (sev) {
+      var delGrupo = visibles.filter(function (h) { return h.sev === sev; });
+      if (!delGrupo.length) return;
+      html += '<h2 class="grupo-titulo">' + SEV[sev].et
+           + '<span class="cuenta">' + delGrupo.length + '</span></h2>';
+      delGrupo.forEach(function (h) { html += tarjeta(h); });
+    });
+
+    if (!visibles.length) {
+      html += '<p style="color:var(--tinta-tenue)">Nada en este filtro.</p>';
+    }
+
+    html += ''
+      + '<div class="bien"><h2>Revisado y bien resuelto</h2><ul>'
+      + '<li>Orden firma → parseo → respuesta, y el rechazo por firma inválida no escribe en <code>webhook_errors</code> (impide que un tercero la inunde).</li>'
+      + '<li>Comparación HMAC sin cortocircuito, con chequeo de longitud previo.</li>'
+      + '<li>Fail-closed: sin <code>APP_SECRET</code> todo POST se rechaza; sin <code>VERIFY_TOKEN</code> el handshake da 403.</li>'
+      + '<li>Resolución del tenant como único punto de verdad, vía <code>whatsapp_numbers</code>, con chequeo de <code>activo</code>.</li>'
+      + '<li>La ausencia de <code>tenant_id</code> en el insert de <code>messages</code> es correcta por diseño, no un olvido.</li>'
+      + '<li>Dedup por <code>contact_channels</code> y no por <code>contacts.telefono</code>: el criterio es el correcto.</li>'
+      + '<li><code>opt_in_at</code> / <code>opt_in_source</code> al crear el contacto, cumpliendo la regla de consentimiento de Meta.</li>'
+      + '<li>Cero credenciales en el repo; <code>.env</code> ignorado y secretos solo por <code>supabase secrets set</code>.</li>'
+      + '</ul></div>'
+
+      + '<footer class="pie">Auditoría del 2 sept 2026 · 6 bloqueantes, 10 importantes, 10 menores. '
+      + 'No revisado: el frontend (no hay componentes de producción todavía), las policies RLS una por una, y no se corrió el validador contra la base.</footer>';
+
+    return html;
+  }
+
+  function metrica(cls, n, et) {
+    return '<div class="metrica ' + cls + '"><span class="n">' + n + '</span><span class="et">' + et + '</span></div>';
+  }
+  function boton(clave, et) {
+    return '<button type="button" data-filtro="' + clave + '" aria-pressed="'
+         + (filtro === clave) + '">' + et + '</button>';
+  }
+  function tarjeta(h) {
+    var listo = hecho(h.id);
+    return ''
+      + '<article class="h ' + h.sev + (listo ? ' hecho' : '') + '">'
+      + '<input type="checkbox" data-id="' + h.id + '"' + (listo ? " checked" : "")
+      + (escribible === false ? " disabled" : "")
+      + ' aria-label="Marcar ' + h.id + ' como corregido">'
+      + '<div class="linea-1">'
+      + '<span class="id">' + h.id + '</span>'
+      + '<span class="chip ' + h.sev + '">' + SEV[h.sev].et + '</span>'
+      + (h.verificado ? '<span class="chip verificado">verificado</span>' : '')
+      + '<span class="titulo">' + esc(h.titulo) + '</span>'
+      + '</div>'
+      + '<div><span class="ubic">' + esc(h.ubic) + '</span></div>'
+      + '<div><p class="porque">' + esc(h.porque) + '</p>'
+      + '<p class="arreglo"><b>Arreglo:</b> ' + esc(h.arreglo) + '</p></div>'
+      + '</article>';
+  }
+
+  function pintar() {
+    raiz.innerHTML = cuerpo();
+    raiz.querySelectorAll("[data-filtro]").forEach(function (b) {
+      b.addEventListener("click", function () { filtro = b.dataset.filtro; pintar(); });
+    });
+    raiz.querySelectorAll('input[type="checkbox"]').forEach(function (c) {
+      c.addEventListener("change", function () { alternar(c.dataset.id, c.checked); });
+    });
+  }
+
+  function aviso(txt) {
+    var el = document.getElementById("estado-guardado");
+    if (el) el.textContent = txt;
+  }
+
+  function documentoCompleto() {
+    var css = document.getElementById("hoja").textContent;
+    var js = document.getElementById("logica").textContent;
+    var fuente = JSON.stringify(datos, null, 2);
+    return "<!doctype html>\n<html lang=\"es\">\n<head>\n<meta charset=\"utf-8\">\n"
+      + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+      + "<title>Hallazgos candyCRM</title>\n"
+      + "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap\">\n"
+      + "<style id=\"hoja\">" + css + "</style>\n</head>\n<body>\n"
+      + "<div class=\"envoltura\"><div id=\"app\"></div></div>\n"
+      + "<script type=\"application/json\" id=\"estado\">" + fuente + "<\/script>\n"
+      + "<script id=\"logica\">" + js + "<\/script>\n</body>\n</html>";
+  }
+
+  function alternar(id, marcar) {
+    var i = datos.hechos.indexOf(id);
+    if (marcar && i === -1) datos.hechos.push(id);
+    if (!marcar && i !== -1) datos.hechos.splice(i, 1);
+    pintar();
+
+    if (!artefacto) { aviso("sin guardar (solo esta vista)"); return; }
+    aviso("guardando…");
+    artefacto.publish(documentoCompleto()).then(function () {
+      aviso("guardado");
+    }).catch(function (e) {
+      var c = e && e.code;
+      if (c === "conflict") return;                 // la vista se recarga sola
+      if (c === "not_writer" || c === "not_granted" || c === "not_declared") {
+        escribible = false; pintar(); aviso("solo lectura");
+        return;
+      }
+      aviso("no se pudo guardar (" + (c || "error") + ")");
+    });
+  }
+
+  pintar();
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("artifact").then(function (a) {
+      artefacto = a;
+      escribible = !!a;
+      pintar();
+      aviso(a ? "" : "solo lectura");
+    });
+  } else {
+    escribible = false;
+    pintar();
+    aviso("solo lectura");
+  }
+})();
+</script>
