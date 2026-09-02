@@ -176,26 +176,92 @@ Condición de activación: **saltada por decisión explícita del usuario, no
   (`insert` en `messages` → la función) — hasta entonces el Router no se
   dispara solo con mensajes reales, solo si se lo invoca a mano.
 
-### [6] Agentes conversacionales (Bot de Catálogo, SDR, Soporte/FAQ, Agendador)
+### [6] Agentes conversacionales — desagrupado el 2 sept 2026
+El grupo original ("Bot de Catálogo, SDR, Soporte/FAQ, Agendador") se separó en
+4 candidatos propios: [6a]-[6d]. Motivo — decisión del usuario, siguiendo el
+ejemplo ya anotado en la pregunta abierta 2: el Agendador depende de una cuenta
+externa (Cal.com/Google Calendar) que ningún otro agente del grupo necesita, así
+que agruparlos forzaba a que todos esperaran por la dependencia de uno solo.
+
+**Separar la decisión de construcción no separa el contexto de conversación.**
+Los 4 van a seguir la misma conversación de un cliente sin perder continuidad
+entre sí, porque el contexto nunca vivió *adentro* de ningún agente: vive en
+`conversation_insights` (score, sentimiento, resumen, sugerencia,
+presupuesto_extraido, `citas_rag`), sembrada desde la primera migración
+justamente para esto — una fila por conversación, no una por agente. Cada
+agente, al arrancar su turno, lee esa fila (y el historial en `messages`) antes
+de responder, y la actualiza al terminar. n8n queda para *despachar* — decidir a
+cuál de los 4 invocar según lo que resolvió el Router — nunca para guardar
+memoria de la conversación.
+
+### [6a] Bot de Catálogo
 Estado: APLAZADO
 Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05),
   `docs/guia-fases-1-2.md` (2.4-2.6)
 Mecanismo: script SDK sin loop
-Composición: orquestador (Router, candidato [5]) + 4 subagentes
-Condición de activación: candidato [5] aceptado y construido, más Fase 1
-  cerrada. Ver pregunta abierta 2 — el Agendador podría desagruparse por su
-  dependencia externa a Cal.com/Google Calendar.
+Composición: un solo agente, invocado por el Router (candidato [5])
+Condición de activación: Fase 1 cerrada (bandeja funcionando con mensajes
+  reales).
 
-### [7] Agentes de backend (Enriquecedor, Analista, Agente de Recuperación)
+### [6b] Agente SDR / Calificador
+Estado: APLAZADO
+Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05),
+  `docs/guia-fases-1-2.md` (2.4)
+Mecanismo: script SDK sin loop
+Composición: un solo agente, invocado por el Router (candidato [5])
+Condición de activación: Fase 1 cerrada.
+
+### [6c] Agente de Soporte / FAQ
+Estado: APLAZADO
+Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05),
+  `docs/guia-fases-1-2.md` (2.4-2.6)
+Mecanismo: script SDK sin loop
+Composición: un solo agente, invocado por el Router (candidato [5])
+Condición de activación: Fase 1 cerrada.
+
+### [6d] Agendador
+Estado: APLAZADO
+Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05),
+  `docs/guia-fases-1-2.md` (2.4-2.6)
+Mecanismo: script SDK sin loop
+Composición: un solo agente, invocado por el Router (candidato [5])
+Condición de activación: Fase 1 cerrada **más** una cuenta de Cal.com o Google
+  Calendar conectada — la dependencia que motivó separarlo del resto del grupo.
+  Sin esto, ni siquiera vale la pena empezar a construirlo.
+
+### [7] Agentes de backend — desagrupado el 2 sept 2026
+El grupo original ("Enriquecedor, Analista, Agente de Recuperación") se separó
+en 3 candidatos propios: [7a]-[7c]. Mismo motivo que [6]: el Agente de
+Recuperación tiene una dependencia (`payment_links`) que el Enriquecedor y el
+Analista no tienen, y agruparlos hacía que los tres esperaran por esa columna
+inexistente aunque dos de ellos no la necesiten. La nota sobre dónde vive el
+contexto compartido (ver [6]) aplica igual acá si estos agentes también leen o
+escriben sobre una conversación — a confirmar cuando se construyan.
+
+### [7a] Agente Enriquecedor
 Estado: APLAZADO
 Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05)
-Mecanismo: Agente de Recuperación → script SDK con loop (necesita condición
-  de salida, manejo de errores y control de gasto); Enriquecedor y Analista →
-  script SDK sin loop
-Composición: un agente por rol, sin orquestador entre ellos
-Condición de activación: Fase 1 cerrada; el Agente de Recuperación además
-  necesita que `payment_links` exista en el esquema (hoy no existe, pendiente
-  🔴 en `docs/tener-en-cuenta-base-de-datos.md`, ítem 20).
+Mecanismo: script SDK sin loop
+Composición: un solo agente, sin orquestador
+Condición de activación: Fase 1 cerrada.
+
+### [7b] Agente Analista
+Estado: APLAZADO
+Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05)
+Mecanismo: script SDK sin loop
+Composición: un solo agente, sin orquestador
+Condición de activación: Fase 1 cerrada.
+
+### [7c] Agente de Recuperación
+Estado: APLAZADO
+Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05)
+Mecanismo: script SDK **con loop** — necesita condición de salida, manejo de
+  errores y control de gasto (a diferencia de [7a]/[7b], que no llevan loop)
+Composición: un solo agente, sin orquestador
+Condición de activación: Fase 1 cerrada **más** que `payment_links` exista en
+  el esquema (hoy no existe, pendiente 🔴 en
+  `docs/tener-en-cuenta-base-de-datos.md`, ítem 20) — la dependencia que motivó
+  separarlo del resto del grupo.
 
 ### [8] Chequeo de consistencia entre docs/ y el esquema
 Estado: APLAZADO
@@ -217,12 +283,11 @@ redactadas las entradas de arriba cuando el usuario se pronuncie:
 
 1. ~~**Sobre [2]**~~ — **Resuelta.** [2] pasó a ACEPTADO (script, no guardrail —
    ver la entrada arriba), una vez que el proyecto Supabase real ya existía.
-2. **Sobre [5]/[6]/[7]** — **Parcialmente resuelta.** [5] se desagrupó y ya
-   está ACEPTADO y construido (ver arriba). Sigue sin resolver si [6] y [7]
-   también se desagrupan entre sí. Ejemplo concreto: el
-   Agendador (dentro de [6]) depende de Cal.com/Google Calendar, una
-   dependencia externa que ningún otro agente del grupo tiene — podría
-   justificar tratarlo como candidato aparte.
+2. ~~**Sobre [5]/[6]/[7]**~~ — **Resuelta.** [5] ya estaba ACEPTADO y
+   construido. [6] y [7] se desagruparon el 2 sept 2026 en [6a]-[6d] y
+   [7a]-[7c] — ver esas entradas arriba, incluida la nota sobre cómo se
+   mantiene el contexto de conversación compartido entre los agentes de [6]
+   aunque su construcción se decida por separado.
 3. **Sobre documentos hermanos no traídos todavía** — `catalogo-de-agentes.html`,
    `pipelines-por-tipo-de-lead.html`, e `indicadores-dashboard.html` /
    `indicadores-internos-plataforma.html` completos (hoy solo hay una porción
