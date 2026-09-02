@@ -134,14 +134,47 @@ Condición de activación: campos de atribución (`utm_*`/`ad_id`/`ctwa_clid`)
   agregados al esquema + al menos una campaña real corriendo.
 
 ### [5] Router de clasificación de leads
-Estado: APLAZADO
+Estado: ACEPTADO
 Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 02),
   `docs/guia-fases-1-2.md` (2.1-2.3)
-Mecanismo: script SDK sin loop, un solo agente
+Mecanismo: Edge Function de Supabase (no "script SDK sin loop" como decía la
+  entrada original — se corrige acá: es `supabase/functions/router/`, la misma
+  forma de plataforma que ya tiene el candidato [3], por la excepción de
+  endpoints del `CLAUDE.md` del laboratorio)
 Composición: un solo agente
-Condición de activación: Fase 1 cerrada (bandeja funcionando con mensajes
-  reales, puerta de salida de `docs/guia-fases-1-2.md` cumplida). Ver
-  pregunta abierta 2 — no está resuelto si se desagrupa de [6]/[7].
+Condición de activación: **saltada por decisión explícita del usuario, no
+  cumplida.** La condición original era "Fase 1 cerrada — bandeja funcionando
+  con mensajes reales", y la Fase 1 no está cerrada (no hay Kanban ni bandeja,
+  solo login). El usuario pidió construirlo igual el 2 sept 2026: el Router
+  escribe en la base, no en la UI, así que puede funcionar y medirse sin
+  bandeja. Se le señaló la contradicción con `docs/guia-fases-1-2.md`
+  ("construir agentes sobre un pipeline sin probar en producción es
+  automatizar caos") antes de proceder.
+
+  **Responde la pregunta abierta 2:** se desagrupa de [6]/[7]. El Router quedó
+  como candidato propio, construido antes que cualquier agente conversacional.
+
+  **Construido, desplegado y verificado con datos reales el 2 sept 2026.**
+  Dos capas: `routing_rules` (reglas determinísticas) y Claude Haiku con salida
+  forzada por *tool use* como fallback. Dos piezas que la especificación daba
+  por hechas no existían — `routing_rules` y los pipelines Transaccional/
+  Expansión — y se crearon en la migración `20260902123843`.
+
+  Verificado ejecutando, no leído: clasificación por reglas sin gastar LLM,
+  clasificación semántica con confianza 0.85, y el caso de escalamiento A→B de
+  la propia especificación (2.3), con la fila en `pipeline_transfers` y
+  `detectado_tarde: true`.
+
+  Dos bugs silenciosos encontrados probando: faltaba el header
+  `anthropic-workspace-id` que la API key del usuario exige (sin él, Haiku
+  fallaba siempre y todo caía al pipeline por defecto sin que nada se rompiera
+  visiblemente), y las 4 reglas iniciales estaban muertas por un `(?i)` de
+  sintaxis Postgres que JavaScript no compila. Los dos corregidos y
+  reverificados. Detalle completo en `supabase/functions/router/`.
+
+  **Pendiente, y es del usuario:** conectar el Database Webhook
+  (`insert` en `messages` → la función) — hasta entonces el Router no se
+  dispara solo con mensajes reales, solo si se lo invoca a mano.
 
 ### [6] Agentes conversacionales (Bot de Catálogo, SDR, Soporte/FAQ, Agendador)
 Estado: APLAZADO
@@ -182,12 +215,11 @@ Estas quedaron sin resolver en la propuesta inicial (25 ago 2026). No son
 candidatos en sí, son bifurcaciones que van a afectar cómo terminan
 redactadas las entradas de arriba cuando el usuario se pronuncie:
 
-1. **Sobre [2]** — ¿se trata con la urgencia de un guardrail de
-   `.claude/settings.json` (aceptar ya, sin esperar al proyecto Supabase
-   real), o se espera a tener el proyecto real armado como dice hoy su
-   condición de activación?
-2. **Sobre [5]/[6]/[7]** — hoy agrupan los 8 agentes descritos en
-   `docs/hoja-de-ruta-construccion.md`. ¿Se desagrupan? Ejemplo concreto: el
+1. ~~**Sobre [2]**~~ — **Resuelta.** [2] pasó a ACEPTADO (script, no guardrail —
+   ver la entrada arriba), una vez que el proyecto Supabase real ya existía.
+2. **Sobre [5]/[6]/[7]** — **Parcialmente resuelta.** [5] se desagrupó y ya
+   está ACEPTADO y construido (ver arriba). Sigue sin resolver si [6] y [7]
+   también se desagrupan entre sí. Ejemplo concreto: el
    Agendador (dentro de [6]) depende de Cal.com/Google Calendar, una
    dependencia externa que ningún otro agente del grupo tiene — podría
    justificar tratarlo como candidato aparte.
