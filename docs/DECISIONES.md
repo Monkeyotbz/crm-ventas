@@ -84,13 +84,46 @@ Composición: no aplica
 Condición de activación: cumplida. La primera mitad ya lo estaba desde el 25 ago
   2026 (proyecto Supabase real + esquema con todo lo que la ingesta escribe); el
   usuario dio el veredicto de ACEPTADO el 29 ago 2026 y se escribió la función.
-  **Escrita, no desplegada:** el código está en el repo con verificación de firma
-  `X-Hub-Signature-256`, resolución de tenant por `phone_number_id`, dedup de
-  contacto por `contact_channels`, idempotencia por `messages.externo_id` y
-  ventana de 24 h. Falta —y depende de Meta, no de nosotros— sembrar
-  `whatsapp_numbers` con el Phone Number ID / WABA ID reales, setear los secrets
-  `WA_VERIFY_TOKEN` y `META_APP_SECRET`, desplegar, y registrar la Callback URL.
-  Ver `supabase/functions/ingesta-whatsapp/README.md`.
+  **Desplegada y verificada de punta a punta con un mensaje real (1-2 sept 2026).**
+  El código tiene verificación de firma `X-Hub-Signature-256`, resolución de
+  tenant por `phone_number_id`, dedup de contacto por `contact_channels`,
+  idempotencia por `messages.externo_id` y ventana de 24 h. `whatsapp_numbers`
+  sembrada con el número de prueba de Meta; secrets `WA_VERIFY_TOKEN` y
+  `META_APP_SECRET` seteados vía `supabase secrets set` (nunca tocaron un
+  archivo del repo). Un WhatsApp real, mandado desde un teléfono real al número
+  de prueba, quedó guardado en `messages` — no fue solo el payload de muestra de
+  Meta.
+
+  **Tres bloqueos reales encontrados y resueltos en el camino, ninguno obvio de
+  antemano:**
+  1. La app tiene que estar **publicada** en Meta — mientras esté "Sin publicar",
+     Meta no entrega webhooks reales ni siquiera a los admins de la app.
+     Publicar exigió completar "URL de la Política de privacidad" (Meta lo pide
+     siempre, sin excepción) — se usó un Artifact temporal de candyCRM como
+     solución transitoria, con nota en `CLAUDE.md` para reemplazarlo cuando
+     `getcandycrm.com` exista.
+  2. **El Verify Token se desincronizó en algún punto** de la configuración por
+     UI (posiblemente la propia pantalla de Meta, que redirigía sola después de
+     "Verificar y guardar" sin completar el handshake) — el toggle de `messages`
+     seguía en "Suscrito" pero la verificación real había fallado (403 en los
+     logs). Se resolvió reconfigurando el webhook directo por la Graph API
+     (`POST /{app-id}/subscriptions`), evitando la UI.
+  3. **La WABA de prueba nunca tuvo esta app suscrita** — solo tenía la app
+     interna de demo de Meta ("WA DevX Webhook Events 1P App"). Era el bloqueo
+     de fondo real: ningún mensaje iba a llegar nunca, sin importar qué tan bien
+     estuviera configurado todo lo demás. Se resolvió con
+     `POST /{waba-id}/subscribed_apps` usando el token de usuario temporal del
+     panel de Meta.
+
+  **Un bug de código propio, también encontrado recién con datos reales:** el
+  `.upsert()` de `messages` con `onConflict: "conversation_id,externo_id"` no
+  puede apuntar a un índice único **parcial** (`where externo_id is not null`)
+  — Postgres lo rechaza. Se cambió a `insert` liso + capturar el código `23505`
+  (unique_violation) como éxito idempotente. Corregido, redesplegado y
+  reverificado con un segundo mensaje real.
+
+  Ver `supabase/functions/ingesta-whatsapp/README.md` para el detalle técnico
+  completo.
 
 ### [4] Vista de ROI por campaña (atribución Meta Ads)
 Estado: APLAZADO

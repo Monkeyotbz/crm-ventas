@@ -65,6 +65,59 @@ WhatsApp → Configuración → Webhooks:
 
 Meta dispara un `GET` al guardar. Si el token no coincide, responde 403 y Meta muestra el error.
 
+⚠️ **Esto NO alcanza para recibir mensajes reales.** Registrar el webhook a nivel de la app es
+necesario pero no suficiente — ver "Tres bloqueos que no son obvios" más abajo antes de dar por
+sentado que un mensaje real va a llegar.
+
+## Tres bloqueos que no son obvios (encontrados el 1-2 sept 2026)
+
+Todo lo de arriba puede estar perfecto y aun así **no llegar ni un mensaje**, sin ningún error
+visible del lado nuestro. Tres causas reales, en el orden en que hay que descartarlas:
+
+**1. La app tiene que estar publicada.** Mientras figure "Sin publicar" en Meta for Developers,
+Meta **no entrega webhooks reales a nadie** — ni siquiera a los admins/developers de la app que
+mandan el mensaje de prueba desde su propio celular. El botón "Test" de cada campo de webhook sí
+funciona sin publicar (manda un payload de muestra directo desde el panel), lo cual engaña: hace
+parecer que todo funciona cuando en realidad un mensaje real todavía no puede llegar. Publicar
+exige completar "URL de la Política de privacidad" en Configuración de la app → Información
+básica — Meta lo pide siempre, sin excepción, para cualquier app.
+
+**2. El Verify Token puede desincronizarse sin que el panel lo avise.** El toggle de `messages`
+en "Campos de webhook" puede seguir mostrando "Suscrito" aunque la verificación real haya
+fallado — pasó en esta sesión, con dos handshakes `403` en los logs de la función sin que la UI
+de Meta mostrara ningún error. Si sospechás esto, la forma confiable de reconfigurar (evitando la
+pantalla de Meta, que en esta sesión redirigía sola después de "Verificar y guardar" sin
+completar el handshake) es directo por la Graph API:
+
+```bash
+curl -X POST "https://graph.facebook.com/v21.0/<APP_ID>/subscriptions" \
+  -d "object=whatsapp_business_account" \
+  -d "callback_url=<CALLBACK_URL>" \
+  -d "verify_token=<WA_VERIFY_TOKEN>" \
+  -d "fields=messages" \
+  -d "access_token=<APP_ID>|<APP_SECRET>"
+```
+
+Confirmar con `GET` al mismo endpoint (mismo `access_token`) que `active: true`.
+
+**3. La WABA tiene que tener ESTA app suscrita — no alcanza con el webhook a nivel de app.**
+Es un paso separado que la UI de "Configurar Webhooks" no deja ver con claridad. El número de
+prueba que Meta provisiona automáticamente ("Paso 1. Probar") viene con **otra app ya suscrita**
+por default: la interna de demo de Meta ("WA DevX Webhook Events 1P App"), la que alimenta su
+propio widget "Comprobar webhooks de prueba". Si nunca se suscribe explícitamente la app propia a
+esa WABA, los mensajes reales siguen yendo solo a la app de Meta, para siempre, sin importar qué
+tan bien esté configurado todo lo demás. Se verifica y corrige así (requiere el token de usuario
+temporal del panel de Meta — "Paso 1. Probar" → "Identificador de acceso" → "Generar
+identificador" —, no el `access_token` de app):
+
+```bash
+# ver qué apps están suscritas hoy
+curl "https://graph.facebook.com/v21.0/<WABA_ID>/subscribed_apps?access_token=<TOKEN_DE_USUARIO>"
+
+# suscribir esta app
+curl -X POST "https://graph.facebook.com/v21.0/<WABA_ID>/subscribed_apps?access_token=<TOKEN_DE_USUARIO>"
+```
+
 ## Probar sin Meta
 
 ```bash
