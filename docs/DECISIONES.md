@@ -172,9 +172,15 @@ Condición de activación: **saltada por decisión explícita del usuario, no
   sintaxis Postgres que JavaScript no compila. Los dos corregidos y
   reverificados. Detalle completo en `supabase/functions/router/`.
 
-  **Pendiente, y es del usuario:** conectar el Database Webhook
-  (`insert` en `messages` → la función) — hasta entonces el Router no se
-  dispara solo con mensajes reales, solo si se lo invoca a mano.
+  **Disparo automático conectado el 2 sept 2026** — pero no como estaba previsto.
+  El Database Webhook del panel (Integrations → Database Webhooks) falla en este
+  proyecto con `schema "supabase_functions" does not exist`: es una pieza que
+  Supabase provisiona automáticamente en todo proyecto nuevo, y en este faltó.
+  Se resolvió habilitando `pg_net` (tampoco estaba habilitado) y construyendo el
+  trigger equivalente a mano — `private.disparar_router()` sobre
+  `insert on messages`, con el secret del header guardado en Vault, nunca en un
+  archivo del repo. Ver las migraciones `20260902171034` y `20260902171944`.
+  Verificado con un insert real: clasificó sin que nadie lo invocara a mano.
 
 ### [6] Agentes conversacionales — desagrupado el 2 sept 2026
 El grupo original ("Bot de Catálogo, SDR, Soporte/FAQ, Agendador") se separó en
