@@ -26,6 +26,25 @@ este proyecto. Si invocás `seleccionar-forma` acá, buscá el archivo en `docs/
 default esperaría encontrarlo en la raíz y, si no lo encuentra, puede asumir que no existe y tratar
 la sesión como modo inicial de nuevo.
 
+## Dónde viven los agentes de este proyecto
+
+`agentes-sdk/` está **vacía a propósito y probablemente se quede así**. Todos los
+agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`:
+
+| Agente | Carpeta | Lo dispara |
+|---|---|---|
+| Ingesta de WhatsApp | `supabase/functions/ingesta-whatsapp/` | Webhook de Meta |
+| Router de clasificación | `supabase/functions/router/` | Database Webhook sobre `insert` en `messages` |
+
+Es la excepción de plataforma del `CLAUDE.md` del laboratorio: son endpoints HTTP
+que invoca un tercero, y una carpeta local no puede servir HTTP. La regla que
+sigue valiendo es la de clasificación — el código que llama a Claude (el Router
+llama a Haiku) no se mezcla con el determinístico de `scripts/`.
+
+**No mover estas funciones a `agentes-sdk/`.** Se rompe lo que las invoca: la
+Callback URL registrada en Meta y el Database Webhook de Supabase apuntan a la
+URL que Supabase genera desde `supabase/functions/`.
+
 ## Regla del esquema: nunca editar una migración ya aplicada
 
 El esquema de base de datos vive en [`supabase/migrations/`](supabase/migrations/) y se cambia
