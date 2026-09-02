@@ -212,25 +212,26 @@ async function guardarEntrante(
   const contactId = await contactoDe(tenantId, msg.from, nombrePerfil);
   const conversationId = await conversacionDe(tenantId, contactId);
 
-  // Idempotencia: `unique (conversation_id, externo_id)`. Si Meta reintenta el mismo
-  // mensaje, el segundo insert no hace nada en vez de duplicar la fila.
-  const { error: errMsg } = await db
-    .from("messages")
-    .upsert(
-      {
-        conversation_id: conversationId,
-        direccion: "in",
-        canal: "whatsapp",
-        contenido: extraerContenido(msg),
-        payload_raw: msg,
-        externo_id: msg.id,
-        entregado: true,
-        entregado_at: new Date().toISOString(),
-      },
-      { onConflict: "conversation_id,externo_id", ignoreDuplicates: true },
-    );
+  // Idempotencia: `unique (conversation_id, externo_id)` — pero es un índice PARCIAL
+  // (`where externo_id is not null`), y `.upsert({onConflict: "col,col"})` no puede
+  // apuntarle: Postgres exige que el ON CONFLICT nombre exactamente un constraint o
+  // índice existente, y uno parcial no matchea solo por columnas. La solución es un
+  // insert liso: si Meta reintenta el mismo mensaje, el índice lo rechaza con 23505
+  // (unique_violation) y se lo trata como éxito — el mensaje ya estaba guardado.
+  const { error: errMsg } = await db.from("messages").insert({
+    conversation_id: conversationId,
+    direccion: "in",
+    canal: "whatsapp",
+    contenido: extraerContenido(msg),
+    payload_raw: msg,
+    externo_id: msg.id,
+    entregado: true,
+    entregado_at: new Date().toISOString(),
+  });
 
-  if (errMsg) throw new Error(`messages: ${errMsg.message}`);
+  if (errMsg && errMsg.code !== "23505") {
+    throw new Error(`messages: ${errMsg.message}`);
+  }
 
   // La ventana la abre el contacto al escribir, no nosotros al responder: se cuenta
   // desde el timestamp que manda Meta, no desde que esta función corre.
