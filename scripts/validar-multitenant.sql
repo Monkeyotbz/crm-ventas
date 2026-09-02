@@ -1,9 +1,9 @@
 -- Validador de aislamiento multi-tenant — candidato [2] de docs/DECISIONES.md.
 --
 -- Verifica las tres capas del Paso 2 de docs/guia-fases-1-2.md:
---   Capa 1  toda tabla de negocio tiene tenant_id
+--   Capa 1  toda tabla de negocio tiene tenant_id, y no es nullable
 --   Capa 2  las FK entre tablas de negocio son compuestas (tenant_id, padre_id)
---   Capa 3  toda tabla tiene RLS habilitado y al menos una policy que filtre por tenant
+--   Capa 3  toda tabla tiene RLS habilitado y policies que realmente filtran
 --
 -- SQL puro, sin meta-comandos de psql: corre igual en el SQL Editor del panel,
 -- en `execute_sql` del MCP de Supabase, o por psql. Devuelve una fila por hallazgo.
@@ -63,23 +63,72 @@ capa2 as (
   join pg_namespace n on n.oid = con.connamespace
   where n.nspname = 'public'
     and con.contype = 'f'
-    -- el hijo tiene tenant_id...
     and exists (
       select 1 from pg_attribute a
       where a.attrelid = con.conrelid and a.attname = 'tenant_id' and not a.attisdropped
     )
-    -- ...el padre también...
     and exists (
       select 1 from pg_attribute a
       where a.attrelid = con.confrelid and a.attname = 'tenant_id' and not a.attisdropped
     )
-    -- ...pero la FK no incluye tenant_id entre sus columnas.
     and not exists (
       select 1 from pg_attribute a
       where a.attrelid = con.conrelid
         and a.attnum = any(con.conkey)
         and a.attname = 'tenant_id'
     )
+),
+
+-- CAPA 2b — el punto ciego que encontró la auditoría (H5).
+-- La capa 2 solo mira FK donde AMBOS lados tienen tenant_id, así que toda FK
+-- hacia (o desde) una tabla que "hereda el tenant del padre" le es invisible.
+-- Así se le escapó messages.template_id → message_templates: un cruce real que
+-- el validador certificaba como limpio.
+capa2b as (
+  select
+    2 as capa,
+    'REVISAR' as severidad,
+    con.conrelid::regclass::text as tabla,
+    'FK ' || con.conname || ' → ' || con.confrelid::regclass::text
+      || ' cruza la frontera de tenant sin poder expresarse como FK compuesta '
+      || '(uno de los dos lados hereda el tenant). Confirmar que un trigger o '
+      || 'la lógica de la aplicación lo valide.' as hallazgo
+  from pg_constraint con
+  join pg_namespace n on n.oid = con.connamespace
+  join pg_class padre on padre.oid = con.confrelid
+  join pg_namespace np on np.oid = padre.relnamespace
+  where n.nspname = 'public'
+    and con.contype = 'f'
+    and con.conrelid <> con.confrelid
+    -- exactamente uno de los dos lados tiene tenant_id
+    and (
+      exists (select 1 from pg_attribute a where a.attrelid = con.conrelid
+                and a.attname = 'tenant_id' and not a.attisdropped)
+      <>
+      exists (select 1 from pg_attribute a where a.attrelid = con.confrelid
+                and a.attname = 'tenant_id' and not a.attisdropped)
+    )
+    -- Excluye los casos estructuralmente correctos, que si no ahogan la señal:
+    --   · apuntar a `tenants` es la definición misma de pertenecer a un tenant
+    --   · `auth.users` es global de Supabase, no tiene ni puede tener tenant_id
+    and np.nspname = 'public'
+    and padre.relname <> 'tenants'
+),
+
+-- CAPA 1b — nulabilidad (el agujero que descubrió payments.tenant_id).
+-- Con MATCH SIMPLE, una FK compuesta cuyo tenant_id sea null simplemente NO se
+-- evalúa: la protección queda decorativa.
+capa1b as (
+  select
+    1 as capa,
+    'ERROR' as severidad,
+    t.tabla,
+    'tenant_id es nullable — con MATCH SIMPLE, toda FK compuesta que lo incluya '
+      || 'deja de evaluarse cuando es null' as hallazgo
+  from tablas t
+  join pg_attribute a on a.attrelid = t.oid and a.attname = 'tenant_id' and not a.attisdropped
+  where not a.attnotnull
+    and t.tabla not in (select tabla from exentas)
 ),
 
 -- CAPA 3 -------------------------------------------------------------------
@@ -98,26 +147,59 @@ capa3_sin_policy as (
     and not exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = t.tabla)
 ),
 
-capa3_sin_tenant as (
-  select 3 as capa, 'REVISAR' as severidad, t.tabla,
-         'ninguna policy menciona el tenant — verificar que el aislamiento venga de la tabla padre' as hallazgo
-  from tablas t
-  where t.rls_activo
-    and exists (select 1 from pg_policies p where p.schemaname = 'public' and p.tablename = t.tabla)
-    and not exists (
-      select 1 from pg_policies p
-      where p.schemaname = 'public' and p.tablename = t.tabla
-        and (coalesce(p.qual, '') || coalesce(p.with_check, '')) like '%tenant%'
+-- CAPA 3b — evaluación POLICY POR POLICY (H6).
+-- Antes esto concatenaba todas las policies de la tabla y buscaba 'tenant' en el
+-- conjunto: una tabla con tres policies correctas y una cuarta `using (true)`
+-- pasaba limpia. Que es literalmente el caso "RLS activo pero no filtra nada".
+capa3_permisiva as (
+  select 3 as capa, 'ERROR' as severidad, p.tablename as tabla,
+         'policy "' || p.policyname || '" no filtra nada (USING/WITH CHECK = true): '
+           || 'RLS figura activo pero deja pasar todo' as hallazgo
+  from pg_policies p
+  where p.schemaname = 'public'
+    and p.tablename <> 'tenants'
+    and (
+      replace(replace(coalesce(p.qual, ''), '(', ''), ')', '') = 'true'
+      or replace(replace(coalesce(p.with_check, ''), '(', ''), ')', '') = 'true'
     )
-    and t.tabla <> 'tenants'
+),
+
+-- Y tampoco miraba a QUIÉN se le otorga. Ojo con la trampa acá: en Postgres una
+-- policy sin cláusula TO queda en `public`, y eso NO significa "accesible sin
+-- autenticar" — quien restringe es la expresión (`tenant_id = current_tenant_id()`),
+-- que para un anónimo sin JWT da falso. `public` es el patrón normal de Supabase.
+-- Lo que sí es un olor real es otorgar a `anon` EXPLÍCITAMENTE: eso solo se escribe
+-- a propósito, y en una tabla de negocio casi nunca es lo que se quiso.
+capa3_rol_anon as (
+  select 3 as capa, 'ERROR' as severidad, p.tablename as tabla,
+         'policy "' || p.policyname || '" otorgada explícitamente a anon — '
+           || 'una tabla de negocio no debería ser accesible sin autenticar' as hallazgo
+  from pg_policies p
+  where p.schemaname = 'public'
+    and p.roles && array['anon']::name[]
+),
+
+capa3_sin_tenant as (
+  select 3 as capa, 'REVISAR' as severidad, p.tablename as tabla,
+         'policy "' || p.policyname || '" no menciona el tenant ni is_platform_admin — '
+           || 'verificar que el aislamiento venga de la tabla padre' as hallazgo
+  from pg_policies p
+  where p.schemaname = 'public'
+    and p.tablename <> 'tenants'
+    and (coalesce(p.qual, '') || coalesce(p.with_check, '')) not like '%tenant%'
+    and (coalesce(p.qual, '') || coalesce(p.with_check, '')) not like '%platform_admin%'
 )
 
 select capa, severidad, tabla, hallazgo
 from (
   select * from capa1
+  union all select * from capa1b
   union all select * from capa2
+  union all select * from capa2b
   union all select * from capa3_sin_rls
   union all select * from capa3_sin_policy
+  union all select * from capa3_permisiva
+  union all select * from capa3_rol_anon
   union all select * from capa3_sin_tenant
 ) hallazgos
 order by severidad, capa, tabla;

@@ -127,80 +127,44 @@ async function ownerPorDefecto(tenantId: string): Promise<string> {
  * Contacto por número de WhatsApp. La deduplicación NO es por `contacts.telefono`
  * (texto libre, se escribe de mil formas) sino por `contact_channels`, que tiene
  * `unique (tenant_id, tipo, valor)` — ese constraint es el que define la identidad.
+ *
+ * Se delega en una función de Postgres (H3 de la auditoría): antes esto era un
+ * check-then-insert desde acá, y dos webhooks concurrentes del mismo número
+ * dejaban un `contacts` huérfano sin canal — imposible de deduplicar después,
+ * porque la identidad la define el canal. WhatsApp entrega en paralelo de forma
+ * rutinaria, así que no era un caso teórico. Del lado de Postgres, el unique del
+ * canal arbitra la carrera y el perdedor limpia lo que alcanzó a crear.
  */
 async function contactoDe(tenantId: string, telefono: string, nombrePerfil: string | null) {
-  const { data: canal, error: errCanal } = await db
-    .from("contact_channels")
-    .select("contact_id")
-    .eq("tenant_id", tenantId)
-    .eq("tipo", "whatsapp")
-    .eq("valor", telefono)
-    .maybeSingle();
-
-  if (errCanal) throw new Error(`contact_channels: ${errCanal.message}`);
-  if (canal) return canal.contact_id as number;
-
-  const ownerId = await ownerPorDefecto(tenantId);
-  const { data: contacto, error: errContacto } = await db
-    .from("contacts")
-    .insert({
-      tenant_id: tenantId,
-      nombre: nombrePerfil ?? telefono,
-      telefono,
-      origen: "whatsapp",
-      owner_id: ownerId,
-      // Escribir primero equivale a consentimiento bajo las reglas de Meta: el contacto
-      // inició la conversación. Sin esto no se le puede mandar una plantilla después.
-      opt_in_at: new Date().toISOString(),
-      opt_in_source: "whatsapp_inbound",
-    })
-    .select("id")
-    .single();
-
-  if (errContacto) throw new Error(`contacts: ${errContacto.message}`);
-
-  const { error: errNuevoCanal } = await db.from("contact_channels").insert({
-    tenant_id: tenantId,
-    contact_id: contacto.id,
-    tipo: "whatsapp",
-    valor: telefono,
+  const { data, error } = await db.rpc("resolver_contacto_whatsapp", {
+    p_tenant: tenantId,
+    p_telefono: telefono,
+    p_nombre: nombrePerfil,
   });
-  if (errNuevoCanal) throw new Error(`contact_channels insert: ${errNuevoCanal.message}`);
 
-  return contacto.id as number;
+  if (error) throw new Error(`resolver_contacto_whatsapp: ${error.message}`);
+  if (data == null) throw new Error("resolver_contacto_whatsapp no devolvió contacto");
+  return data as number;
 }
 
-/** Conversación abierta del contacto en WhatsApp, creándola si no hay. */
+/**
+ * Conversación abierta del contacto en WhatsApp, creándola si no hay.
+ *
+ * Misma corrección que arriba (H4). Acá el arbitraje lo hace el índice parcial
+ * `uq_conversations_abierta_por_canal`, que además es lo que impide que existan
+ * dos conversaciones abiertas a la vez — sin él, el mismo `wamid` reintentado
+ * contra la otra conversación no chocaba con el unique de idempotencia y se
+ * guardaba duplicado.
+ */
 async function conversacionDe(tenantId: string, contactId: number) {
-  const { data, error } = await db
-    .from("conversations")
-    .select("id")
-    .eq("tenant_id", tenantId)
-    .eq("contact_id", contactId)
-    .eq("canal", "whatsapp")
-    .eq("estado", "abierta")
-    .order("id", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const { data, error } = await db.rpc("resolver_conversacion_whatsapp", {
+    p_tenant: tenantId,
+    p_contact: contactId,
+  });
 
-  if (error) throw new Error(`conversations: ${error.message}`);
-  if (data) return data.id as number;
-
-  const ownerId = await ownerPorDefecto(tenantId);
-  const { data: nueva, error: errNueva } = await db
-    .from("conversations")
-    .insert({
-      tenant_id: tenantId,
-      contact_id: contactId,
-      canal: "whatsapp",
-      estado: "abierta",
-      owner_id: ownerId,
-    })
-    .select("id")
-    .single();
-
-  if (errNueva) throw new Error(`conversations insert: ${errNueva.message}`);
-  return nueva.id as number;
+  if (error) throw new Error(`resolver_conversacion_whatsapp: ${error.message}`);
+  if (data == null) throw new Error("resolver_conversacion_whatsapp no devolvió conversación");
+  return data as number;
 }
 
 /** Un mensaje entrante: lo guarda y corre la ventana de servicio de 24 h. */
