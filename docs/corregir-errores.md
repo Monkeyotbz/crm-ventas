@@ -19,15 +19,17 @@ fuera del visor no hay dónde guardar).
 Es decir: **el estado de qué está corregido vive en el artifact, no en este repo.** El `.html` de
 acá sirve para versionar el contenido y para poder reconstruir la página si el artifact se pierde.
 
+> ✅ **Actualización 2 sept 2026 — los 6 bloqueantes están corregidos.** Todos
+> verificados ejecutando contra la base, no solo leídos. Quedan los 10 importantes
+> y los 10 menores. El detalle de cada corrección está en las migraciones
+> `20260902111946`, `20260902173834` y `20260902174357`, y en
+> `scripts/validar-multitenant.sql`. La tabla de abajo describe cómo estaban
+> **antes** del arreglo; se conserva porque explica por qué existía cada uno.
+
 ## Los 6 bloqueantes, en el orden sugerido para atacarlos
 
 | # | Qué | Dónde |
 |---|---|---|
-> **Actualización 2 sept 2026 — H1 a H6 corregidos.** Los seis bloqueantes están
-> cerrados y verificados ejecutando contra la base, no solo leídos. Quedan los 10
-> importantes y los 10 menores. El detalle de cada corrección está en las migraciones
-> `20260902111946`, `20260902173834` y `20260902174357`, y en `scripts/validar-multitenant.sql`.
-
 | **H1** | `on delete set null` sin lista de columnas rompe el borrado de conversaciones y contactos. **Está en producción.** Único hallazgo **verificado ejecutando** contra la base: `DELETE FROM conversations` falla hoy con `23502` | `20260829205609_...sql:25-26, 32-33, 39-40` |
 | **H2** | El `try` envuelve el `for` entero: un mensaje que falla mata los siguientes del lote, y como ya se respondió 200, Meta no reintenta | `ingesta-whatsapp/index.ts:301-320` |
 | **H3** | Carrera en `contactoDe`: dos webhooks concurrentes dejan un contacto duplicado y huérfano | `ingesta-whatsapp/index.ts:131-171` |
