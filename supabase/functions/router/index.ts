@@ -20,6 +20,11 @@
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
+// Las API keys vinculadas a identidad exigen declarar en qué workspace actúa la
+// petición. Sin este header, Anthropic responde 400 y la capa 2 queda muerta en
+// silencio: el Router seguiría clasificando todo al pipeline por defecto sin
+// fallar nunca. Se descubrió probando la key contra la API, no leyendo el código.
+const ANTHROPIC_WORKSPACE_ID = Deno.env.get("ANTHROPIC_WORKSPACE_ID") ?? "";
 const ROUTER_SECRET = Deno.env.get("ROUTER_SECRET") ?? "";
 const MODELO = "claude-haiku-4-5-20251001";
 
@@ -62,15 +67,22 @@ function reglaMatchea(regla: any, contenido: string, contacto: any): boolean {
       return dato.toLowerCase().includes(String(regla.valor).toLowerCase());
     case "igual":
       return dato.toLowerCase() === String(regla.valor).toLowerCase();
-    case "regex":
-      // Una regla mal escrita no puede tumbar la clasificación entera: si el
-      // patrón no compila, esa regla no matchea y se sigue con la siguiente.
+    case "regex": {
+      // Las reglas se escriben pensando en Postgres, donde `(?i)` al principio
+      // significa "sin distinguir mayúsculas". JavaScript NO soporta flags
+      // inline: tira SyntaxError, el catch descartaba la regla, y quedaba
+      // silenciosamente muerta — todo caía a la capa semántica y cada mensaje
+      // pagaba una llamada al LLM sin que nada fallara. Se acepta esa forma por
+      // compatibilidad, se le quita el prefijo, y se compila siempre
+      // case-insensitive, que es lo que se quiere al matchear texto de un chat.
+      const patron = String(regla.valor).replace(/^\(\?i\)/, "");
       try {
-        return new RegExp(regla.valor).test(dato);
+        return new RegExp(patron, "i").test(dato);
       } catch {
         console.error("[router] regex inválida en la regla:", regla.nombre);
         return false;
       }
+    }
     default:
       return false;
   }
@@ -162,6 +174,9 @@ async function porSemantica(
         "x-api-key": ANTHROPIC_API_KEY,
         "anthropic-version": "2023-06-01",
         "content-type": "application/json",
+        ...(ANTHROPIC_WORKSPACE_ID
+          ? { "anthropic-workspace-id": ANTHROPIC_WORKSPACE_ID }
+          : {}),
       },
       body: JSON.stringify({
         model: MODELO,
