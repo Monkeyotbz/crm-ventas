@@ -24,7 +24,7 @@ const MAX_MENSAJE = 4000;
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   "Access-Control-Allow-Headers": "content-type",
 };
 
@@ -99,6 +99,53 @@ async function conversacionDe(tenantId: string, contactId: number) {
   return data as number;
 }
 
+/**
+ * Mensajes salientes (respuestas del vendedor) desde que el widget vio el
+ * último. Es la contraparte de "recibir" — el widget no tiene sesión ni
+ * cliente de Supabase propio, así que no puede suscribirse a Realtime
+ * (RLS no le da nada a `anon`, a propósito). En vez de eso, el widget
+ * consulta esto cada pocos segundos mientras el panel está abierto.
+ *
+ * Se resuelve por `sesion`, no por un `conversation_id` que mandara el
+ * cliente: igual que `contactoDe`, el cruce (tenant_id, tipo, valor) de
+ * `contact_channels` es lo que impide que alguien pase el conversation_id
+ * de OTRO tenant y lea mensajes ajenos. Devuelve vacío, no error, si
+ * todavía no hay contacto/conversación para esa sesión — es el estado
+ * normal antes del primer mensaje.
+ */
+async function mensajesNuevos(tenantId: string, sesion: string, desde: number) {
+  const { data: canal } = await db
+    .from("contact_channels")
+    .select("contact_id")
+    .eq("tenant_id", tenantId)
+    .eq("tipo", "chat_web")
+    .eq("valor", sesion)
+    .maybeSingle();
+  if (!canal) return [];
+
+  const { data: conv } = await db
+    .from("conversations")
+    .select("id")
+    .eq("tenant_id", tenantId)
+    .eq("contact_id", canal.contact_id)
+    .eq("canal", "chat_web")
+    .eq("estado", "abierta")
+    .maybeSingle();
+  if (!conv) return [];
+
+  const { data: mensajes, error } = await db
+    .from("messages")
+    .select("id, contenido, created_at")
+    .eq("conversation_id", conv.id)
+    .eq("direccion", "out")
+    .gt("id", desde)
+    .order("id", { ascending: true })
+    .limit(50);
+
+  if (error) throw new Error(`messages (poll): ${error.message}`);
+  return mensajes ?? [];
+}
+
 /** Deja constancia del fallo. Solo se llama con un tenant ya resuelto — ver la nota de arriba. */
 async function registrarError(err: unknown, payload: unknown, tenantId: string, evento: string) {
   await db.from("webhook_errors").insert({
@@ -114,6 +161,34 @@ Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS });
   }
+
+  if (req.method === "GET") {
+    const url = new URL(req.url);
+    const widgetKey = (url.searchParams.get("widget_key") ?? "").trim();
+    const sesion = (url.searchParams.get("sesion") ?? "").trim();
+    const desde = Number(url.searchParams.get("desde") ?? "0") || 0;
+
+    if (!widgetKey) return json({ error: "falta widget_key" }, 400);
+    if (!sesion) return json({ error: "falta sesion" }, 400);
+
+    let tenantId: string | null;
+    try {
+      tenantId = await resolverTenant(widgetKey);
+    } catch (err) {
+      console.error("[ingesta-widget-chat] resolverTenant (poll):", err);
+      return json({ error: "error interno" }, 500);
+    }
+    if (!tenantId) return json({ error: "widget no encontrado" }, 404);
+
+    try {
+      const mensajes = await mensajesNuevos(tenantId, sesion, desde);
+      return json({ mensajes });
+    } catch (err) {
+      console.error("[ingesta-widget-chat] poll:", err);
+      return json({ error: "no se pudo consultar mensajes" }, 500);
+    }
+  }
+
   if (req.method !== "POST") {
     return json({ error: "method_not_allowed" }, 405);
   }

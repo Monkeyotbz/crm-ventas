@@ -168,6 +168,14 @@
     .enviar svg { width: 16px; height: 16px; fill: #fff; }
 
     .error { font-size: 11px; color: #c0266f; padding: 0 14px 8px; flex: none; }
+
+    .insignia {
+      position: absolute; top: -3px; right: -3px; min-width: 18px; height: 18px;
+      border-radius: 999px; background: #ff3b6b; color: #fff; font-size: 10.5px;
+      font-weight: 700; display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .insignia[hidden] { display: none; }
   `;
   root.appendChild(style);
 
@@ -176,6 +184,7 @@
   wrap.innerHTML =
     '<button class="burbuja" type="button" aria-label="Abrir chat" aria-expanded="false">' +
       '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.77 1.47 5.24 3.77 6.85-.12.99-.5 2.36-1.5 3.85-.14.2 0 .48.26.47 1.86-.1 3.68-.78 4.99-1.6.79.16 1.62.24 2.48.24 5.52 0 10-3.94 10-8.81C22 5.94 17.52 2 12 2z"/></svg>' +
+      '<span class="insignia" hidden aria-hidden="true"></span>' +
     "</button>" +
     '<div class="panel" role="dialog" aria-label="Chat">' +
       '<div class="cabecera">' +
@@ -206,13 +215,25 @@
   var enviarBtn = wrap.querySelector(".enviar");
   var emailInput = wrap.querySelector("#candy-email");
   var errorEl = wrap.querySelector(".error");
+  var insigniaEl = wrap.querySelector(".insignia");
 
   if (emailGuardado) emailInput.value = emailGuardado;
+
+  var noLeidos = 0;
+  function mostrarInsignia() {
+    insigniaEl.hidden = noLeidos === 0;
+    insigniaEl.textContent = noLeidos > 9 ? "9+" : String(noLeidos);
+  }
 
   function alternarPanel() {
     var abierto = panel.classList.toggle("abierto");
     burbujaBtn.setAttribute("aria-expanded", String(abierto));
-    if (abierto) textarea.focus();
+    if (abierto) {
+      textarea.focus();
+      noLeidos = 0;
+      mostrarInsignia();
+      mensajesEl.scrollTop = mensajesEl.scrollHeight;
+    }
   }
   burbujaBtn.addEventListener("click", alternarPanel);
   cerrarBtn.addEventListener("click", alternarPanel);
@@ -280,4 +301,54 @@
       enviarBtn.disabled = false;
     }
   });
+
+  // -----------------------------------------------------------------------
+  // Recibir respuestas del vendedor.
+  //
+  // El widget no tiene sesión de Supabase ni cliente propio — no hay forma
+  // de suscribirse a Realtime sin dársele a `anon` acceso a `messages`, que
+  // es justo lo que las RLS existen para no hacer. En vez de eso, se
+  // consulta la misma Edge Function cada pocos segundos preguntando "algo
+  // nuevo desde el último id que vi" — la misma idea que un polling de
+  // bandeja de entrada, no un chat en tiempo real de verdad, pero no expone
+  // ningún dato que el widget no debiera poder leer.
+  //
+  // Pausa cuando la pestaña no está visible: es una consulta pública sin
+  // límite de velocidad todavía (ver el comentario del backend), así que no
+  // vale la pena gastarla en pestañas de fondo.
+  // -----------------------------------------------------------------------
+  var ultimoIdVisto = 0;
+  var pollEnCurso = false;
+
+  async function consultarNuevos() {
+    if (pollEnCurso || document.hidden) return;
+    pollEnCurso = true;
+    try {
+      var params = new URLSearchParams({ widget_key: WIDGET_KEY, sesion: sesion, desde: String(ultimoIdVisto) });
+      var resp = await fetch(API_URL + "?" + params.toString());
+      if (!resp.ok) return;
+      var cuerpo = await resp.json();
+      var nuevos = cuerpo.mensajes || [];
+      if (!nuevos.length) return;
+
+      var panelAbierto = panel.classList.contains("abierto");
+      nuevos.forEach(function (m) {
+        agregarMensaje(m.contenido, "in");
+        if (m.id > ultimoIdVisto) ultimoIdVisto = m.id;
+      });
+      if (!panelAbierto) {
+        noLeidos += nuevos.length;
+        mostrarInsignia();
+      }
+    } catch (err) {
+      // Silencioso a propósito: un poll que falla una vez no es un error
+      // que el visitante tenga que ver — el próximo intento lo resuelve solo.
+      console.warn("[candy-chat-widget] poll:", err);
+    } finally {
+      pollEnCurso = false;
+    }
+  }
+
+  consultarNuevos();
+  setInterval(consultarNuevos, 4000);
 })();

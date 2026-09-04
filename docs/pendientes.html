@@ -167,7 +167,7 @@
 
 <script type="application/json" id="estado">
 {
-  "hechos": ["F2", "F3"],
+  "hechos": ["F2", "F3", "F2c"],
   "areas": [
     {
       "clave": "frontend",
@@ -177,7 +177,7 @@
         { "id": "F1", "titulo": "Construir el Kanban de oportunidades", "detalle": "Deals arrastrables entre etapas de cada pipeline (Transaccional/Consultivo/Expansión). Pantalla aparte del inbox, no estaba en el mockup de CandyInbox.dc.html." },
         { "id": "F2", "titulo": "Construir la bandeja unificada (inbox) — solo lectura", "detalle": "Ver las conversaciones que entran por WhatsApp y por el widget de chat, con su contacto y su deal. Verificado con datos reales de producción (4 sept)." },
         { "id": "F2b", "titulo": "Envío por WhatsApp — construido, sin verificar contra la API real", "detalle": "envio-whatsapp respeta la ventana de 24h y ya está conectado al composer. Falta el secret WHATSAPP_ACCESS_TOKEN (nadie lo generó en Meta), y el único contacto real tiene la ventana cerrada — ni con el token hay con quién probar el camino de texto libre todavía." },
-        { "id": "F2c", "titulo": "Envío por el widget de chat", "detalle": "candy-chat-widget.js solo manda mensajes, nunca escucha respuestas — falta que se suscriba a Realtime para poder recibir lo que conteste el vendedor." },
+        { "id": "F2c", "titulo": "Envío por el widget de chat — resuelto por polling", "detalle": "No por Realtime (anon no tiene acceso a messages vía RLS). El widget consulta GET ingesta-widget-chat cada 4s, con insignia de no-leídos. Verificado contra el backend real." },
         { "id": "F3", "titulo": "Panel copiloto IA", "detalle": "Construido — lee conversation_insights (score, sentimiento, resumen, sugerencia) y muestra un estado vacío honesto mientras no exista el agente Analista [7b] que los llene." }
       ]
     },

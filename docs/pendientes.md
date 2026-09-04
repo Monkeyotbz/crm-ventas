@@ -26,8 +26,12 @@ Había tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Rout
   Meta todavía — ver `supabase/functions/envio-whatsapp/README.md`), y encima el único contacto
   real tiene la ventana cerrada, así que ni con el token puesto hay con quién probar el camino de
   texto libre hasta que llegue un mensaje entrante nuevo.
-- Envío para el widget de chat — falta que `candy-chat-widget.js` escuche respuestas nuevas
-  (Realtime); hoy solo manda, nunca recibe
+- ✅ **Envío para el widget de chat — resuelto por polling** (4 sept 2026). No por Realtime: el
+  widget no tiene sesión de Supabase (`anon` no tiene acceso a `messages` vía RLS, a propósito), así
+  que en cambio consulta `GET ingesta-widget-chat` cada 4s preguntando "algo nuevo desde el último
+  id que vi", con insignia de no-leídos en la burbuja cuando el panel está cerrado. Verificado
+  contra el backend real (no simulado): mensaje real → respuesta insertada → detectada sola sin
+  tocar nada.
 - Construir el Kanban de oportunidades (deals arrastrables entre etapas) — pantalla aparte, no
   estaba en el mockup de la bandeja
 
