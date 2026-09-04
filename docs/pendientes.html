@@ -167,16 +167,17 @@
 
 <script type="application/json" id="estado">
 {
-  "hechos": [],
+  "hechos": ["F2", "F3"],
   "areas": [
     {
       "clave": "frontend",
       "titulo": "Frontend — Sprint 1",
-      "nota": "El cuello de botella real: hay tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Router clasificando) y ningún lugar del CRM para ver lo que entra — sigue siendo solo el login de Sprint 0.",
+      "nota": "Ya hay dónde VER lo que entra (bandeja de solo lectura, 4 sept) — lo que falta es responder desde ahí, y el Kanban de deals.",
       "items": [
-        { "id": "F1", "titulo": "Construir el Kanban de oportunidades", "detalle": "Deals arrastrables entre etapas de cada pipeline (Transaccional/Consultivo/Expansión)." },
-        { "id": "F2", "titulo": "Construir la bandeja unificada (inbox)", "detalle": "Ver y responder las conversaciones que ya están entrando por WhatsApp y por el widget de chat." },
-        { "id": "F3", "titulo": "Panel copiloto IA", "detalle": "Lee conversation_insights (score, sentimiento, resumen, sugerencia). Depende de que F1 y F2 existan primero." }
+        { "id": "F1", "titulo": "Construir el Kanban de oportunidades", "detalle": "Deals arrastrables entre etapas de cada pipeline (Transaccional/Consultivo/Expansión). Pantalla aparte del inbox, no estaba en el mockup de CandyInbox.dc.html." },
+        { "id": "F2", "titulo": "Construir la bandeja unificada (inbox) — solo lectura", "detalle": "Ver las conversaciones que entran por WhatsApp y por el widget de chat, con su contacto y su deal. Verificado con datos reales de producción (4 sept)." },
+        { "id": "F2b", "titulo": "Enviar respuestas desde la bandeja", "detalle": "Falta la Edge Function de salida: WhatsApp Graph API (ventana 24h/plantillas) y el equivalente para el widget. El campo de escribir ya existe en la UI, deshabilitado." },
+        { "id": "F3", "titulo": "Panel copiloto IA", "detalle": "Construido — lee conversation_insights (score, sentimiento, resumen, sugerencia) y muestra un estado vacío honesto mientras no exista el agente Analista [7b] que los llene." }
       ]
     },
     {

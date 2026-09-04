@@ -14,13 +14,15 @@ viva — el checklist se tilda en el Artifact, no acá.
 ## Los ítems accionables (con checkbox en la página viva)
 
 ### Frontend — Sprint 1 (el cuello de botella real)
-Hay tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Router clasificando) y
-**ningún lugar del frontend para ver lo que entra** — el CRM sigue siendo solo el login de
-Sprint 0.
+Había tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Router clasificando) y
+**ningún lugar del frontend para ver lo que entra** — el CRM era solo el login de Sprint 0.
 
-- Construir el Kanban de oportunidades (deals arrastrables entre etapas)
-- Construir la bandeja unificada (inbox) para ver y responder WhatsApp/widget
-- Panel copiloto IA (lee `conversation_insights`) — depende de que existan los dos anteriores
+- ✅ **Construida la bandeja unificada de solo lectura** (4 sept 2026) — lista de conversaciones,
+  hilo de mensajes, panel copiloto (lee `conversation_insights`, vacío hasta que exista el
+  Analista [7b]). Verificado con datos reales de producción, no solo leído.
+- Construir el envío de respuestas — falta la Edge Function de salida (WhatsApp Graph API, widget)
+- Construir el Kanban de oportunidades (deals arrastrables entre etapas) — pantalla aparte, no
+  estaba en el mockup de la bandeja
 
 ### Widget de chat web
 Construido y probado el 4 sept 2026 (ver `docs/DECISIONES.md` y la memoria de esa sesión). Falta:

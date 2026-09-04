@@ -14,6 +14,24 @@
   --color-neon-cyan: #22d3ee;
   --color-neon-violet: #a78bfa;
   --color-neon-emerald: #34d399;
+
+  /* Candy + Aero — identidad propia de candyCRM (design/CandyInbox.dc.html),
+     separada a propósito de la paleta "night/neon" de arriba, que es la que
+     heredó el login de Sprint 0 de un template genérico y todavía no se
+     migró. Namespace `candy-*` para que ningún nombre choque con los de
+     arriba: las dos conviven mientras el resto de las pantallas no se hayan
+     migrado. */
+  --font-candy-display: "Baloo 2", ui-rounded, sans-serif;
+  --font-candy-body: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --color-candy-rosa: #ff5ca8;
+  --color-candy-azul: #5b9bff;
+  --color-candy-violeta: #b98bff;
+  --color-candy-menta: #6ee7b7;
+  --color-candy-durazno: #ffb35c;
+  --color-candy-tinta: #3b2a55;
+  --color-candy-tinta-media: #8478a0;
+  --color-candy-tinta-tenue: #9b8fb5;
 }
 
 body {
@@ -22,4 +40,26 @@ body {
 
 ::selection {
   background-color: rgba(34, 211, 238, 0.3);
+}
+
+/* Candy + Aero — utilidades compartidas de la bandeja (Sprint 1). El fondo y
+   el glassmorphism se repiten en cada panel de design/CandyInbox.dc.html, así
+   que se nombran una vez acá en vez de repetir el arbitrary-value de Tailwind
+   en cada componente. */
+@utility candy-fondo {
+  background:
+    radial-gradient(circle at 12% 15%, rgba(255, 90, 160, 0.34), transparent 42%),
+    radial-gradient(circle at 88% 8%, rgba(88, 150, 255, 0.3), transparent 45%),
+    radial-gradient(circle at 50% 100%, rgba(167, 120, 255, 0.26), transparent 55%),
+    radial-gradient(circle at 92% 85%, rgba(45, 210, 160, 0.24), transparent 42%),
+    linear-gradient(160deg, #fdf3ff 0%, #eef3ff 45%, #fff2f7 100%);
+  color: var(--color-candy-tinta);
+}
+
+@utility candy-glass {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 10px 30px rgba(120, 60, 200, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.9);
 }
