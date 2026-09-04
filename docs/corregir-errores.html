@@ -235,7 +235,7 @@
 
 <script type="application/json" id="estado">
 {
-  "hechos": [],
+  "hechos": ["H1", "H2", "H3", "H4", "H5", "H6"],
   "hallazgos": [
     {
       "id": "H1", "sev": "bloqueante", "verificado": true,
@@ -252,28 +252,28 @@
       "arreglo": "Mover el try/catch adentro de cada iteración, registrando el ítem puntual (msg/estado) como payload en vez del cambio entero."
     },
     {
-      "id": "H3", "sev": "bloqueante",
+      "id": "H3", "sev": "bloqueante", "verificado": true,
       "titulo": "Carrera en contactoDe: deja contactos duplicados y huérfanos",
       "ubic": "supabase/functions/ingesta-whatsapp/index.ts:131-171",
       "porque": "Es check-then-insert sin transacción. Dos webhooks concurrentes del mismo número leen 'no existe', ambos insertan en contacts, y el segundo revienta con 23505 en contact_channels. Queda un contacto sin canal, imposible de deduplicar después porque la identidad la define contact_channels. WhatsApp entrega webhooks en paralelo de forma rutinaria.",
       "arreglo": "Mover a una RPC en private que haga insert ... on conflict (tenant_id, tipo, valor) do update ... returning contact_id en una sola sentencia atómica."
     },
     {
-      "id": "H4", "sev": "bloqueante",
+      "id": "H4", "sev": "bloqueante", "verificado": true,
       "titulo": "Carrera en conversacionDe: rompe la idempotencia entera",
       "ubic": "supabase/functions/ingesta-whatsapp/index.ts:174-204",
       "porque": "No existe un unique (tenant_id, contact_id, canal) where estado='abierta'. Con dos conversaciones abiertas simultáneas, el mismo wamid reintentado por Meta contra la otra conversación NO da 23505 y se guarda duplicado — la red de seguridad desaparece justo en el escenario para el que fue puesta.",
       "arreglo": "Migración: create unique index ... on conversations (tenant_id, contact_id, canal) where estado = 'abierta'. Y capturar 23505 en el insert, reintentando el SELECT."
     },
     {
-      "id": "H5", "sev": "bloqueante",
+      "id": "H5", "sev": "bloqueante", "verificado": true,
       "titulo": "El validador multi-tenant tiene un falso negativo: hay un cruce abierto hoy",
       "ubic": "scripts/validar-multitenant.sql:55-83",
       "porque": "La Capa 2 solo mira FK donde hijo Y padre tienen tenant_id, así que no ve messages.template_id → message_templates (FK simple). Un tenant puede apuntar a la plantilla de otro y saltear la validación de ventana, porque validar_plantilla_para_iniciar solo chequea template_id is not null, nunca de quién es. Un validador que da 0 hallazgos sobre una base con un hueco es peor que no tenerlo.",
       "arreglo": "Sumar un criterio (b): FK simple desde un hijo con tenant_id hacia cualquier tabla de negocio, incluidas las exentas por herencia. Y decidir si messages lleva tenant_id propio — es decisión de esquema, no un parche."
     },
     {
-      "id": "H6", "sev": "bloqueante",
+      "id": "H6", "sev": "bloqueante", "verificado": true,
       "titulo": "El validador evalúa RLS por tabla, no por policy",
       "ubic": "scripts/validar-multitenant.sql:101-113",
       "porque": "Concatena todas las policies de la tabla y busca 'tenant' en el conjunto. Una tabla con tres policies correctas y una cuarta using (true) pasa limpia — que es literalmente el caso 'RLS activo pero no filtra nada'. Tampoco mira pg_policies.roles, así que una policy otorgada a anon es indistinguible de una buena.",
@@ -471,10 +471,12 @@
       + '</div>'
       + '<div class="barra-progreso"><i style="width:' + pct + '%"></i></div>'
 
-      + '<div class="aviso"><strong>H1 está en producción y verificado empíricamente.</strong> '
-      + 'Se probó contra la base real: <code>DELETE FROM conversations</code> falla hoy con '
-      + '<code>23502</code>. Borrar un contacto también, por la cascada. Es el único hallazgo confirmado '
-      + 'con una prueba ejecutada; el resto salió de lectura de código.</div>'
+      + '<div class="aviso"><strong>Los 6 bloqueantes (H1-H6) están corregidos y verificados '
+      + 'ejecutando contra la base, no solo leídos.</strong> Detalle de cada corrección en las '
+      + 'migraciones <code>20260902111946</code>, <code>20260902173834</code> y '
+      + '<code>20260902174357</code>, y en <code>scripts/validar-multitenant.sql</code>. '
+      + 'Quedan los 10 importantes y los 10 menores, todos por lectura de código sin ejecutar '
+      + 'todavía — filtrá por severidad abajo.</div>'
 
       + '<div class="filtros">'
       + boton("todos", "Todos (" + todos.length + ")")
