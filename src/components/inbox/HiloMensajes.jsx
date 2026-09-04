@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { estiloCanal, formatearHora } from "../../lib/canales.js";
-import { listarMensajes } from "../../lib/bandeja.js";
+import { listarMensajes, enviarMensajeWhatsapp } from "../../lib/bandeja.js";
 
 export default function HiloMensajes({ conversacion }) {
   const { data: mensajes, isLoading } = useQuery({
@@ -59,28 +60,114 @@ export default function HiloMensajes({ conversacion }) {
         ))}
       </div>
 
-      {/* Enviar no está disponible todavía: falta la Edge Function de salida
-          (Graph API de WhatsApp, ventana de 24h/plantillas) — ver docs/pendientes.md.
-          El campo queda visible porque el diseño lo prevé, pero deshabilitado
-          para no prometer algo que todavía no hace nada. */}
+      {conversacion.canal === "whatsapp" ? (
+        <ComposerWhatsapp conversacion={conversacion} chs={chs} />
+      ) : (
+        <ComposerNoDisponible chs={chs} />
+      )}
+    </div>
+  );
+}
+
+// WhatsApp es el único canal con envío conectado por ahora (docs/pendientes.md,
+// F2b) — el resto (chat_web, instagram, etc.) sigue con el aviso de siempre.
+function ComposerWhatsapp({ conversacion, chs }) {
+  const [texto, setTexto] = useState("");
+  const [error, setError] = useState(null);
+  const queryClient = useQueryClient();
+
+  const ventanaAbierta = Boolean(
+    conversacion.ventana_abierta_hasta && new Date(conversacion.ventana_abierta_hasta) > new Date(),
+  );
+
+  const envio = useMutation({
+    mutationFn: () => enviarMensajeWhatsapp({ conversationId: conversacion.conversation_id, contenido: texto.trim() }),
+    onSuccess: () => {
+      setTexto("");
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ["mensajes", conversacion.conversation_id] });
+      queryClient.invalidateQueries({ queryKey: ["conversaciones"] });
+    },
+    onError: (err) => setError(err.message),
+  });
+
+  // Ventana cerrada y sin plantilla que elegir todavía (message_templates
+  // está vacía, ver README de envio-whatsapp) — no tiene sentido mostrar un
+  // campo que solo puede fallar, así que se explica por qué en su lugar.
+  if (!ventanaAbierta) {
+    return (
       <div className="shrink-0 px-[22px] pb-5 pt-3.5">
-        <div className="flex gap-2.5 items-center">
-          <div className="flex-1 candy-glass rounded-full px-4 py-3 text-[12.5px] text-candy-tinta-tenue cursor-not-allowed">
-            Responder llega pronto — todavía no se puede enviar desde acá
-          </div>
-          <button
-            type="button"
-            disabled
-            title="Enviar todavía no está disponible"
-            className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-white opacity-40 cursor-not-allowed"
-            style={{ background: chs.gradiente }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m22 2-7 20-4-9-9-4Z" />
-              <path d="M22 2 11 13" />
-            </svg>
-          </button>
+        <div className="candy-glass rounded-2xl px-4 py-3 text-[12.5px] text-candy-tinta-media leading-relaxed">
+          <span className="font-bold text-candy-tinta">Ventana de 24h cerrada.</span> Solo se puede reabrir con
+          una plantilla aprobada por Meta, y todavía no hay ninguna cargada. Se reabre sola si {conversacion.contacto_nombre}{" "}
+          escribe de nuevo.
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="shrink-0 px-[22px] pb-5 pt-3.5">
+      <form
+        className="flex gap-2.5 items-end"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!texto.trim() || envio.isPending) return;
+          envio.mutate();
+        }}
+      >
+        <textarea
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (texto.trim() && !envio.isPending) envio.mutate();
+            }
+          }}
+          placeholder="Escribir una respuesta…"
+          rows={1}
+          className="flex-1 candy-glass rounded-2xl px-4 py-3 text-[12.5px] text-candy-tinta placeholder:text-candy-tinta-tenue outline-none resize-none max-h-24"
+        />
+        <button
+          type="submit"
+          disabled={!texto.trim() || envio.isPending}
+          title="Enviar"
+          className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-white shadow-[0_4px_12px_rgba(0,0,0,0.18)] disabled:opacity-40"
+          style={{ background: chs.gradiente }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+        </button>
+      </form>
+      {error && <p className="text-[11.5px] text-red-500 mt-1.5 px-1">{error}</p>}
+    </div>
+  );
+}
+
+// Sin cambios respecto de antes: los demás canales todavía no tienen Edge
+// Function de salida (docs/pendientes.md).
+function ComposerNoDisponible({ chs }) {
+  return (
+    <div className="shrink-0 px-[22px] pb-5 pt-3.5">
+      <div className="flex gap-2.5 items-center">
+        <div className="flex-1 candy-glass rounded-full px-4 py-3 text-[12.5px] text-candy-tinta-tenue cursor-not-allowed">
+          Responder llega pronto — todavía no se puede enviar desde acá
+        </div>
+        <button
+          type="button"
+          disabled
+          title="Enviar todavía no está disponible"
+          className="w-10 h-10 rounded-full shrink-0 flex items-center justify-center text-white opacity-40 cursor-not-allowed"
+          style={{ background: chs.gradiente }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="m22 2-7 20-4-9-9-4Z" />
+            <path d="M22 2 11 13" />
+          </svg>
+        </button>
       </div>
     </div>
   );

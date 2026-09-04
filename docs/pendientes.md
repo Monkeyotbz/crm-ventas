@@ -20,7 +20,14 @@ Había tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Rout
 - ✅ **Construida la bandeja unificada de solo lectura** (4 sept 2026) — lista de conversaciones,
   hilo de mensajes, panel copiloto (lee `conversation_insights`, vacío hasta que exista el
   Analista [7b]). Verificado con datos reales de producción, no solo leído.
-- Construir el envío de respuestas — falta la Edge Function de salida (WhatsApp Graph API, widget)
+- ⏳ **Envío por WhatsApp construido y conectado** (4 sept 2026) — `envio-whatsapp` respeta la
+  ventana de 24h, guarda el `wamid` para engancharse al tracking de estado que ya existía. **Sin
+  verificar contra la API real**: falta el secret `WHATSAPP_ACCESS_TOKEN` (nadie lo generó en
+  Meta todavía — ver `supabase/functions/envio-whatsapp/README.md`), y encima el único contacto
+  real tiene la ventana cerrada, así que ni con el token puesto hay con quién probar el camino de
+  texto libre hasta que llegue un mensaje entrante nuevo.
+- Envío para el widget de chat — falta que `candy-chat-widget.js` escuche respuestas nuevas
+  (Realtime); hoy solo manda, nunca recibe
 - Construir el Kanban de oportunidades (deals arrastrables entre etapas) — pantalla aparte, no
   estaba en el mockup de la bandeja
 
