@@ -1,0 +1,397 @@
+<title>Pendientes candyCRM</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style id="hoja">
+  :root {
+    --fondo: #f6f5f9;
+    --panel: #ffffff;
+    --panel-2: #efecf5;
+    --borde: #ded9ea;
+    --tinta: #201a2b;
+    --tinta-media: #5c5468;
+    --tinta-tenue: #8b839a;
+    --acento: #6b4fa0;
+    --acento-fondo: #efe8fb;
+    --ok: #17773f;
+    --ok-fondo: #e6f4ec;
+    --warn: #9a5800;
+    --warn-fondo: #fdf3e2;
+    --mono-fondo: #efecf5;
+    --mono-tinta: #6b4fa0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --fondo: #16121e;
+      --panel: #1e1828;
+      --panel-2: #261f33;
+      --borde: #372c47;
+      --tinta: #ede8f4;
+      --tinta-media: #b5abc7;
+      --tinta-tenue: #857a99;
+      --acento: #c3a6f2;
+      --acento-fondo: #2c2140;
+      --ok: #5cd98a;
+      --ok-fondo: #16291f;
+      --warn: #e3a95e;
+      --warn-fondo: #2c2318;
+      --mono-fondo: #261f33;
+      --mono-tinta: #c3a6f2;
+    }
+  }
+  :root[data-theme="dark"] {
+    --fondo: #16121e;
+    --panel: #1e1828;
+    --panel-2: #261f33;
+    --borde: #372c47;
+    --tinta: #ede8f4;
+    --tinta-media: #b5abc7;
+    --tinta-tenue: #857a99;
+    --acento: #c3a6f2;
+    --acento-fondo: #2c2140;
+    --ok: #5cd98a;
+    --ok-fondo: #16291f;
+    --warn: #e3a95e;
+    --warn-fondo: #2c2318;
+    --mono-fondo: #261f33;
+    --mono-tinta: #c3a6f2;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--fondo); color: var(--tinta);
+    font-family: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+    font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased;
+  }
+  .envoltura { max-width: 64rem; margin: 0 auto; padding: 2.5rem 1.25rem 5rem; }
+
+  header.cabecera { margin-bottom: 1.75rem; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace; font-size: .72rem;
+    letter-spacing: .09em; text-transform: uppercase;
+    color: var(--tinta-tenue); margin-bottom: .5rem;
+  }
+  h1 {
+    font-family: 'Archivo', system-ui, sans-serif; font-weight: 700;
+    font-size: clamp(1.7rem, 3.6vw, 2.3rem); line-height: 1.1;
+    margin: 0 0 .6rem; text-wrap: balance;
+  }
+  .subtitulo { color: var(--tinta-media); max-width: 48rem; margin: 0; }
+
+  .resumen {
+    display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap;
+    margin: 1.6rem 0 1.5rem; padding: 1rem 1.2rem;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+  }
+  .resumen .cifra {
+    font-family: 'Archivo', sans-serif; font-weight: 700;
+    font-size: 1.9rem; line-height: 1; color: var(--acento);
+    font-variant-numeric: tabular-nums;
+  }
+  .resumen .cifra-et { font-size: .78rem; color: var(--tinta-tenue); margin-top: .25rem; }
+  .resumen .barra {
+    flex: 1; min-width: 10rem; height: 8px; background: var(--panel-2);
+    border-radius: 99px; overflow: hidden; border: 1px solid var(--borde);
+  }
+  .resumen .barra > i {
+    display: block; height: 100%; background: var(--acento); transition: width .35s ease;
+  }
+  @media (prefers-reduced-motion: reduce) { .resumen .barra > i { transition: none; } }
+
+  h2.area-titulo {
+    font-family: 'Archivo', sans-serif; font-weight: 700; font-size: 1.05rem;
+    margin: 2.25rem 0 .3rem; display: flex; align-items: baseline; gap: .55rem;
+  }
+  .area-titulo .cuenta {
+    font-family: 'JetBrains Mono', monospace; font-size: .76rem; font-weight: 400;
+    color: var(--tinta-tenue);
+  }
+  p.area-nota { color: var(--tinta-media); font-size: .89rem; margin: 0 0 .9rem; max-width: 52rem; }
+
+  .item {
+    background: var(--panel); border: 1px solid var(--borde);
+    border-left: 3px solid var(--acento); border-radius: 10px;
+    padding: .85rem 1.05rem; margin-bottom: .55rem;
+    display: grid; grid-template-columns: auto 1fr; gap: .15rem .75rem; align-items: start;
+  }
+  .item.hecho { opacity: .55; border-left-color: var(--ok); }
+  .item.hecho .item-titulo { text-decoration: line-through; text-decoration-thickness: 1px; }
+  .item input[type="checkbox"] {
+    grid-row: 1 / span 2; width: 1.05rem; height: 1.05rem; margin-top: .2rem;
+    accent-color: var(--ok); cursor: pointer;
+  }
+  .item input[type="checkbox"]:disabled { cursor: not-allowed; }
+  .item-titulo { font-weight: 600; }
+  .item-detalle { color: var(--tinta-media); font-size: .89rem; margin: .25rem 0 0; }
+
+  .referencia {
+    margin-top: 2.75rem; padding-top: .5rem; border-top: 1px solid var(--borde);
+  }
+  .referencia > p.lead {
+    color: var(--tinta-media); font-size: .89rem; max-width: 52rem; margin: .4rem 0 1.1rem;
+  }
+  .ref-card {
+    background: var(--panel-2); border: 1px dashed var(--borde); border-radius: 10px;
+    padding: .95rem 1.1rem; margin-bottom: .7rem;
+  }
+  .ref-card h3 {
+    font-family: 'Archivo', sans-serif; font-size: .95rem; margin: 0 0 .35rem;
+  }
+  .ref-card p { color: var(--tinta-media); font-size: .89rem; margin: 0; }
+  .ref-card a { color: var(--acento); }
+  code {
+    font-family: 'JetBrains Mono', monospace; font-size: .85em;
+    background: var(--mono-fondo); color: var(--mono-tinta);
+    padding: .08em .35em; border-radius: 4px; overflow-wrap: anywhere;
+  }
+
+  footer.pie {
+    margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid var(--borde);
+    font-size: .82rem; color: var(--tinta-tenue);
+  }
+  #estado-guardado {
+    font-family: 'JetBrains Mono', monospace; font-size: .75rem;
+    color: var(--tinta-tenue); margin-left: .5rem;
+  }
+  .filtros { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.4rem; }
+  .filtros button {
+    font: inherit; font-size: .85rem; cursor: pointer;
+    background: var(--panel); color: var(--tinta-media);
+    border: 1px solid var(--borde); border-radius: 99px; padding: .3rem .75rem;
+  }
+  .filtros button[aria-pressed="true"] { background: var(--acento); border-color: var(--acento); color: #fff; }
+  .filtros button:focus-visible, .item input:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+</style>
+
+<div class="envoltura">
+  <div id="app"></div>
+</div>
+
+<script type="application/json" id="estado">
+{
+  "hechos": [],
+  "areas": [
+    {
+      "clave": "frontend",
+      "titulo": "Frontend — Sprint 1",
+      "nota": "El cuello de botella real: hay tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Router clasificando) y ningún lugar del CRM para ver lo que entra — sigue siendo solo el login de Sprint 0.",
+      "items": [
+        { "id": "F1", "titulo": "Construir el Kanban de oportunidades", "detalle": "Deals arrastrables entre etapas de cada pipeline (Transaccional/Consultivo/Expansión)." },
+        { "id": "F2", "titulo": "Construir la bandeja unificada (inbox)", "detalle": "Ver y responder las conversaciones que ya están entrando por WhatsApp y por el widget de chat." },
+        { "id": "F3", "titulo": "Panel copiloto IA", "detalle": "Lee conversation_insights (score, sentimiento, resumen, sugerencia). Depende de que F1 y F2 existan primero." }
+      ]
+    },
+    {
+      "clave": "widget",
+      "titulo": "Widget de chat web",
+      "nota": "Construido y probado de punta a punta el 4 sept 2026 — esto es lo que le falta.",
+      "items": [
+        { "id": "W1", "titulo": "Embeberlo en hellominus.com real", "detalle": "Hoy corre en GitHub Pages contra un doble local (widget/prueba.html), no en el sitio real." },
+        { "id": "W2", "titulo": "Límite de velocidad en ingesta-widget-chat", "detalle": "Brecha de seguridad conocida y documentada en el propio código, no un descuido — a diferencia de WhatsApp, este endpoint no tiene firma de un tercero que lo proteja." },
+        { "id": "W3", "titulo": "(Menor) Merge manual de contactos duplicados", "detalle": "Cuando alguien identifica un email que ya pertenece a otro contacto. Deliberadamente sin resolver por ahora — documentado como limitación conocida, no un bug." }
+      ]
+    },
+    {
+      "clave": "meta",
+      "titulo": "WhatsApp / Meta — producción real",
+      "nota": "",
+      "items": [
+        { "id": "M1", "titulo": "Registrar un número real de WhatsApp", "detalle": "Hoy solo está conectado el número de prueba de Meta." },
+        { "id": "M2", "titulo": "Confirmar la verificación de negocio de Meta", "detalle": "\"Paso 3\" de docs/configurar-webhook-meta.md — estado no confirmado en este documento." },
+        { "id": "M3", "titulo": "Reemplazar la URL de Política de Privacidad", "detalle": "Hoy apunta a un Artifact temporal. Reemplazar en Meta for Developers cuando exista getcandycrm.com — ver CLAUDE.md." }
+      ]
+    },
+    {
+      "clave": "n8n",
+      "titulo": "n8n",
+      "nota": "Sigue sin cuenta creada. Tres pasos, en este orden, antes del primer flujo real.",
+      "items": [
+        { "id": "N1", "titulo": "Crear la cuenta de n8n", "detalle": "Cloud o self-host." },
+        { "id": "N2", "titulo": "Resolver el mapeo canal → tenant", "detalle": "Para Instagram/Messenger/Meta Ads, que no tienen Edge Function propia. Es el bloqueante real — sin esto no se puede construir bien ni el primer flujo." },
+        { "id": "N3", "titulo": "Construir la Edge Function de ingesta genérica", "detalle": "Para los canales que entren vía n8n — reusando el patrón atómico de resolución de contacto/conversación." }
+      ]
+    },
+    {
+      "clave": "equipo",
+      "titulo": "Equipo y accesos",
+      "nota": "",
+      "items": [
+        { "id": "G1", "titulo": "Conseguir el correo de Gabriel", "detalle": "Para invitarlo a la organización de Supabase con rol Developer." },
+        { "id": "G2", "titulo": "Agregarlo como colaborador de GitHub", "detalle": "Permiso Write en Monkeyotbz/crm-ventas, no Admin." },
+        { "id": "G3", "titulo": "Decidir sobre crm-ventas-staging", "detalle": "Proyecto Supabase pausado (INACTIVE) — borrarlo o dejarlo así." }
+      ]
+    },
+    {
+      "clave": "dominio",
+      "titulo": "Dominio",
+      "nota": "",
+      "items": [
+        { "id": "D1", "titulo": "Desplegar getcandycrm.com", "detalle": "Bloquea el reemplazo de la URL de Política de Privacidad (M3) y da un destino real para el widget (W1)." }
+      ]
+    }
+  ]
+}
+</script>
+
+<script id="logica">
+(function () {
+  var raiz = document.getElementById("app");
+  var datos = JSON.parse(document.getElementById("estado").textContent);
+  var filtro = "todos";
+  var escribible = null;
+  var artefacto = null;
+
+  function esc(s) { return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
+  function hecho(id) { return datos.hechos.indexOf(id) !== -1; }
+
+  function todosLosItems() {
+    var lista = [];
+    datos.areas.forEach(function (a) { a.items.forEach(function (it) { lista.push(it); }); });
+    return lista;
+  }
+
+  function cuerpo() {
+    var todos = todosLosItems();
+    var listos = datos.hechos.filter(function (id) { return todos.some(function (it) { return it.id === id; }); }).length;
+    var pct = todos.length ? Math.round((listos / todos.length) * 100) : 0;
+
+    var html = ''
+      + '<header class="cabecera">'
+      + '<p class="eyebrow">Estado general · candyCRM</p>'
+      + '<h1>Pendientes del proyecto</h1>'
+      + '<p class="subtitulo">Panorama completo de qué falta — no solo del widget de chat recién construido. '
+      + 'Tildá cada ítem a medida que se resuelve; el estado queda guardado para todos.</p>'
+      + '</header>'
+
+      + '<div class="resumen">'
+      + '<div><span class="cifra">' + listos + '/' + todos.length + '</span><div class="cifra-et">resueltos</div></div>'
+      + '<div class="barra"><i style="width:' + pct + '%"></i></div>'
+      + '</div>'
+
+      + '<div class="filtros">'
+      + boton("todos", "Todos (" + todos.length + ")")
+      + boton("pendientes", "Pendientes (" + (todos.length - listos) + ")")
+      + boton("hechos", "Resueltos (" + listos + ")")
+      + '<span id="estado-guardado"></span>'
+      + '</div>';
+
+    datos.areas.forEach(function (area) {
+      var items = area.items.filter(function (it) {
+        if (filtro === "pendientes") return !hecho(it.id);
+        if (filtro === "hechos") return hecho(it.id);
+        return true;
+      });
+      if (!items.length) return;
+      html += '<h2 class="area-titulo">' + esc(area.titulo) + '<span class="cuenta">' + items.length + '</span></h2>';
+      if (area.nota) html += '<p class="area-nota">' + esc(area.nota) + '</p>';
+      items.forEach(function (it) { html += tarjeta(it); });
+    });
+
+    html += ''
+      + '<div class="referencia">'
+      + '<h2 class="area-titulo">Referencia — con dueño de estado propio</h2>'
+      + '<p class="lead">Estos dos grupos no se tildan acá a propósito: ya tienen su propio lugar donde su estado '
+      + 'se decide y se registra, y duplicarlo acá arriesga que los dos queden desincronizados.</p>'
+
+      + '<div class="ref-card">'
+      + '<h3>Calidad de código — auditoría del 2 sept</h3>'
+      + '<p>Los 6 bloqueantes (H1-H6) están corregidos. Quedan <strong>10 importantes y 10 menores</strong> '
+      + 'sin tocar — detalle completo, con checkboxes propios, en <code>docs/corregir-errores.md</code> y su Artifact.</p>'
+      + '</div>'
+
+      + '<div class="ref-card">'
+      + '<h3>Candidatos de agentes sin construir — [6a] a [7c]</h3>'
+      + '<p>Los 4 agentes conversacionales ([6a] Catálogo, [6b] SDR, [6c] Soporte/FAQ, [6d] Agendador) y los 3 de '
+      + 'backend ([7a] Enriquecedor, [7b] Analista, [7c] Recuperación) — todos <code>APLAZADO</code> en '
+      + '<code>docs/DECISIONES.md</code>, con condición "Fase 1 cerrada" (coincide con el grupo Frontend de arriba). '
+      + '[6d] necesita además Cal.com/Google Calendar. La condición extra de [7c] decía que <code>payment_links</code> '
+      + 'no existía en el esquema — <strong>ya existe, verificado contra la base el 4 sept</strong> — esa entrada '
+      + 'quedó desactualizada en ese punto puntual; el cambio de estado en sí sigue siendo decisión del usuario.</p>'
+      + '</div>'
+      + '</div>'
+
+      + '<footer class="pie">Armado el 4 sept 2026. No es un reemplazo de <code>docs/DECISIONES.md</code> ni de '
+      + '<code>docs/corregir-errores.md</code> — es el panorama que faltaba por arriba de los dos.</footer>';
+
+    return html;
+  }
+
+  function boton(clave, et) {
+    return '<button type="button" data-filtro="' + clave + '" aria-pressed="' + (filtro === clave) + '">' + et + '</button>';
+  }
+  function tarjeta(it) {
+    var listo = hecho(it.id);
+    return ''
+      + '<article class="item' + (listo ? ' hecho' : '') + '">'
+      + '<input type="checkbox" data-id="' + it.id + '"' + (listo ? " checked" : "")
+      + (escribible === false ? " disabled" : "")
+      + ' aria-label="Marcar ' + it.id + ' como resuelto">'
+      + '<div class="item-titulo">' + esc(it.titulo) + '</div>'
+      + '<div class="item-detalle">' + esc(it.detalle) + '</div>'
+      + '</article>';
+  }
+
+  function pintar() {
+    raiz.innerHTML = cuerpo();
+    raiz.querySelectorAll("[data-filtro]").forEach(function (b) {
+      b.addEventListener("click", function () { filtro = b.dataset.filtro; pintar(); });
+    });
+    raiz.querySelectorAll('input[type="checkbox"]').forEach(function (c) {
+      c.addEventListener("change", function () { alternar(c.dataset.id, c.checked); });
+    });
+  }
+
+  function aviso(txt) {
+    var el = document.getElementById("estado-guardado");
+    if (el) el.textContent = txt;
+  }
+
+  function documentoCompleto() {
+    var css = document.getElementById("hoja").textContent;
+    var js = document.getElementById("logica").textContent;
+    var fuente = JSON.stringify(datos, null, 2);
+    return "<!doctype html>\n<html lang=\"es\">\n<head>\n<meta charset=\"utf-8\">\n"
+      + "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
+      + "<title>Pendientes candyCRM</title>\n"
+      + "<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;500&display=swap\">\n"
+      + "<style id=\"hoja\">" + css + "</style>\n</head>\n<body>\n"
+      + "<div class=\"envoltura\"><div id=\"app\"></div></div>\n"
+      + "<script type=\"application/json\" id=\"estado\">" + fuente + "<\/script>\n"
+      + "<script id=\"logica\">" + js + "<\/script>\n</body>\n</html>";
+  }
+
+  function alternar(id, marcar) {
+    var i = datos.hechos.indexOf(id);
+    if (marcar && i === -1) datos.hechos.push(id);
+    if (!marcar && i !== -1) datos.hechos.splice(i, 1);
+    pintar();
+
+    if (!artefacto) { aviso("sin guardar (solo esta vista)"); return; }
+    aviso("guardando…");
+    artefacto.publish(documentoCompleto()).then(function () {
+      aviso("guardado");
+    }).catch(function (e) {
+      var c = e && e.code;
+      if (c === "conflict") return;
+      if (c === "not_writer" || c === "not_granted" || c === "not_declared") {
+        escribible = false; pintar(); aviso("solo lectura");
+        return;
+      }
+      aviso("no se pudo guardar (" + (c || "error") + ")");
+    });
+  }
+
+  pintar();
+
+  if (window.claude && window.claude.use) {
+    window.claude.use("artifact").then(function (a) {
+      artefacto = a;
+      escribible = !!a;
+      pintar();
+      aviso(a ? "" : "solo lectura");
+    });
+  } else {
+    escribible = false;
+    pintar();
+    aviso("solo lectura");
+  }
+})();
+</script>
