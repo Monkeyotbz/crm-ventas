@@ -17,8 +17,7 @@
 //   - Ventana cerrada: hace falta una plantilla aprobada por Meta. Este
 //     camino existe en el código pero NO se probó contra la API real todavía
 //     — message_templates está vacía (nadie sometió una plantilla a Meta
-//     todavía) y falta el secret WHATSAPP_ACCESS_TOKEN. Ver README.md de
-//     esta función.
+//     todavía). Ver README.md de esta función.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 
@@ -27,14 +26,29 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const GRAPH_VERSION = "v21.0";
 
+// A diferencia de ingesta-whatsapp (Meta la llama servidor-a-servidor) y
+// router (la llama un trigger de Postgres), a esta la llama el navegador
+// del vendedor — cross-origin real (localhost:5173 hoy, getcandycrm.com
+// después), con un header Authorization propio. Sin estos headers el
+// preflight OPTIONS del navegador falla y supabase-js lo reporta como
+// "Failed to send a request to the Edge Function" — un error de red, no
+// uno de esta función, así que no hay forma de verlo desde acá sin probarlo
+// con un navegador real. Se descubrió recién probando con el usuario logueado.
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "authorization, content-type",
+};
+
 function json(body: unknown, status: number) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...CORS },
   });
 }
 
 Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return json({ error: "Method Not Allowed" }, 405);
 
   const authHeader = req.headers.get("Authorization");

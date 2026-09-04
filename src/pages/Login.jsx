@@ -15,7 +15,15 @@ export default function Login() {
       return;
     }
     setStatus("sending");
-    const { error } = await supabase.auth.signInWithOtp({ email });
+    // emailRedirectTo explícito: sin esto, Supabase manda el link de vuelta
+    // a lo que tenga guardado como "Site URL" en su panel — que no
+    // necesariamente coincide con dónde está corriendo la app ahora mismo
+    // (local en un puerto, producción en otro dominio después). Así el link
+    // siempre apunta a donde el usuario efectivamente está.
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: { emailRedirectTo: window.location.origin },
+    });
     setStatus(error ? "error" : "sent");
   }
 
