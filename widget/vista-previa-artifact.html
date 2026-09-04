@@ -1,0 +1,273 @@
+<!--
+  Copia derivada de candy-chat-widget.js + prueba.html, adaptada para
+  publicarse como Claude Artifact (fragmento sin doctype/html/head/body,
+  fetch() real reemplazado por una simulación — los Artifacts no pueden
+  llamar a *.supabase.co). NO es la fuente de verdad del widget: si
+  candy-chat-widget.js cambia, esta copia queda desactualizada hasta que
+  alguien la sincronice a mano. Sirve solo para mirar el diseño y la
+  interacción sin depender de GitHub Pages ni de un servidor local.
+  Publicada: https://claude.ai/code/artifact/9cb566ed-b8d6-46e7-b82f-efd2adf66443
+-->
+<title>Vista previa del widget</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --ground:#f7f5f8; --surface:#ffffff; --surface-2:#efe9f4;
+  --line:#e3dce7; --line-strong:#cdc2d5;
+  --ink:#241d28; --ink-2:#5f5568; --ink-3:#8d8296;
+  --warn:#a9660f; --warn-soft:#fbefdc;
+  --rosa:#ff5ca8; --violeta:#b98bff;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#15111a; --surface:#1e1824; --surface-2:#261f2e;
+    --line:#352d40; --line-strong:#4d4359;
+    --ink:#f2ecf4; --ink-2:#b8acc0; --ink-3:#897d93;
+    --warn:#ffb35c; --warn-soft:#38260f;
+    --rosa:#ff7cb8; --violeta:#c39cff;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#15111a; --surface:#1e1824; --surface-2:#261f2e;
+  --line:#352d40; --line-strong:#4d4359;
+  --ink:#f2ecf4; --ink-2:#b8acc0; --ink-3:#897d93;
+  --warn:#ffb35c; --warn-soft:#38260f;
+  --rosa:#ff7cb8; --violeta:#c39cff;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height:1.6;
+}
+.banner{
+  position:sticky; top:0; z-index:500;
+  background:var(--warn-soft); border-bottom:1px solid var(--warn);
+  padding:10px 20px; font-size:.86rem; color:var(--ink);
+  display:flex; flex-wrap:wrap; gap:6px 10px; align-items:baseline;
+}
+.banner strong{color:var(--warn)}
+.banner code{
+  font-family:"IBM Plex Mono",monospace; font-size:.88em;
+  background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:.05em .35em;
+}
+.page{max-width:720px; margin:0 auto; padding:56px 24px 120px}
+h1{
+  font-family:"Baloo 2","IBM Plex Sans",sans-serif; font-weight:700;
+  font-size:clamp(1.8rem,4vw,2.3rem); margin:0 0 10px; text-wrap:balance;
+}
+.deck{color:var(--ink-2); font-size:1.02rem; max-width:56ch; margin:0 0 32px}
+.contenido p{color:var(--ink-2); max-width:60ch}
+.contenido{
+  background:var(--surface); border:1px solid var(--line); border-radius:14px;
+  padding:24px 26px; margin-top:8px;
+}
+</style>
+
+<div class="banner">
+  <strong>Vista previa visual, no conectada a la base real.</strong>
+  <span>Las Artifacts no pueden llamar a <code>*.supabase.co</code> — acá el botón de enviar simula la respuesta. La versión que sí escribe en la base está en <code>widget/prueba.html</code> del repo (o en GitHub Pages, cuando se active).</span>
+</div>
+
+<div class="page">
+  <h1>Hellominus (doble de prueba)</h1>
+  <p class="deck">Así se ve <code>candy-chat-widget.js</code> embebido — abrí la burbuja rosa de abajo a la derecha. El diseño, el Shadow DOM y la interacción son exactamente los del widget real; solo el envío final a la base está simulado acá.</p>
+  <div class="contenido">
+    <p>Contenido de ejemplo de la página, para que el widget se vea flotando sobre algo parecido a un sitio real en vez de una pantalla en blanco.</p>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function sesionAnonima() {
+    var CLAVE = "candy_chat_sesion_preview";
+    try {
+      var v = localStorage.getItem(CLAVE);
+      if (!v) { v = "web_" + crypto.randomUUID(); localStorage.setItem(CLAVE, v); }
+      return v;
+    } catch (e) { return "web_" + crypto.randomUUID(); }
+  }
+  var sesion = sesionAnonima();
+  var emailGuardado = null;
+  try { emailGuardado = localStorage.getItem("candy_chat_email_preview"); } catch (e) {}
+
+  var host = document.createElement("div");
+  host.id = "candy-chat-widget-host";
+  document.body.appendChild(host);
+  var root = host.attachShadow({ mode: "open" });
+
+  var style = document.createElement("style");
+  style.textContent = `
+    :host, * { box-sizing: border-box; }
+    .wrap {
+      position: fixed; right: 20px; bottom: 20px; z-index: 2147483000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    .burbuja {
+      width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #ff5ca8, #b98bff);
+      box-shadow: 0 8px 24px -6px rgba(255, 92, 168, 0.55), 0 2px 8px rgba(0,0,0,0.15);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .15s ease;
+    }
+    .burbuja:hover { transform: scale(1.06); }
+    .burbuja svg { width: 26px; height: 26px; fill: #fff; }
+
+    .panel {
+      position: absolute; right: 0; bottom: 76px;
+      width: 340px; max-width: calc(100vw - 32px);
+      height: 480px; max-height: calc(100vh - 120px);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 20px 60px -12px rgba(80, 40, 110, 0.35), inset 0 1px 0 rgba(255,255,255,0.8);
+      display: none; flex-direction: column; overflow: hidden;
+    }
+    .panel.abierto { display: flex; }
+
+    .cabecera {
+      padding: 16px 18px;
+      background: linear-gradient(120deg, #ff5ca8, #b98bff 70%);
+      color: #fff; flex: none;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .cabecera h1 {
+      font-family: "Baloo 2", -apple-system, sans-serif;
+      font-size: 16px; font-weight: 700; margin: 0;
+    }
+    .cabecera p { margin: 2px 0 0; font-size: 12px; opacity: .92; }
+    .cerrar {
+      background: rgba(255,255,255,0.22); border: none; color: #fff;
+      width: 26px; height: 26px; border-radius: 50%; cursor: pointer; font-size: 15px;
+      display: flex; align-items: center; justify-content: center; flex: none;
+    }
+
+    .identidad { padding: 8px 14px; flex: none; border-bottom: 1px solid rgba(0,0,0,0.06); }
+    .identidad input {
+      width: 100%; border: 1px solid rgba(0,0,0,0.12); border-radius: 8px;
+      padding: 6px 10px; font-size: 12px; background: rgba(255,255,255,0.7); outline: none;
+    }
+    .identidad input:focus { border-color: #ff5ca8; }
+    .identidad label { font-size: 10.5px; color: #6b5c78; display: block; margin-bottom: 3px; }
+
+    .mensajes { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+    .burbuja-msg {
+      max-width: 78%; padding: 8px 12px; border-radius: 14px; font-size: 13.5px; line-height: 1.4;
+      word-wrap: break-word; white-space: pre-wrap;
+    }
+    .in {
+      align-self: flex-start; background: rgba(255,255,255,0.85);
+      border: 1px solid rgba(0,0,0,0.06); color: #241d28; border-bottom-left-radius: 4px;
+    }
+    .out {
+      align-self: flex-end; color: #fff; border-bottom-right-radius: 4px;
+      background: linear-gradient(135deg, #ff5ca8, #ff8fc4);
+    }
+    .bienvenida { align-self: flex-start; font-size: 12.5px; color: #6b5c78; padding: 4px 4px 8px; }
+
+    .form {
+      flex: none; padding: 10px; border-top: 1px solid rgba(0,0,0,0.06);
+      display: flex; gap: 8px; background: rgba(255,255,255,0.4);
+    }
+    .form textarea {
+      flex: 1; resize: none; border: 1px solid rgba(0,0,0,0.14); border-radius: 12px;
+      padding: 8px 12px; font-size: 13.5px; font-family: inherit; outline: none;
+      background: #fff; max-height: 80px; line-height: 1.35;
+    }
+    .form textarea:focus { border-color: #ff5ca8; }
+    .enviar {
+      flex: none; width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+      background: linear-gradient(135deg, #ff5ca8, #b98bff); display: flex; align-items: center; justify-content: center;
+    }
+    .enviar:disabled { opacity: .5; cursor: default; }
+    .enviar svg { width: 16px; height: 16px; fill: #fff; }
+  `;
+  root.appendChild(style);
+
+  var wrap = document.createElement("div");
+  wrap.className = "wrap";
+  wrap.innerHTML =
+    '<button class="burbuja" type="button" aria-label="Abrir chat" aria-expanded="false">' +
+      '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 5.94 2 10.8c0 2.77 1.47 5.24 3.77 6.85-.12.99-.5 2.36-1.5 3.85-.14.2 0 .48.26.47 1.86-.1 3.68-.78 4.99-1.6.79.16 1.62.24 2.48.24 5.52 0 10-3.94 10-8.81C22 5.94 17.52 2 12 2z"/></svg>' +
+    "</button>" +
+    '<div class="panel" role="dialog" aria-label="Chat">' +
+      '<div class="cabecera">' +
+        "<div><h1>candyCRM</h1><p>Normalmente respondemos en minutos</p></div>" +
+        '<button class="cerrar" type="button" aria-label="Cerrar chat">✕</button>' +
+      "</div>" +
+      '<div class="identidad">' +
+        '<label for="candy-email">Tu email (opcional, para poder responderte)</label>' +
+        '<input id="candy-email" type="email" placeholder="vos@ejemplo.com" autocomplete="email" />' +
+      "</div>" +
+      '<div class="mensajes"><p class="bienvenida">Hola 👋 Contanos qué necesitás y te respondemos apenas podamos.</p></div>' +
+      '<form class="form">' +
+        '<textarea rows="1" placeholder="Escribí tu mensaje…" aria-label="Mensaje"></textarea>' +
+        '<button class="enviar" type="submit" aria-label="Enviar">' +
+          '<svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>' +
+        "</button>" +
+      "</form>" +
+    "</div>";
+  root.appendChild(wrap);
+
+  var burbujaBtn = wrap.querySelector(".burbuja");
+  var panel = wrap.querySelector(".panel");
+  var cerrarBtn = wrap.querySelector(".cerrar");
+  var mensajesEl = wrap.querySelector(".mensajes");
+  var form = wrap.querySelector(".form");
+  var textarea = wrap.querySelector("textarea");
+  var enviarBtn = wrap.querySelector(".enviar");
+  var emailInput = wrap.querySelector("#candy-email");
+  if (emailGuardado) emailInput.value = emailGuardado;
+
+  function alternarPanel() {
+    var abierto = panel.classList.toggle("abierto");
+    burbujaBtn.setAttribute("aria-expanded", String(abierto));
+    if (abierto) textarea.focus();
+  }
+  burbujaBtn.addEventListener("click", alternarPanel);
+  cerrarBtn.addEventListener("click", alternarPanel);
+
+  function agregarMensaje(texto, direccion) {
+    var b = document.createElement("div");
+    b.className = "burbuja-msg " + direccion;
+    b.textContent = texto;
+    mensajesEl.appendChild(b);
+    mensajesEl.scrollTop = mensajesEl.scrollHeight;
+  }
+
+  textarea.addEventListener("input", function () {
+    textarea.style.height = "auto";
+    textarea.style.height = Math.min(textarea.scrollHeight, 80) + "px";
+  });
+  textarea.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); form.requestSubmit(); }
+  });
+
+  // Única diferencia real con candy-chat-widget.js: acá no hay fetch() al
+  // endpoint real (las Artifacts no pueden llamar a *.supabase.co) — se
+  // simula la respuesta para poder mirar la interacción completa.
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var texto = textarea.value.trim();
+    if (!texto) return;
+
+    var email = emailInput.value.trim();
+    if (email) { try { localStorage.setItem("candy_chat_email_preview", email); } catch (err) {} }
+
+    agregarMensaje(texto, "out");
+    textarea.value = "";
+    textarea.style.height = "auto";
+    enviarBtn.disabled = true;
+
+    setTimeout(function () { enviarBtn.disabled = false; }, 350);
+  });
+})();
+</script>
