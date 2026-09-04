@@ -34,7 +34,8 @@ agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`
 | Agente | Carpeta | Lo dispara |
 |---|---|---|
 | Ingesta de WhatsApp | `supabase/functions/ingesta-whatsapp/` | Webhook de Meta |
-| Router de clasificación | `supabase/functions/router/` | Database Webhook sobre `insert` en `messages` |
+| Ingesta del widget de chat web | `supabase/functions/ingesta-widget-chat/` | POST del widget embebido (`widget/candy-chat-widget.js`), autenticado por `widget_key` pública, no por JWT |
+| Router de clasificación | `supabase/functions/router/` | Trigger de Postgres (`private.disparar_router()`, vía `pg_net`) sobre `insert` en `messages` — no el panel de Database Webhooks, que no funciona en este proyecto (ver `docs/DECISIONES.md`, candidato [5]) |
 
 Es la excepción de plataforma del `CLAUDE.md` del laboratorio: son endpoints HTTP
 que invoca un tercero, y una carpeta local no puede servir HTTP. La regla que
@@ -42,8 +43,18 @@ sigue valiendo es la de clasificación — el código que llama a Claude (el Rou
 llama a Haiku) no se mezcla con el determinístico de `scripts/`.
 
 **No mover estas funciones a `agentes-sdk/`.** Se rompe lo que las invoca: la
-Callback URL registrada en Meta y el Database Webhook de Supabase apuntan a la
-URL que Supabase genera desde `supabase/functions/`.
+Callback URL registrada en Meta y el trigger de Postgres apuntan a la URL que
+Supabase genera desde `supabase/functions/`.
+
+## Dónde vive el widget de chat embebible
+
+[`widget/`](widget/) — no es parte de `src/`, aunque también es frontend. La SPA de
+`src/` corre logueada, adentro de candyCRM; `widget/candy-chat-widget.js` es lo
+opuesto: un script suelto que se embebe en el sitio de OTRO tenant (hoy solo
+[`widget/prueba.html`](widget/prueba.html), un doble local — hellominus.com real
+todavía no lo tiene) y por eso no puede depender del build de Vite ni de nada
+de `src/`. Usa Shadow DOM a propósito, para no chocar con el CSS del sitio que
+lo embeba.
 
 ## Regla del esquema: nunca editar una migración ya aplicada
 
@@ -89,7 +100,8 @@ es fuente de verdad**: si contradice a una migración, manda la migración.
   - El esquema son 8 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba.
   - **Las funciones internas viven en el schema `private`**, no en `public` (estaban expuestas como endpoints RPC públicos). Al escribir una policy nueva hay que calificarlas: `private.current_tenant_id()`, no `current_tenant_id()`.
   - **Los 48 ítems de `docs/tener-en-cuenta-base-de-datos` están implementados** (25 ago 2026), con tres desvíos deliberados respecto del documento — ver ahí mismo.
-- Próximo paso de código: Sprint 1 (Kanban funcional), que ya no está bloqueado. El candidato [3] de `docs/DECISIONES.md` (webhook de ingesta de WhatsApp) cumplió la mitad de su condición de activación — falta el arranque del Sprint 1.5. Ver los Sprints en [README.md](README.md).
+- **3 sept/4 sept 2026:** además de WhatsApp (candidato [3], funcionando con mensajes reales) y el Router (candidato [5], `ACEPTADO`), ahora también está construido y probado de punta a punta el canal de **chat web** (Sprint 2 del README): `supabase/functions/ingesta-widget-chat/` + `widget/candy-chat-widget.js`, con resolución atómica de contacto/conversación (mismo patrón que corrigió H3/H4 para WhatsApp) e identidad por email/teléfono tipeados en el chat — no por login de hellominus.com. Entra directo, no por n8n (n8n sigue sin cuenta creada). Falta embeberlo en el sitio real de Hellominus — hoy solo corre contra `widget/prueba.html`.
+- **Próximo paso de código: Sprint 1 (Kanban + bandeja unificada).** Es el verdadero cuello de botella ahora — hay tres canales de ingesta funcionando (WhatsApp, chat web, y el Router clasificando) y **ningún lugar en el frontend para ver lo que entra**: el CRM sigue siendo solo el login de Sprint 0. Ver los Sprints en [README.md](README.md).
 - **Pendiente: reemplazar la URL de Política de Privacidad en Meta for Developers en cuanto exista una URL real de candyCRM (ej. `getcandycrm.com/privacidad`).** Hoy ese campo apunta a un Artifact temporal (`https://claude.ai/code/artifact/7d35f657-92d7-4ee7-8b05-95d6205b2429`, compartido manualmente para que el revisor automático de Meta pueda leerlo) porque el dominio real todavía no está desplegado — se usó para poder publicar la app y probar el webhook con un mensaje real. Cuando `getcandycrm.com` exista: (1) publicar ahí el mismo contenido de la política, (2) en Meta for Developers → app "CRM Ventas - Hello Minus" (App ID `1537215744334186`) → Configuración de la app → Información básica, reemplazar la URL por la del dominio real. El Artifact puede quedar sin uso, no hace falta borrarlo.
 - `docs/` tiene seis documentos de planeación traídos el 24-25 ago 2026 — son guías orientativas, no órdenes literales a seguir. Cada uno en HTML (snapshot original) + Markdown (copia de trabajo, la que se edita). También ahí vive `DECISIONES.md` (excepción a la convención del laboratorio, ver arriba):
   - `hoja-de-ruta-construccion` — mapa general de piezas a construir.

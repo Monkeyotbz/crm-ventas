@@ -1,0 +1,191 @@
+// Ingesta del widget de chat embebible (canal `chat_web`, Sprint 2 del README).
+//
+// Es la contraparte de ingesta-whatsapp para un canal sin Meta de por medio:
+// no hay firma HMAC que valide el origen, así que la confianza acá es más
+// débil por diseño. Lo único que identifica al tenant es `widget_key`, y esa
+// clave NO es secreta — viaja en el HTML/JS de cualquier sitio que embeba el
+// widget (ver el comentario en la migración 20260904171523). Por eso:
+//
+//   - Nunca se registra en webhook_errors una petición con clave inválida:
+//     cualquiera en internet puede mandar una clave inventada, y honrar ese
+//     registro sería dejar que un desconocido llene la tabla a gusto (mismo
+//     criterio que la firma inválida de WhatsApp, ver ingesta-whatsapp).
+//   - No hay límite de velocidad todavía. Es una brecha conocida, no un
+//     descuido: falta antes de exponer esto en un sitio público de verdad.
+//     Mientras tanto, el único límite real es un tope de longitud al mensaje.
+//
+// A diferencia de WhatsApp, acá SÍ conviene responder de forma síncrona: no
+// hay un remitente (Meta) que reintente si tardamos, hay un navegador
+// esperando saber si el mensaje se guardó para poder mostrarlo como enviado.
+
+import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
+
+const MAX_MENSAJE = 4000;
+
+const CORS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "content-type",
+};
+
+function json(body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json", ...CORS },
+  });
+}
+
+// service_role a propósito, igual que ingesta-whatsapp: el widget escribe en
+// cualquier tenant y RLS no lo protege — cada insert lleva su `tenant_id`
+// explícito, resuelto desde `chat_widget_keys`.
+const db: SupabaseClient = createClient(
+  Deno.env.get("SUPABASE_URL") ?? "",
+  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+  { auth: { persistSession: false } },
+);
+
+interface CuerpoWidget {
+  widget_key?: string;
+  sesion?: string;
+  mensaje?: string;
+  email?: string;
+  telefono?: string;
+  nombre?: string;
+  client_message_id?: string;
+}
+
+/** `widget_key` → tenant. Único punto donde este endpoint sabe de quién es. */
+async function resolverTenant(widgetKey: string) {
+  const { data, error } = await db
+    .from("chat_widget_keys")
+    .select("tenant_id, activo")
+    .eq("public_key", widgetKey)
+    .maybeSingle();
+
+  if (error) throw new Error(`chat_widget_keys: ${error.message}`);
+  if (!data || !data.activo) return null;
+  return data.tenant_id as string;
+}
+
+async function contactoDe(
+  tenantId: string,
+  sesion: string,
+  email: string | null,
+  telefono: string | null,
+  nombre: string | null,
+) {
+  const { data, error } = await db.rpc("resolver_contacto_widget", {
+    p_tenant: tenantId,
+    p_sesion: sesion,
+    p_email: email,
+    p_telefono: telefono,
+    p_nombre: nombre,
+  });
+
+  if (error) throw new Error(`resolver_contacto_widget: ${error.message}`);
+  if (data == null) throw new Error("resolver_contacto_widget no devolvió contacto");
+  return data as number;
+}
+
+async function conversacionDe(tenantId: string, contactId: number) {
+  const { data, error } = await db.rpc("resolver_conversacion_canal", {
+    p_tenant: tenantId,
+    p_contact: contactId,
+    p_canal: "chat_web",
+  });
+
+  if (error) throw new Error(`resolver_conversacion_canal: ${error.message}`);
+  if (data == null) throw new Error("resolver_conversacion_canal no devolvió conversación");
+  return data as number;
+}
+
+/** Deja constancia del fallo. Solo se llama con un tenant ya resuelto — ver la nota de arriba. */
+async function registrarError(err: unknown, payload: unknown, tenantId: string, evento: string) {
+  await db.from("webhook_errors").insert({
+    tenant_id: tenantId,
+    origen: "chat_web",
+    evento,
+    error: err instanceof Error ? err.message : String(err),
+    payload: payload as Record<string, unknown>,
+  });
+}
+
+Deno.serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS });
+  }
+  if (req.method !== "POST") {
+    return json({ error: "method_not_allowed" }, 405);
+  }
+
+  let cuerpo: CuerpoWidget;
+  try {
+    cuerpo = await req.json();
+  } catch {
+    return json({ error: "json_invalido" }, 400);
+  }
+
+  const widgetKey = (cuerpo.widget_key ?? "").trim();
+  const sesion = (cuerpo.sesion ?? "").trim();
+  const mensaje = (cuerpo.mensaje ?? "").trim();
+
+  if (!widgetKey) return json({ error: "falta widget_key" }, 400);
+  if (!sesion) return json({ error: "falta sesion" }, 400);
+  if (!mensaje) return json({ error: "el mensaje está vacío" }, 400);
+  if (mensaje.length > MAX_MENSAJE) {
+    return json({ error: `el mensaje supera los ${MAX_MENSAJE} caracteres` }, 413);
+  }
+
+  let tenantId: string | null;
+  try {
+    tenantId = await resolverTenant(widgetKey);
+  } catch (err) {
+    // Acá el fallo es nuestro (la consulta a chat_widget_keys), no del
+    // llamante — sí vale la pena registrarlo, pero sin tenant conocido.
+    console.error("[ingesta-widget-chat] resolverTenant:", err);
+    return json({ error: "error interno" }, 500);
+  }
+  if (!tenantId) {
+    // Clave inválida o inactiva: 404 sin registrar nada (ver comentario del
+    // encabezado). No se distingue "no existe" de "inactiva" en la
+    // respuesta — no le sirve a un atacante saber cuál de las dos fue.
+    return json({ error: "widget no encontrado" }, 404);
+  }
+
+  const email = cuerpo.email?.trim() || null;
+  const telefono = cuerpo.telefono?.trim() || null;
+  const nombre = cuerpo.nombre?.trim() || null;
+
+  try {
+    const contactId = await contactoDe(tenantId, sesion, email, telefono, nombre);
+    const conversationId = await conversacionDe(tenantId, contactId);
+
+    // Idempotencia igual que WhatsApp: `externo_id` lo genera el propio
+    // widget (o nosotros si no lo mandó) y el índice parcial de `messages`
+    // rechaza el duplicado si el navegador reintenta el mismo POST.
+    const externoId = cuerpo.client_message_id?.trim() || crypto.randomUUID();
+    const { error: errMsg } = await db.from("messages").insert({
+      conversation_id: conversationId,
+      direccion: "in",
+      canal: "chat_web",
+      contenido: mensaje,
+      payload_raw: cuerpo as Record<string, unknown>,
+      externo_id: externoId,
+    });
+    if (errMsg && errMsg.code !== "23505") {
+      throw new Error(`messages: ${errMsg.message}`);
+    }
+
+    const { error: errUltimo } = await db
+      .from("conversations")
+      .update({ ultimo_mensaje_at: new Date().toISOString() })
+      .eq("id", conversationId);
+    if (errUltimo) throw new Error(`conversations ultimo_mensaje_at: ${errUltimo.message}`);
+
+    return json({ ok: true, conversation_id: conversationId, contact_id: contactId });
+  } catch (err) {
+    console.error("[ingesta-widget-chat] mensaje:", err);
+    await registrarError(err, cuerpo, tenantId, "mensaje");
+    return json({ error: "no se pudo guardar el mensaje" }, 500);
+  }
+});

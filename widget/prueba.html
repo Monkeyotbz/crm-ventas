@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sitio de prueba — widget de candyCRM</title>
+<style>
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: #f4f1f6; color: #241d28;
+  }
+  header {
+    padding: 48px 24px; text-align: center;
+    background: linear-gradient(160deg, #fff, #f7eefc);
+    border-bottom: 1px solid #e9e0ef;
+  }
+  header h1 { margin: 0 0 8px; font-size: 1.6rem; }
+  header p { margin: 0; color: #6b5c78; max-width: 60ch; margin-inline: auto; }
+  main { max-width: 640px; margin: 0 auto; padding: 32px 24px 120px; }
+  .nota {
+    background: #fff8e6; border: 1px solid #f0d98c; border-radius: 10px;
+    padding: 14px 16px; font-size: 13.5px; line-height: 1.55; margin-bottom: 24px;
+  }
+  code { background: #efe8f5; padding: 1px 5px; border-radius: 4px; font-size: .92em; }
+</style>
+</head>
+<body>
+  <header>
+    <h1>Hellominus (sitio de prueba)</h1>
+    <p>Esta página NO es hellominus.com — es un doble para probar el widget de candyCRM de punta a punta sin tocar el repo real. Abrí la burbuja rosa de abajo a la derecha.</p>
+  </header>
+  <main>
+    <p class="nota">
+      El widget está embebido con la <code>widget_key</code> real de Hellominus
+      (<code>wgt_036c645b66d8425880a2566389129a33</code>), apuntando a la Edge Function
+      <code>ingesta-widget-chat</code> ya desplegada. Cada mensaje que mandes acá crea de verdad
+      un contacto, una conversación y pasa por el Router — como si fuera un visitante real del sitio.
+    </p>
+    <p>Contenido de ejemplo de la página, para que el widget se vea flotando sobre algo parecido a un sitio real en vez de una pantalla en blanco.</p>
+  </main>
+
+  <script
+    src="./candy-chat-widget.js"
+    data-widget-key="wgt_036c645b66d8425880a2566389129a33"
+    data-api-url="https://jrygtluycndiyvrxjmib.supabase.co/functions/v1/ingesta-widget-chat"
+  ></script>
+</body>
+</html>
