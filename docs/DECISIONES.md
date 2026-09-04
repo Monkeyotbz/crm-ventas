@@ -279,6 +279,45 @@ Composición: un solo agente
 Condición de activación: una cuarta ronda de cambios de esquema que vuelva a
   requerir reconciliar prosa a mano en los docs.
 
+### [9] API pública y MCP para tenants — separados por dependencia
+El pedido original fue "¿hace falta una API o un MCP para que los tenants se conecten con
+candyCRM?". Se separa en dos candidatos propios, [9a] y [9b], por el mismo motivo que [6] y [7]:
+el MCP depende de que la API exista primero (es una capa de *tool calling* encima de los mismos
+endpoints, no una segunda implementación paralela) — agruparlos forzaría a que el MCP espere sin
+necesidad si algún día se decide construir solo la API.
+
+**Lo que este candidato NO resuelve, porque ya está resuelto:** que candyCRM gestione las ventas
+de cada tenant de forma aislada (RLS + `tenant_id`) y que esté "en contacto" con el equipo humano
+de cada uno (la bandeja unificada, Sprint 1). Este candidato es específicamente sobre integrar
+SISTEMAS EXTERNOS de un tenant (su sitio, su otro software) sin que candyCRM tenga que construirle
+una Edge Function a medida por cada cliente nuevo — que es como está resuelto hoy para Hellominus
+(WhatsApp, el widget).
+
+### [9a] API pública de candyCRM
+Estado: APLAZADO
+Procedencia: pregunta directa del usuario, 4 sept 2026 — "¿es necesaria una API para el CRM de
+  ventas candy?"
+Mecanismo: Edge Function(s) de Supabase, mismo molde que `ingesta-whatsapp` /
+  `ingesta-widget-chat` — autenticación por clave (`tenant_api_keys`, mismo patrón que
+  `chat_widget_keys`), no JWT de usuario, porque quien llama es código de un tercero, no una
+  persona logueada.
+Composición: no aplica
+Condición de activación: que exista un segundo tenant-cliente real que necesite conectar un
+  sistema propio (su sitio, otro CRM, un formulario), o que Hellominus mismo lo necesite antes.
+  Hasta entonces, construir cada canal a mano (como WhatsApp y el widget) sigue siendo más simple
+  y no hay evidencia de que haga falta generalizar.
+
+### [9b] MCP para tenants
+Estado: APLAZADO
+Procedencia: misma pregunta del usuario, 4 sept 2026.
+Mecanismo: servidor MCP, capa fina sobre [9a] — expone como "herramientas" los mismos endpoints
+  de la API para que un agente de IA (del tenant, o Claude Desktop) pueda operar el CRM por su
+  cuenta ("mové el deal de Fulano a Ganado").
+Composición: no aplica
+Condición de activación: que [9a] esté `ACEPTADO` y construida — un MCP sin una API debajo no
+  tiene qué exponer. Además, que un tenant concreto pida específicamente acceso vía agente de IA
+  propio, no solo vía su sistema (eso ya lo cubre [9a] solo).
+
 ---
 
 ## Preguntas abiertas — pendientes de que el usuario retome la decisión
