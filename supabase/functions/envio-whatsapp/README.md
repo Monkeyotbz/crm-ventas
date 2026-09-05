@@ -73,17 +73,24 @@ Sin `--no-verify-jwt`, a propósito: el gateway de Supabase tiene que rechazar u
 válido antes de que el código corra. `ingesta-whatsapp` y `router` sí llevan ese flag porque nadie
 logueado los invoca — esta función es la excepción de las tres.
 
-## Verificado / sin verificar
+## Verificado — de punta a punta contra la API real (4 sept 2026)
 
-- Rechazo por ventana cerrada sin plantilla: **verificado**, no necesita a Meta para probarse.
-- El envío real contra la Graph API: **sin verificar todavía**, aunque el secret ya está cargado
-  (4 sept). Dos cosas tienen que darse antes de poder probarlo de punta a punta:
-  1. Que la ventana de 24h esté abierta — el único contacto real (JSC) la tiene cerrada desde el
-     3 sept; se reabre sola si escribe de nuevo por WhatsApp.
-  2. `whatsapp_numbers` apunta al **número de prueba de Meta**, no a uno real. Los números de
-     prueba solo pueden mandar mensajes a destinatarios agregados a mano en Meta for Developers →
-     WhatsApp → API Setup → lista de números de prueba (máx. 5). Si el envío falla con algo como
-     `(#100) Invalid parameter` aun con la ventana abierta, es probable que sea esto — hay que
-     confirmar que el teléfono de JSC esté en esa lista.
-- La prueba de punta a punta real (login real, no la sesión falseada de Playwright) queda
-  pendiente de hacer junto con el usuario.
+Login real con contraseña (no una sesión falseada), mensaje real escrito desde la bandeja,
+enviado, y confirmado con tres señales independientes:
+
+1. La función respondió `200` con el mensaje guardado.
+2. Meta devolvió un `wamid` real (`wamid.HBgM...`), no un error.
+3. **`entregado` pasó a `true` solo, sin que nadie lo tocara** — es el webhook de status de Meta
+   (`guardarEstado()` en `ingesta-whatsapp`) confirmando la entrega real al teléfono. No es "la
+   función no explotó", es "el mensaje llegó".
+
+Por el camino se encontraron y corrigieron **tres** bugs de CORS distintos en esta función (H1: el
+manejo de CORS faltaba directamente; H2: Site URL/Redirect URLs de Supabase Auth mal
+configurados, afectaba el login, no esta función en sí; H3: `Access-Control-Allow-Headers`
+listaba headers a mano y le faltaba `x-client-info`, que `supabase-js` manda sin avisar — se
+resolvió con `"*"`, válido porque acá no se usan credenciales/cookies). Ninguno era de Meta.
+
+**Sin verificar todavía:** el camino de plantilla (ventana cerrada) — sigue sin haber ninguna
+plantilla aprobada en `message_templates`. Y el número real en `whatsapp_numbers` sigue siendo el
+de prueba de Meta, así que un destinatario que no esté en la lista de números de prueba (Meta for
+Developers → WhatsApp → API Setup, máx. 5) todavía fallaría con `(#100) Invalid parameter`.

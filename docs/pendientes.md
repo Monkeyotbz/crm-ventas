@@ -20,12 +20,12 @@ Había tres canales de ingesta funcionando (WhatsApp, el widget de chat, el Rout
 - ✅ **Construida la bandeja unificada de solo lectura** (4 sept 2026) — lista de conversaciones,
   hilo de mensajes, panel copiloto (lee `conversation_insights`, vacío hasta que exista el
   Analista [7b]). Verificado con datos reales de producción, no solo leído.
-- ⏳ **Envío por WhatsApp construido y conectado** (4 sept 2026) — `envio-whatsapp` respeta la
-  ventana de 24h, guarda el `wamid` para engancharse al tracking de estado que ya existía. **Sin
-  verificar contra la API real**: falta el secret `WHATSAPP_ACCESS_TOKEN` (nadie lo generó en
-  Meta todavía — ver `supabase/functions/envio-whatsapp/README.md`), y encima el único contacto
-  real tiene la ventana cerrada, así que ni con el token puesto hay con quién probar el camino de
-  texto libre hasta que llegue un mensaje entrante nuevo.
+- ✅ **Envío por WhatsApp — verificado de punta a punta contra la API real** (4 sept 2026, más
+  tarde el mismo día). Login por contraseña real, mensaje enviado desde la bandeja, `wamid` real
+  devuelto por Meta, y `entregado=true` confirmado por el webhook de status — el mensaje llegó al
+  teléfono. Por el camino se encontraron y corrigieron tres bugs de CORS distintos (ninguno de
+  Meta) — ver `supabase/functions/envio-whatsapp/README.md`. Sigue sin probarse el camino de
+  plantilla (ventana cerrada): no hay ninguna plantilla aprobada todavía en `message_templates`.
 - ✅ **Envío para el widget de chat — resuelto por polling** (4 sept 2026). No por Realtime: el
   widget no tiene sesión de Supabase (`anon` no tiene acceso a `messages` vía RLS, a propósito), así
   que en cambio consulta `GET ingesta-widget-chat` cada 4s preguntando "algo nuevo desde el último
