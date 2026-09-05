@@ -34,10 +34,18 @@ const GRAPH_VERSION = "v21.0";
 // "Failed to send a request to the Edge Function" — un error de red, no
 // uno de esta función, así que no hay forma de verlo desde acá sin probarlo
 // con un navegador real. Se descubrió recién probando con el usuario logueado.
+//
+// Allow-Headers en "*": la primera versión listaba "authorization,
+// content-type" a mano y igual falló — supabase-js manda además
+// `x-client-info` (y a veces `apikey`) sin avisar, así que cualquier lista
+// explícita corre el riesgo de quedarse corta con la próxima versión del
+// SDK. "*" es válido en CORS mientras no se usen credenciales (cookies), que
+// no es el caso acá — la autenticación va en el header Authorization, no en
+// una cookie de sesión.
 const CORS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, content-type",
+  "Access-Control-Allow-Headers": "*",
 };
 
 function json(body: unknown, status: number) {
