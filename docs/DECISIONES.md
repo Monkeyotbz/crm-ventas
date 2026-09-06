@@ -294,7 +294,7 @@ una Edge Function a medida por cada cliente nuevo — que es como está resuelto
 (WhatsApp, el widget).
 
 ### [9a] API pública de candyCRM
-Estado: APLAZADO
+Estado: ACEPTADO
 Procedencia: pregunta directa del usuario, 4 sept 2026 — "¿es necesaria una API para el CRM de
   ventas candy?"
 Mecanismo: Edge Function(s) de Supabase, mismo molde que `ingesta-whatsapp` /
@@ -302,10 +302,18 @@ Mecanismo: Edge Function(s) de Supabase, mismo molde que `ingesta-whatsapp` /
   `chat_widget_keys`), no JWT de usuario, porque quien llama es código de un tercero, no una
   persona logueada.
 Composición: no aplica
-Condición de activación: que exista un segundo tenant-cliente real que necesite conectar un
-  sistema propio (su sitio, otro CRM, un formulario), o que Hellominus mismo lo necesite antes.
-  Hasta entonces, construir cada canal a mano (como WhatsApp y el widget) sigue siendo más simple
-  y no hay evidencia de que haga falta generalizar.
+
+**Aceptado el 6 sept 2026**, aplicado primero al canal que ya existe (WhatsApp) en vez de a
+"cualquier sistema externo" en abstracto: el usuario decidió que la condición de activación
+original ya se cumplió por decisión propia, no por evidencia externa — quiere que **cada tenant
+registre su propia app de Meta, completa e independiente** (su propio App ID, App Secret, Verify
+Token y token de acceso, sin compartir nada entre tenants), con **autoservicio real**: una
+pantalla en la bandeja donde el admin de cada tenant carga sus propias credenciales, sin que
+candyCRM tenga que tocar SQL a mano por cada cliente nuevo.
+
+Diseño completo (tabla `tenant_meta_credentials` + secretos en Vault por tenant + identificación
+del tenant por la URL del webhook + pantalla de configuración) queda en el plan aprobado de la
+sesión — se construye a partir de acá.
 
 ### [9b] MCP para tenants
 Estado: APLAZADO
