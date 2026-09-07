@@ -4,6 +4,7 @@ import BarraSuperior from "../components/inbox/BarraSuperior.jsx";
 import ListaConversaciones from "../components/inbox/ListaConversaciones.jsx";
 import HiloMensajes from "../components/inbox/HiloMensajes.jsx";
 import PanelCopiloto from "../components/inbox/PanelCopiloto.jsx";
+import PanelConfiguracion from "../components/inbox/PanelConfiguracion.jsx";
 import ConfiguracionMeta from "./ConfiguracionMeta.jsx";
 import ClavesApi from "./ClavesApi.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
@@ -28,6 +29,7 @@ export default function Bandeja() {
   const [rol, setRol] = useState(null);
   const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
   const [copilotoAbierto, setCopilotoAbierto] = useState(false); // panel flotante <1024px
+  const [menuConfigAbierto, setMenuConfigAbierto] = useState(false); // hub del engranaje
   const queryClient = useQueryClient();
 
   // Solo admin/owner ven el ícono de Configuración de Meta (candidato [9a]) —
@@ -78,12 +80,22 @@ export default function Bandeja() {
     setVistaMobile("hilo");
   }
 
+  // Copiloto y Configuración son los dos paneles flotantes de esta pantalla —
+  // nunca conviven: abrir uno cierra el otro. Sin esto, el engranaje tocado
+  // con el Copiloto ya abierto dejaría los dos overlays superpuestos peleando
+  // por el mismo espacio a la derecha.
+  function abrirCopiloto() {
+    setMenuConfigAbierto(false);
+    setCopilotoAbierto(true);
+  }
+  function abrirConfig() {
+    setCopilotoAbierto(false);
+    setMenuConfigAbierto(true);
+  }
+
   return (
     <div className="h-dvh candy-fondo flex flex-col overflow-hidden">
-      <BarraSuperior
-        onAbrirConfiguracion={esAdmin ? () => setPagina("configuracion-meta") : undefined}
-        onAbrirClaves={esAdmin ? () => setPagina("claves-api") : undefined}
-      />
+      <BarraSuperior onAbrirConfiguracion={esAdmin ? abrirConfig : undefined} />
 
       <div className="flex-1 flex gap-3 sm:gap-3.5 px-3 sm:px-5 pt-3 sm:pt-3.5 pb-3 sm:pb-5 min-h-0">
         {isLoading && <p className="m-auto text-sm text-candy-tinta-tenue font-candy-body">Cargando la bandeja…</p>}
@@ -112,7 +124,7 @@ export default function Bandeja() {
               <HiloMensajes
                 conversacion={activa}
                 onVolver={() => setVistaMobile("lista")}
-                onAbrirCopiloto={() => setCopilotoAbierto(true)}
+                onAbrirCopiloto={abrirCopiloto}
               />
             </div>
 
@@ -142,6 +154,14 @@ export default function Bandeja() {
             </div>
           </div>
         </div>
+      )}
+
+      {menuConfigAbierto && (
+        <PanelConfiguracion
+          onCerrar={() => setMenuConfigAbierto(false)}
+          onAbrirMeta={() => setPagina("configuracion-meta")}
+          onAbrirClaves={() => setPagina("claves-api")}
+        />
       )}
     </div>
   );
