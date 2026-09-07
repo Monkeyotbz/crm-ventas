@@ -3,7 +3,10 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { estiloCanal, formatearHora } from "../../lib/canales.js";
 import { listarMensajes, enviarMensajeWhatsapp } from "../../lib/bandeja.js";
 
-export default function HiloMensajes({ conversacion }) {
+// `onVolver` y `onAbrirCopiloto` solo se usan abajo de ciertos breakpoints —
+// ver el comentario de layout en Bandeja.jsx. En desktop los dos botones que
+// los disparan están ocultos por CSS, así que sobra pasarlos pero no molesta.
+export default function HiloMensajes({ conversacion, onVolver, onAbrirCopiloto }) {
   const { data: mensajes, isLoading } = useQuery({
     queryKey: ["mensajes", conversacion?.conversation_id],
     queryFn: () => listarMensajes(conversacion.conversation_id),
@@ -12,8 +15,8 @@ export default function HiloMensajes({ conversacion }) {
 
   if (!conversacion) {
     return (
-      <div className="flex-1 min-w-0 candy-glass rounded-[20px] flex items-center justify-center font-candy-body">
-        <p className="text-sm text-candy-tinta-tenue">Elegí una conversación de la izquierda para verla acá.</p>
+      <div className="w-full h-full candy-glass rounded-[20px] flex items-center justify-center font-candy-body p-6">
+        <p className="text-sm text-candy-tinta-tenue text-center">Elegí una conversación de la izquierda para verla acá.</p>
       </div>
     );
   }
@@ -21,31 +24,57 @@ export default function HiloMensajes({ conversacion }) {
   const chs = estiloCanal(conversacion.canal);
 
   return (
-    <div className="flex-1 min-w-0 candy-glass rounded-[20px] flex flex-col overflow-hidden font-candy-body">
-      <div className="shrink-0 px-[22px] py-4 flex items-center justify-between border-b border-[rgba(150,120,200,0.15)]">
-        <div>
-          <div className="font-candy-display text-[15px] font-extrabold text-candy-tinta">
-            {conversacion.contacto_nombre}
-            {conversacion.contacto_empresa ? ` · ${conversacion.contacto_empresa}` : ""}
-          </div>
-          <div className="text-[11.5px] text-candy-tinta-media mt-0.5">
-            Último mensaje {formatearHora(conversacion.ultimo_mensaje_at)}
+    <div className="w-full h-full min-w-0 candy-glass rounded-[20px] flex flex-col overflow-hidden font-candy-body">
+      <div className="shrink-0 px-4 sm:px-[22px] py-3 sm:py-4 flex items-center gap-2 justify-between border-b border-[rgba(150,120,200,0.15)]">
+        <div className="flex items-center gap-1.5 min-w-0">
+          {/* Solo mobile: abajo de 768px la lista y el hilo comparten pantalla,
+              así que sin esto no habría forma de volver a la lista. */}
+          <button
+            type="button"
+            onClick={onVolver}
+            className="md:hidden shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-candy-tinta-media hover:bg-white/50"
+            aria-label="Volver a la lista de conversaciones"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <div className="min-w-0">
+            <div className="font-candy-display text-[13.5px] sm:text-[15px] font-extrabold text-candy-tinta truncate">
+              {conversacion.contacto_nombre}
+              {conversacion.contacto_empresa ? ` · ${conversacion.contacto_empresa}` : ""}
+            </div>
+            <div className="text-[11.5px] text-candy-tinta-media mt-0.5 truncate">
+              Último mensaje {formatearHora(conversacion.ultimo_mensaje_at)}
+            </div>
           </div>
         </div>
-        <div
-          className="inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3 py-1.5 rounded-full text-white shrink-0"
-          style={{ background: chs.gradiente }}
-        >
-          {chs.etiqueta}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* El copiloto es la tercera columna solo desde 1024px; abajo de eso
+              se abre flotante desde acá. */}
+          <button
+            type="button"
+            onClick={onAbrirCopiloto}
+            className="lg:hidden rounded-full px-2.5 py-1 text-[11px] font-bold"
+            style={{ background: "rgba(255,92,168,0.16)", color: "#d6367d" }}
+          >
+            Copiloto IA
+          </button>
+          <div
+            className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3 py-1.5 rounded-full text-white"
+            style={{ background: chs.gradiente }}
+          >
+            {chs.etiqueta}
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-[22px] flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-[22px] flex flex-col gap-3">
         {isLoading && <p className="text-xs text-candy-tinta-tenue">Cargando mensajes…</p>}
         {mensajes?.map((m) => (
           <div key={m.id} className={`flex ${m.direccion === "out" ? "justify-end" : ""}`}>
             <div
-              className={`max-w-[58%] px-[15px] py-[11px] rounded-2xl text-[13px] leading-[1.45] ${
+              className={`max-w-[85%] sm:max-w-[68%] lg:max-w-[58%] px-[15px] py-[11px] rounded-2xl text-[13px] leading-[1.45] ${
                 m.direccion === "out" ? "text-white rounded-br-[4px] shadow-[0_6px_16px_rgba(0,0,0,0.12)]" : "rounded-bl-[4px] border"
               }`}
               style={
@@ -96,7 +125,7 @@ function ComposerWhatsapp({ conversacion, chs }) {
   // campo que solo puede fallar, así que se explica por qué en su lugar.
   if (!ventanaAbierta) {
     return (
-      <div className="shrink-0 px-[22px] pb-5 pt-3.5">
+      <div className="shrink-0 px-4 sm:px-[22px] pb-4 sm:pb-5 pt-3.5">
         <div className="candy-glass rounded-2xl px-4 py-3 text-[12.5px] text-candy-tinta-media leading-relaxed">
           <span className="font-bold text-candy-tinta">Ventana de 24h cerrada.</span> Solo se puede reabrir con
           una plantilla aprobada por Meta, y todavía no hay ninguna cargada. Se reabre sola si {conversacion.contacto_nombre}{" "}
@@ -107,7 +136,7 @@ function ComposerWhatsapp({ conversacion, chs }) {
   }
 
   return (
-    <div className="shrink-0 px-[22px] pb-5 pt-3.5">
+    <div className="shrink-0 px-4 sm:px-[22px] pb-4 sm:pb-5 pt-3.5">
       <form
         className="flex gap-2.5 items-end"
         onSubmit={(e) => {
@@ -151,7 +180,7 @@ function ComposerWhatsapp({ conversacion, chs }) {
 // Function de salida (docs/pendientes.md).
 function ComposerNoDisponible({ chs }) {
   return (
-    <div className="shrink-0 px-[22px] pb-5 pt-3.5">
+    <div className="shrink-0 px-4 sm:px-[22px] pb-4 sm:pb-5 pt-3.5">
       <div className="flex gap-2.5 items-center">
         <div className="flex-1 candy-glass rounded-full px-4 py-3 text-[12.5px] text-candy-tinta-tenue cursor-not-allowed">
           Responder llega pronto — todavía no se puede enviar desde acá

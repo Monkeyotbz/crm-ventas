@@ -6,7 +6,10 @@ export default function ListaConversaciones({ conversaciones, filtro, onFiltro, 
   const visibles = conversaciones.filter((c) => filtro === "todos" || c.canal === filtro);
 
   return (
-    <div className="w-[336px] shrink-0 candy-glass rounded-[20px] flex flex-col overflow-hidden font-candy-body">
+    // El ancho lo decide el contenedor de Bandeja.jsx según el breakpoint
+    // (w-full en mobile, 280px en tablet, 336px en desktop) — acá adentro
+    // siempre se ocupa todo lo que haya.
+    <div className="w-full h-full candy-glass rounded-[20px] flex flex-col overflow-hidden font-candy-body">
       <div className="p-4 pb-2.5 shrink-0">
         <h1 className="font-candy-display text-base font-extrabold text-candy-tinta mb-2.5">Bandeja unificada</h1>
         <div className="flex flex-wrap gap-1.5">

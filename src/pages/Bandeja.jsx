@@ -8,15 +8,25 @@ import ConfiguracionMeta from "./ConfiguracionMeta.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
 
-// Sprint 1 — bandeja unificada, solo lectura (docs/pendientes.md): se puede
-// ver cada conversación con su contacto, su deal y el estado del copiloto,
-// pero todavía no se puede responder desde acá — falta la Edge Function de
-// envío saliente (WhatsApp Graph API + widget), que es trabajo aparte.
+// Sprint 1 — bandeja unificada. El envío saliente ya está conectado para
+// WhatsApp (ver HiloMensajes); los demás canales siguen en solo lectura.
+//
+// Layout responsive portado de la rama de Gabriel (merge del 7 sept), sobre
+// estos componentes y no los suyos: los tres breakpoints son los del diseño
+// de referencia, y lo que cambia entre ellos es SOLO qué paneles se ven, no
+// de dónde salen los datos.
+//   <768px  (mobile): un panel a la vez — lista o hilo, con botón de volver;
+//                     el copiloto sale como panel flotante.
+//   768-1023 (tablet): lista + hilo lado a lado; el copiloto sigue flotante
+//                     porque las tres columnas de ancho fijo no entran.
+//   ≥1024px (desktop): las tres columnas fijas, que es el diseño original.
 export default function Bandeja() {
   const [filtro, setFiltro] = useState("todos");
   const [seleccionadaId, setSeleccionadaId] = useState(null);
   const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta"
   const [rol, setRol] = useState(null);
+  const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
+  const [copilotoAbierto, setCopilotoAbierto] = useState(false); // panel flotante <1024px
   const queryClient = useQueryClient();
 
   // Solo admin/owner ven el ícono de Configuración de Meta (candidato [9a]) —
@@ -56,11 +66,19 @@ export default function Bandeja() {
     return <ConfiguracionMeta onVolver={() => setPagina("bandeja")} />;
   }
 
+  // En mobile, elegir una conversación es "entrar" a ella: la lista y el hilo
+  // comparten la misma pantalla. En tablet/desktop este cambio de estado no se
+  // nota, porque los dos paneles se ven al mismo tiempo igual.
+  function seleccionar(id) {
+    setSeleccionadaId(id);
+    setVistaMobile("hilo");
+  }
+
   return (
-    <div className="min-h-screen candy-fondo flex flex-col">
+    <div className="h-dvh candy-fondo flex flex-col overflow-hidden">
       <BarraSuperior onAbrirConfiguracion={esAdmin ? () => setPagina("configuracion-meta") : undefined} />
 
-      <div className="flex-1 flex gap-3.5 px-5 pt-3.5 pb-5 min-h-0">
+      <div className="flex-1 flex gap-3 sm:gap-3.5 px-3 sm:px-5 pt-3 sm:pt-3.5 pb-3 sm:pb-5 min-h-0">
         {isLoading && <p className="m-auto text-sm text-candy-tinta-tenue font-candy-body">Cargando la bandeja…</p>}
 
         {error && (
@@ -71,18 +89,53 @@ export default function Bandeja() {
 
         {conversaciones && (
           <>
-            <ListaConversaciones
-              conversaciones={conversaciones}
-              filtro={filtro}
-              onFiltro={setFiltro}
-              seleccionadaId={seleccionadaId}
-              onSeleccionar={setSeleccionadaId}
-            />
-            <HiloMensajes conversacion={activa} />
-            <PanelCopiloto conversacion={activa} />
+            <div
+              className={`${vistaMobile === "lista" ? "flex" : "hidden"} min-h-0 w-full flex-col md:flex md:w-[280px] md:shrink-0 lg:w-[336px]`}
+            >
+              <ListaConversaciones
+                conversaciones={conversaciones}
+                filtro={filtro}
+                onFiltro={setFiltro}
+                seleccionadaId={seleccionadaId}
+                onSeleccionar={seleccionar}
+              />
+            </div>
+
+            <div className={`${vistaMobile === "hilo" ? "flex" : "hidden"} min-h-0 w-full flex-1 flex-col md:flex`}>
+              <HiloMensajes
+                conversacion={activa}
+                onVolver={() => setVistaMobile("lista")}
+                onAbrirCopiloto={() => setCopilotoAbierto(true)}
+              />
+            </div>
+
+            <div className="hidden min-h-0 lg:flex lg:w-[280px] lg:shrink-0 lg:flex-col">
+              <PanelCopiloto conversacion={activa} />
+            </div>
           </>
         )}
       </div>
+
+      {/* Copiloto flotante: es el mismo componente y los mismos datos que la
+          tercera columna de desktop — abajo de 1024px no entra al lado del
+          hilo, así que se muestra encima en vez de recortarlo. */}
+      {copilotoAbierto && (
+        <div className="fixed inset-0 z-50 flex justify-end lg:hidden">
+          <div className="absolute inset-0 bg-candy-tinta/30" onClick={() => setCopilotoAbierto(false)} />
+          <div className="relative flex h-full w-full max-w-[340px] flex-col gap-2 p-3">
+            <button
+              type="button"
+              onClick={() => setCopilotoAbierto(false)}
+              className="candy-glass self-end rounded-full px-3 py-1 text-xs font-bold text-candy-tinta-media"
+            >
+              Cerrar ✕
+            </button>
+            <div className="min-h-0 flex-1">
+              <PanelCopiloto conversacion={activa} />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,15 +1,18 @@
 import { estiloScore, estiloSentimiento, formatearDinero } from "../../lib/canales.js";
 
 export default function PanelCopiloto({ conversacion }) {
+  // Igual que ListaConversaciones: el ancho lo pone el contenedor. Este mismo
+  // componente se usa como tercera columna en desktop y como panel flotante
+  // abajo de 1024px, así que no puede traer un ancho fijo propio.
   if (!conversacion) {
-    return <div className="w-[280px] shrink-0 candy-glass rounded-[20px]" />;
+    return <div className="w-full h-full candy-glass rounded-[20px]" />;
   }
 
   const score = estiloScore(conversacion.score);
   const sentimiento = estiloSentimiento(conversacion.sentimiento);
 
   return (
-    <div className="w-[280px] shrink-0 candy-glass rounded-[20px] p-[18px] flex flex-col gap-3.5 overflow-y-auto font-candy-body">
+    <div className="w-full h-full candy-glass rounded-[20px] p-[18px] flex flex-col gap-3.5 overflow-y-auto font-candy-body">
       <div className="flex items-center gap-2 font-candy-display text-[13px] font-extrabold text-candy-tinta">
         <div
           className="w-4 h-4 rounded-full shrink-0"
