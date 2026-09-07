@@ -46,7 +46,7 @@ export default function BarraSuperior({ onAbrirConfiguracion, onAbrirClaves }) {
       </div>
 
       <div className="hidden sm:block">
-        <BotonesCuenta onAbrirConfiguracion={onAbrirConfiguracion} />
+        <BotonesCuenta onAbrirConfiguracion={onAbrirConfiguracion} onAbrirClaves={onAbrirClaves} />
       </div>
     </div>
   );
