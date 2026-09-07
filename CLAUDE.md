@@ -33,10 +33,10 @@ agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`
 
 | Agente | Carpeta | Lo dispara |
 |---|---|---|
-| Ingesta de WhatsApp | `supabase/functions/ingesta-whatsapp/` | Webhook de Meta |
+| Ingesta de WhatsApp | `supabase/functions/ingesta-whatsapp/` | Webhook de Meta. **La Callback URL lleva el tenant en el path** (`.../ingesta-whatsapp/<tenant_id>`) — cada tenant registra la suya en su propia app de Meta, ver *Credenciales de Meta por tenant* más abajo |
 | Ingesta del widget de chat web | `supabase/functions/ingesta-widget-chat/` | POST del widget embebido (`widget/candy-chat-widget.js`), autenticado por `widget_key` pública, no por JWT |
 | Router de clasificación | `supabase/functions/router/` | Trigger de Postgres (`private.disparar_router()`, vía `pg_net`) sobre `insert` en `messages` — no el panel de Database Webhooks, que no funciona en este proyecto (ver `docs/DECISIONES.md`, candidato [5]) |
-| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **es la única de las cuatro que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Falta el secret `WHATSAPP_ACCESS_TOKEN` (ver el README de la función) |
+| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **la única de las cuatro que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Usa un segundo cliente `service_role` SOLO para leer el token de Meta del tenant, nunca para tocar `conversations`/`messages` |
 
 Es la excepción de plataforma del `CLAUDE.md` del laboratorio: son endpoints HTTP
 que invoca un tercero, y una carpeta local no puede servir HTTP. La regla que
@@ -46,6 +46,35 @@ llama a Haiku) no se mezcla con el determinístico de `scripts/`.
 **No mover estas funciones a `agentes-sdk/`.** Se rompe lo que las invoca: la
 Callback URL registrada en Meta y el trigger de Postgres apuntan a la URL que
 Supabase genera desde `supabase/functions/`.
+
+## Credenciales de Meta por tenant — no hay ninguna global
+
+Desde el 6 sept 2026 (candidato [9a] de `docs/DECISIONES.md`, `ACEPTADO`), **cada tenant registra
+su propia app de Meta**, completa e independiente: su App ID, App Secret, Verify Token y token de
+acceso. **Ya no existen `WA_VERIFY_TOKEN`, `META_APP_SECRET` ni `WHATSAPP_ACCESS_TOKEN` como
+variables de entorno** — si un documento viejo las menciona, está desactualizado.
+
+- Los tres secretos viven en **Supabase Vault**, mismo criterio que `ROUTER_SECRET`. La tabla
+  `tenant_meta_credentials` guarda **el UUID que devolvió `vault.create_secret()`**, no el nombre:
+  `vault.secrets.name` no tiene restricción de unicidad, así que buscar por nombre sería ambiguo.
+- `public.guardar_credenciales_meta(...)` — `security definer`, la llama el admin del tenant desde
+  la pantalla de configuración. Siempre actúa sobre `private.current_tenant_id()`, nunca sobre un
+  `tenant_id` que mande el cliente. También hace el upsert de `whatsapp_numbers`, salteando a
+  propósito la policy de plataforma de esa tabla.
+- `public.obtener_secreto_meta_tenant(tenant, tipo)` — la única que devuelve un secreto en texto
+  plano. **Revocada a todo lo que no sea `service_role`** (mismo candado que `resolver_contacto_whatsapp`):
+  la llaman las dos Edge Functions desde su lado servidor, nunca el navegador.
+- La pantalla de autoservicio es [`src/pages/ConfiguracionMeta.jsx`](src/pages/ConfiguracionMeta.jsx),
+  con su capa de datos en [`src/lib/configuracionMeta.js`](src/lib/configuracionMeta.js). Se entra
+  por el engranaje de la barra superior, **visible solo para `admin`/`owner`**. Los secretos nunca
+  se vuelven a mostrar una vez guardados: un campo vacío significa "no cambiar este".
+
+**Al dar de alta un tenant nuevo, verificar cada secreto contra lo que muestra Meta, campo por
+campo.** Migrar a Hellominus costó tres intentos por errores de carga que el código no puede
+detectar solo: un Verify Token guardado con un espacio inicial, y el App Secret pisado con el valor
+del Verify Token. Ninguno da error al guardar — se manifiestan como un `401` en el webhook, que
+parece un bug del código y no lo es. Un App Secret de Meta son 32 caracteres hexadecimales; si lo
+guardado no tiene esa forma, está mal cargado.
 
 ## Dónde vive el widget de chat embebible
 
@@ -86,25 +115,30 @@ Al escribir una migración nueva:
 - **Guardar el archivo en `supabase/migrations/`** con el nombre exacto que quedó registrado — si
   no, la base y el repo se separan.
 
-Para leer el esquema de un vistazo sin abrir las 8 migraciones:
+Para leer el esquema de un vistazo sin abrir las 19 migraciones:
 [`supabase/schema-referencia.md`](supabase/schema-referencia.md) — generado, no ejecutable, y **no
 es fuente de verdad**: si contradice a una migración, manda la migración.
 
 ## Estado del proyecto
 
-- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind, login con magic link. **El frontend es y sigue siendo Vite + React** — cualquier documento de `docs/` que mencione Next.js es una propuesta descartada del documento original, ya corregida ahí mismo.
+- Sprint 0 (scaffold) completo: estructura Vite+React+Tailwind. **El frontend es y sigue siendo Vite + React** — cualquier documento de `docs/` que mencione Next.js es una propuesta descartada del documento original, ya corregida ahí mismo. **No hay router**: `App.jsx` es un auth-gate simple (sin sesión → `Login`, con sesión → `Bandeja`) y la navegación interna es estado de React, no rutas.
+- **El login es por contraseña, no magic link** (5 sept 2026, commit `bd4b6a2`). El magic link fue el default de Sprint 0 y se abandonó a propósito: el servicio de email de Supabase tiene un límite de envíos por hora muy bajo que no se puede subir sin SMTP propio, y bloqueó el trabajo en vivo. **No volver a magic link sin resolver primero el SMTP** — ya se intentó reintroducir en una rama paralela y se descartó por esto mismo.
 - Esquema de base de datos **rediseñado** (en lo que hoy es la primera migración) a la luz de lo que reveló el canvas de diseño: los `domain` `canal_type`/`fuente_type` ahora incluyen `messenger`/`linkedin`, tabla nueva `conversation_insights` (estado actual del Copiloto IA por conversación: score, sentimiento, nivel de interés derivado, resumen, sugerencia, citas RAG), tabla nueva `meetings` (agenda de llamadas), `contacts.sector`, e índices en las columnas FK que antes no tenían ninguno. Detalle completo en [supabase/README.md](supabase/README.md).
 - **Multi-tenant (24 ago 2026):** el esquema tiene tabla `tenants` y `tenant_id` en cada tabla de negocio, con RLS que aísla por tenant vía `current_tenant_id()` (lee `app_metadata.tenant_id` del JWT) antes de aplicar la regla de dueño/admin ya existente, y FK compuestas `(tenant_id, padre_id)` para que tampoco se pueda escribir una fila cruzada entre tenants. Hellominus está sembrado como primer tenant (`slug = 'hellominus'`). Motivo: el CRM se vende como producto a otras empresas, no solo lo usa Hellominus internamente — ver [`docs/guia-fases-1-2.md`](docs/guia-fases-1-2.md) para el detalle de la decisión.
 - **Soporte multi-tenant:** el equipo de Hellominus opera el SaaS de los tenants-cliente vía la tabla `platform_admins` (no vía membresías extra en `team_members`, que sigue siendo un tenant por persona). Para entrar al CRM de otro tenant hay que **abrir una sesión de soporte** (`support_sessions`, con motivo obligatorio y vencimiento a 60 min) y mandar el header `X-Acting-Tenant`; sin sesión activa el header no habilita nada. Las escrituras durante un soporte quedan en `audit_log` con fila anterior/posterior y su `support_session_id`, y el tenant auditado puede leer las sesiones abiertas sobre sus datos. **Las lecturas no se auditan una por una** — Postgres no dispara triggers en `SELECT`; la sesión declarada es el rastro. Detalle en [supabase/README.md](supabase/README.md).
 - **Verticales configurables:** `contacts.sector` dejó de ser un `check` hardcodeado; ahora es la tabla `sectors` por tenant (`contacts.sector_id`), con los 5 rubros de Hellominus sembrados con los mismos slugs de antes.
 - **El proyecto Supabase real EXISTE desde el 25 ago 2026** (`crm-ventas`, ref `jrygtluycndiyvrxjmib`, us-east-1). 36 tablas, todas con RLS, 0 advertencias del linter de seguridad. Credenciales ya en `.env` (gitignored). Usuario `owner` dado de alta: `juansecode2026@gmail.com`.
-  - El esquema son 8 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba.
+  - El esquema son 19 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba. (`supabase/schema-referencia.md` quedó desactualizado: no incluye ni el catálogo turístico ni `tenant_meta_credentials`.)
   - **Las funciones internas viven en el schema `private`**, no en `public` (estaban expuestas como endpoints RPC públicos). Al escribir una policy nueva hay que calificarlas: `private.current_tenant_id()`, no `current_tenant_id()`.
   - **Los 48 ítems de `docs/tener-en-cuenta-base-de-datos` están implementados** (25 ago 2026), con tres desvíos deliberados respecto del documento — ver ahí mismo.
 - **3 sept/4 sept 2026:** además de WhatsApp (candidato [3], funcionando con mensajes reales) y el Router (candidato [5], `ACEPTADO`), ahora también está construido y probado de punta a punta el canal de **chat web** (Sprint 2 del README): `supabase/functions/ingesta-widget-chat/` + `widget/candy-chat-widget.js`, con resolución atómica de contacto/conversación (mismo patrón que corrigió H3/H4 para WhatsApp) e identidad por email/teléfono tipeados en el chat — no por login de hellominus.com. Entra directo, no por n8n (n8n sigue sin cuenta creada). Falta embeberlo en el sitio real de Hellominus — hoy solo corre contra `widget/prueba.html`.
-- **4 sept 2026 — Sprint 1, primera mitad: bandeja unificada de solo lectura.** `src/pages/Bandeja.jsx` + `src/components/inbox/` — lista de conversaciones (filtro por canal), hilo de mensajes, panel copiloto (score/sentimiento/sugerencia de `conversation_insights`, hoy vacíos porque el agente Analista [7b] no existe todavía). Lee de la vista `inbox_conversaciones` (migración `20260904202843`), que resuelve contacto + último mensaje + deal más reciente + insights en una sola fila — evita joins anidados frágiles desde el cliente. Verificado con datos reales de producción (el contacto JSC) vía Playwright, no solo leído. El Kanban de deals (drag-and-drop entre etapas) sigue sin construir — no estaba en el mockup de `CandyInbox.dc.html`, es una pantalla aparte.
-- **4 sept 2026 — envío saliente de WhatsApp.** `supabase/functions/envio-whatsapp/` — respeta la ventana de 24h (texto libre si está abierta, plantilla aprobada si no) y guarda el `wamid` como `externo_id` para engancharse al tracking de estado que ya tenía `ingesta-whatsapp`. El composer de `HiloMensajes.jsx` ya llama a esta función para WhatsApp; los demás canales siguen con el aviso de "responder llega pronto". **Sin verificar contra la API real todavía**: falta el secret `WHATSAPP_ACCESS_TOKEN` (nadie lo generó en Meta), y el único contacto real (JSC) tiene la ventana cerrada desde el 3 sept, así que ni con el token puesto habría con quién probar el camino de texto libre hasta que llegue un mensaje entrante nuevo. Lo que sí se verificó con Playwright: el rechazo por ventana cerrada, el payload que manda el frontend, y que un error de la función se muestra sin romper nada.
-- **Próximo paso de código:** conseguir `WHATSAPP_ACCESS_TOKEN` y probar un envío real; después, el envío para el widget (necesita que `candy-chat-widget.js` escuche respuestas nuevas por Realtime, hoy solo manda) y el Kanban. Ver los Sprints en [README.md](README.md).
+- **4 sept 2026 — Sprint 1: bandeja unificada.** `src/pages/Bandeja.jsx` + `src/components/inbox/` — lista de conversaciones (filtro por canal), hilo de mensajes, panel copiloto (score/sentimiento/sugerencia de `conversation_insights`, hoy vacíos porque el agente Analista [7b] no existe todavía). Lee de la vista `inbox_conversaciones` (migración `20260904202843`), que resuelve contacto + último mensaje + deal más reciente + insights en una sola fila — evita joins anidados frágiles desde el cliente. Verificado con datos reales de producción (el contacto JSC). Ya **no** es solo lectura: el composer de WhatsApp envía de verdad (ver abajo). El Kanban de deals (drag-and-drop entre etapas) sigue sin construir — no estaba en el mockup de `CandyInbox.dc.html`, es una pantalla aparte.
+- **La bandeja es responsive en tres breakpoints** (7 sept 2026): abajo de 768px se ve un panel a la vez (lista o hilo, con botón de volver), entre 768 y 1023 lista+hilo, y desde 1024 las tres columnas del diseño original. El Copiloto abajo de 1024px es un panel flotante — el mismo componente y los mismos datos que la tercera columna. Por eso **ningún panel trae su propio ancho fijo**: lo decide el contenedor de `Bandeja.jsx` según el breakpoint.
+- **6 sept 2026 — envío saliente de WhatsApp, verificado contra la API real.** `supabase/functions/envio-whatsapp/` — respeta la ventana de 24h (texto libre si está abierta, plantilla aprobada si no) y guarda el `wamid` como `externo_id` para engancharse al tracking de estado que ya tenía `ingesta-whatsapp`. Probado de punta a punta con mensajes reales: entrante con firma HMAC válida y saliente con `wamid` + `entregado=true`. El camino de plantilla sigue **sin** probarse contra Meta: `message_templates` está vacía, nadie sometió una plantilla todavía. Los canales que no son WhatsApp siguen con el aviso de "responder llega pronto".
+- **Hellominus usa el número de PRUEBA de Meta** (`+1 555-644-0707`), no un número propio. Para conectar uno real hace falta completar la **verificación de empresa** en Meta for Developers, que pide documentos legales que Hellominus todavía no tiene (la empresa no está constituida). Decisión explícita del usuario de posponerlo — no es un olvido. Ese número de prueba es imborrable y ocupa el único lugar disponible hasta que la verificación se apruebe.
+- **Próximo paso de código:** el envío para el widget (necesita que `candy-chat-widget.js` escuche respuestas nuevas por Realtime, hoy solo manda) y el Kanban. Ver los Sprints en [README.md](README.md).
+- **7 sept 2026 — módulo de catálogo turístico**, traído de la rama de Gabriel: `destinations`, `accommodations` y `tours` (migración `20260904120000`) + `scripts/importar-catalogo-turismo.mjs`. Es un **vertical de un tenant nuevo** ("Turismo Colombia", turismocolombia.fit), no una pieza del CRM genérico: por eso está separado de `products`, y por eso esas tablas **rompen el patrón del resto del esquema** — además de la policy por `current_tenant_id()`, llevan una policy de lectura pública para `status = 'published'`, porque el sitio del tenant las lee sin login. Los textos son `jsonb {es, en}`.
+- **La rama de trabajo es `juanse-candycrm-ventas`** (renombrada el 7 sept; antes `multi-tenant-y-documentacion`). `main` está 40+ commits atrás y **nadie fusionó nada ahí todavía** — no asumir que `main` refleja el estado del proyecto. La rama `gabo` es de Gabriel y ya está fusionada acá; de ella se conservó el catálogo turístico, el isotipo y el layout responsive, y se **descartó** su login (magic link + react-router) y su bandeja con datos mock (`src/features/inbox/`, que no existe en esta rama). Si alguien vuelve a traer esos archivos, está reintroduciendo trabajo ya descartado a propósito.
 - **Pendiente: reemplazar la URL de Política de Privacidad en Meta for Developers en cuanto exista una URL real de candyCRM (ej. `getcandycrm.com/privacidad`).** Hoy ese campo apunta a un Artifact temporal (`https://claude.ai/code/artifact/7d35f657-92d7-4ee7-8b05-95d6205b2429`, compartido manualmente para que el revisor automático de Meta pueda leerlo) porque el dominio real todavía no está desplegado — se usó para poder publicar la app y probar el webhook con un mensaje real. Cuando `getcandycrm.com` exista: (1) publicar ahí el mismo contenido de la política, (2) en Meta for Developers → app "CRM Ventas - Hello Minus" (App ID `1537215744334186`) → Configuración de la app → Información básica, reemplazar la URL por la del dominio real. El Artifact puede quedar sin uso, no hace falta borrarlo.
 - `docs/` tiene seis documentos de planeación traídos el 24-25 ago 2026 — son guías orientativas, no órdenes literales a seguir. Cada uno en HTML (snapshot original) + Markdown (copia de trabajo, la que se edita). También ahí vive `DECISIONES.md` (excepción a la convención del laboratorio, ver arriba):
   - `hoja-de-ruta-construccion` — mapa general de piezas a construir.
