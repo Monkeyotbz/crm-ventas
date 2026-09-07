@@ -56,6 +56,19 @@ body {
   color: var(--color-candy-tinta);
 }
 
+/* Traída de la rama de Gabriel (merge del 7 sept): la barra de navegación de
+   la bandeja scrollea horizontal en mobile, y la barra de scroll nativa encima
+   de un pill de vidrio se ve rota. Se declara como `@utility` y no como clase
+   suelta —así Tailwind la trata igual que candy-glass y admite variantes. */
+@utility no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility candy-glass {
   background: rgba(255, 255, 255, 0.55);
   backdrop-filter: blur(18px) saturate(1.5);
