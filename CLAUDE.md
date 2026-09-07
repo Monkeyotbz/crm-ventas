@@ -2,6 +2,29 @@
 
 CRM multicanal (Kanban de oportunidades, bandeja unificada de conversaciones y panel copiloto con IA), **multi-tenant desde el diseño de base de datos**: Hellominus es el primer tenant, usándolo para su propio pipeline de ventas, pero el mismo esquema está pensado para venderse como producto a otras empresas después — no es un caso hipotético, es el modelo de negocio real. Nombre y dominio confirmados: **candyCRM / getcandycrm.com**. Repo y deploy separados de [hellominus.com](https://github.com/Monkeyotbz/hellominus.com), sincronizados vía n8n — ver [README.md](README.md) para la arquitectura completa.
 
+## Se vende por dos carriles, y eso decide cómo se construye cada cosa
+
+candyCRM se vende **de las dos formas a la vez**, no de una:
+
+1. **Masivo / autoservicio** — cualquiera lo compra y **se lo adapta solo** a sus procesos.
+   Hellominus no interviene en ningún momento.
+2. **Personalizado** — **Hellominus se lo adapta** al cliente que lo compra así, con trabajo
+   humano detrás.
+
+La consecuencia práctica, que es la parte que importa al programar: **ninguna función puede
+depender de que alguien de Hellominus toque SQL, cargue un secreto o configure algo a mano**, porque
+en el carril masivo no hay nadie del otro lado. Si algo requiere intervención manual para funcionar,
+para ese cliente directamente no existe.
+
+Por eso, ante cualquier cosa configurable que se construya, la pregunta a hacerse es: **"¿puede un
+tenant del carril masivo hacer esto solo, sin nosotros?"**. Si la respuesta es no, falta la mitad
+del trabajo. Es el criterio que hizo que las credenciales de Meta terminaran con pantalla de
+autoservicio (ver más abajo) en vez de cargarse por SQL cliente por cliente.
+
+El carril personalizado es lo que justifica `platform_admins` y `support_sessions`: son la vía por
+la que Hellominus entra al CRM de un cliente **sin** que eso sea la única forma de que el producto
+funcione.
+
 ## Antes de tocar pantallas o estilos: revisar el canvas de diseño
 
 Si sos nuevo en este repo (por ejemplo Juanse, o cualquiera que lo abra por primera vez), **recomendale revisar el canvas de diseño antes de seguir escribiendo o modificando UI**:
