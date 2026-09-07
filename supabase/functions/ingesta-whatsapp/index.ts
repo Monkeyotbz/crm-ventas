@@ -9,11 +9,17 @@
 // recibe un 200 rápido, y un reintento con la ingesta a medio camino duplicaría filas.
 // Se responde primero y se procesa después, con la idempotencia de `messages.externo_id`
 // como red por si el reintento igual llega.
+//
+// Credenciales por tenant (candidato [9a], 6 sept 2026): cada tenant registra su propia
+// app de Meta, así que ya no hay un WA_VERIFY_TOKEN/META_APP_SECRET global. La URL misma
+// identifica al tenant — cada uno pega en su panel de Meta:
+//   .../functions/v1/ingesta-whatsapp/<tenant_id>
+// Es lo que resuelve el problema de huevo y gallina: el handshake GET no lleva ningún
+// dato de negocio en el payload (solo hub.mode/verify_token/challenge), así que sin la
+// URL no habría forma de saber de qué tenant es ANTES de tener ya la credencial para
+// validarlo. Con la URL, el tenant se sabe primero — recién después se busca su secreto.
 
 import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2.45.0";
-
-const VERIFY_TOKEN = Deno.env.get("WA_VERIFY_TOKEN") ?? "";
-const APP_SECRET = Deno.env.get("META_APP_SECRET") ?? "";
 
 // El cliente usa la key de servicio a propósito: la ingesta escribe en cualquier tenant
 // y RLS no la protege. Por eso cada insert lleva su `tenant_id` explícito, resuelto
@@ -25,16 +31,33 @@ const db: SupabaseClient = createClient(
 );
 
 // ---------------------------------------------------------------------------
+// Credenciales por tenant
+// ---------------------------------------------------------------------------
+
+/** Último segmento no vacío de la URL — es el tenant_id que cada uno pega en su panel de Meta. */
+function tenantDeLaUrl(url: URL): string | null {
+  const segmentos = url.pathname.split("/").filter(Boolean);
+  return segmentos.at(-1) ?? null;
+}
+
+/** `obtener_secreto_meta_tenant` — service_role únicamente, ver la migración 20260906000001. */
+async function secretoMeta(tenantId: string, tipo: "app_secret" | "verify_token"): Promise<string | null> {
+  const { data, error } = await db.rpc("obtener_secreto_meta_tenant", { p_tenant: tenantId, p_tipo: tipo });
+  if (error) throw new Error(`obtener_secreto_meta_tenant(${tipo}): ${error.message}`);
+  return data as string | null;
+}
+
+// ---------------------------------------------------------------------------
 // Firma
 // ---------------------------------------------------------------------------
 
-/** HMAC-SHA256 del cuerpo crudo contra el App Secret, en comparación de tiempo constante. */
-async function firmaValida(cuerpoCrudo: string, cabecera: string | null): Promise<boolean> {
-  if (!cabecera?.startsWith("sha256=") || !APP_SECRET) return false;
+/** HMAC-SHA256 del cuerpo crudo contra el App Secret DE ESE TENANT, en comparación de tiempo constante. */
+async function firmaValida(cuerpoCrudo: string, cabecera: string | null, appSecret: string | null): Promise<boolean> {
+  if (!cabecera?.startsWith("sha256=") || !appSecret) return false;
 
   const clave = await crypto.subtle.importKey(
     "raw",
-    new TextEncoder().encode(APP_SECRET),
+    new TextEncoder().encode(appSecret),
     { name: "HMAC", hash: "SHA-256" },
     false,
     ["sign"],
@@ -90,8 +113,14 @@ function extraerContenido(msg: Record<string, any>): string {
 // Escritura en la base
 // ---------------------------------------------------------------------------
 
-/** `phone_number_id` → tenant. Es el único punto donde el webhook sabe de quién es. */
-async function resolverTenant(phoneNumberId: string) {
+/**
+ * `phone_number_id` → tenant, y defensa en profundidad: tiene que coincidir con el
+ * `tenant_id` que ya dio la URL (ver tenantDeLaUrl). Antes de [9a] este era el ÚNICO
+ * punto donde el webhook sabía de quién era; ahora la URL lo sabe primero, y esto
+ * confirma que el número que mandó Meta realmente pertenece a ese mismo tenant — evita
+ * que una URL mal copiada (tenant A pegó por error la de tenant B) pase desapercibida.
+ */
+async function resolverTenant(phoneNumberId: string, tenantEsperado: string) {
   const { data, error } = await db
     .from("whatsapp_numbers")
     .select("tenant_id, activo")
@@ -101,6 +130,11 @@ async function resolverTenant(phoneNumberId: string) {
   if (error) throw new Error(`whatsapp_numbers: ${error.message}`);
   if (!data) throw new Error(`phone_number_id ${phoneNumberId} no está registrado`);
   if (!data.activo) throw new Error(`el número ${phoneNumberId} está marcado inactivo`);
+  if (data.tenant_id !== tenantEsperado) {
+    throw new Error(
+      `el número ${phoneNumberId} pertenece al tenant ${data.tenant_id}, pero la URL identificó a ${tenantEsperado}`,
+    );
+  }
   return data.tenant_id as string;
 }
 
@@ -255,7 +289,7 @@ async function registrarError(
 // Procesamiento (fuera del camino de respuesta)
 // ---------------------------------------------------------------------------
 
-async function procesar(payload: Record<string, any>) {
+async function procesar(payload: Record<string, any>, tenantDeLaUrlId: string) {
   for (const entry of payload.entry ?? []) {
     for (const cambio of entry.changes ?? []) {
       const valor = cambio.value ?? {};
@@ -267,7 +301,7 @@ async function procesar(payload: Record<string, any>) {
       let perfiles = new Map<string, string | null>();
       try {
         if (!phoneNumberId) throw new Error("el cambio no trae metadata.phone_number_id");
-        tenantId = await resolverTenant(phoneNumberId);
+        tenantId = await resolverTenant(phoneNumberId, tenantDeLaUrlId);
 
         // `contacts` viene aparte de `messages` en el payload de Meta: trae el nombre
         // de perfil, indexado por wa_id.
@@ -276,7 +310,7 @@ async function procesar(payload: Record<string, any>) {
         );
       } catch (err) {
         console.error("[ingesta-whatsapp] lote:", err);
-        await registrarError(err, cambio, tenantId, cambio.field ?? "messages");
+        await registrarError(err, cambio, tenantDeLaUrlId, cambio.field ?? "messages");
         continue;
       }
       if (!tenantId) continue; // inalcanzable: el catch de arriba corta. Es para el type checker.
@@ -313,6 +347,15 @@ async function procesar(payload: Record<string, any>) {
 
 Deno.serve(async (req: Request) => {
   const url = new URL(req.url);
+  const tenantId = tenantDeLaUrl(url);
+
+  // Sin tenant en la URL no hay ninguna credencial que buscar — ni para el
+  // handshake ni para la firma. 404 y nada de registrar: sin tenant conocido
+  // no hay dónde registrarlo, y no vale la pena distinguir el error para
+  // quien está tanteando URLs desde afuera.
+  if (!tenantId) {
+    return new Response("Not Found", { status: 404 });
+  }
 
   // Handshake de verificación: Meta lo dispara al registrar la Callback URL y
   // cada vez que se reactiva la suscripción.
@@ -321,7 +364,15 @@ Deno.serve(async (req: Request) => {
     const token = url.searchParams.get("hub.verify_token");
     const challenge = url.searchParams.get("hub.challenge");
 
-    if (modo === "subscribe" && token === VERIFY_TOKEN && VERIFY_TOKEN !== "") {
+    let verifyToken: string | null;
+    try {
+      verifyToken = await secretoMeta(tenantId, "verify_token");
+    } catch (err) {
+      console.error("[ingesta-whatsapp] handshake:", err);
+      return new Response("Forbidden", { status: 403 });
+    }
+
+    if (modo === "subscribe" && verifyToken && token === verifyToken) {
       return new Response(challenge ?? "", { status: 200 });
     }
     return new Response("Forbidden", { status: 403 });
@@ -335,7 +386,15 @@ Deno.serve(async (req: Request) => {
   // parsear y re-serializar el JSON cambiaría el hash.
   const cuerpoCrudo = await req.text();
 
-  if (!(await firmaValida(cuerpoCrudo, req.headers.get("x-hub-signature-256")))) {
+  let appSecret: string | null;
+  try {
+    appSecret = await secretoMeta(tenantId, "app_secret");
+  } catch (err) {
+    console.error("[ingesta-whatsapp] lectura de secreto:", err);
+    return new Response("Unauthorized", { status: 401 });
+  }
+
+  if (!(await firmaValida(cuerpoCrudo, req.headers.get("x-hub-signature-256"), appSecret))) {
     // Sin firma válida no se confía en el payload — ni siquiera para registrarlo
     // como error, porque cualquiera podría inundar `webhook_errors` desde afuera.
     return new Response("Unauthorized", { status: 401 });
@@ -345,12 +404,12 @@ Deno.serve(async (req: Request) => {
   try {
     payload = JSON.parse(cuerpoCrudo);
   } catch (err) {
-    await registrarError(err, { cuerpoCrudo }, null, "json_invalido");
+    await registrarError(err, { cuerpoCrudo }, tenantId, "json_invalido");
     return new Response("Bad Request", { status: 400 });
   }
 
   // 200 primero, trabajo después: Meta reintenta si la respuesta tarda más de 5 s,
   // y cada reintento es otra pasada completa sobre el mismo payload.
-  EdgeRuntime.waitUntil(procesar(payload));
+  EdgeRuntime.waitUntil(procesar(payload, tenantId));
   return new Response("EVENT_RECEIVED", { status: 200 });
 });

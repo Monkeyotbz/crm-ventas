@@ -4,7 +4,9 @@ import BarraSuperior from "../components/inbox/BarraSuperior.jsx";
 import ListaConversaciones from "../components/inbox/ListaConversaciones.jsx";
 import HiloMensajes from "../components/inbox/HiloMensajes.jsx";
 import PanelCopiloto from "../components/inbox/PanelCopiloto.jsx";
+import ConfiguracionMeta from "./ConfiguracionMeta.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
+import { obtenerMiRol } from "../lib/configuracionMeta.js";
 
 // Sprint 1 — bandeja unificada, solo lectura (docs/pendientes.md): se puede
 // ver cada conversación con su contacto, su deal y el estado del copiloto,
@@ -13,7 +15,15 @@ import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js
 export default function Bandeja() {
   const [filtro, setFiltro] = useState("todos");
   const [seleccionadaId, setSeleccionadaId] = useState(null);
+  const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta"
+  const [rol, setRol] = useState(null);
   const queryClient = useQueryClient();
+
+  // Solo admin/owner ven el ícono de Configuración de Meta (candidato [9a]) —
+  // un 'agent' ni siquiera lo ve, no solo le falla si lo toca.
+  useEffect(() => {
+    obtenerMiRol().then(setRol).catch(() => setRol(null));
+  }, []);
 
   const { data: conversaciones, isLoading, error } = useQuery({
     queryKey: ["conversaciones"],
@@ -40,10 +50,15 @@ export default function Bandeja() {
   }, [conversaciones, seleccionadaId]);
 
   const activa = conversaciones?.find((c) => c.conversation_id === seleccionadaId) ?? null;
+  const esAdmin = rol === "owner" || rol === "admin";
+
+  if (pagina === "configuracion-meta") {
+    return <ConfiguracionMeta onVolver={() => setPagina("bandeja")} />;
+  }
 
   return (
     <div className="min-h-screen candy-fondo flex flex-col">
-      <BarraSuperior />
+      <BarraSuperior onAbrirConfiguracion={esAdmin ? () => setPagina("configuracion-meta") : undefined} />
 
       <div className="flex-1 flex gap-3.5 px-5 pt-3.5 pb-5 min-h-0">
         {isLoading && <p className="m-auto text-sm text-candy-tinta-tenue font-candy-body">Cargando la bandeja…</p>}

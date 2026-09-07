@@ -18,12 +18,22 @@
 //     camino existe en el código pero NO se probó contra la API real todavía
 //     — message_templates está vacía (nadie sometió una plantilla a Meta
 //     todavía). Ver README.md de esta función.
+//
+// Credenciales por tenant (candidato [9a], 6 sept 2026): ya no hay un
+// WHATSAPP_ACCESS_TOKEN global — cada tenant tiene el suyo, guardado en Vault
+// (ver la migración 20260906000001 y obtener_secreto_meta_tenant). El tenant
+// se identifica decodificando el propio JWT del vendedor (el mismo dato que
+// lee private.current_tenant_id() del lado de Postgres, acá leído del lado
+// de Deno para no pagar un round-trip extra), y la lectura del secreto usa un
+// cliente `service_role` APARTE del cliente RLS-scoped de más abajo —
+// obtener_secreto_meta_tenant está revocada a todo lo que no sea service_role,
+// a propósito: nunca debe ser alcanzable con el JWT de un usuario común.
 
 import { createClient } from "npm:@supabase/supabase-js@2.45.0";
 
-const WHATSAPP_ACCESS_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const GRAPH_VERSION = "v21.0";
 
 // A diferencia de ingesta-whatsapp (Meta la llama servidor-a-servidor) y
@@ -55,6 +65,28 @@ function json(body: unknown, status: number) {
   });
 }
 
+/**
+ * `app_metadata.tenant_id` del JWT — sin verificar la firma acá porque el
+ * gateway de Supabase (verify_jwt: true, sin --no-verify-jwt en el deploy de
+ * esta función) ya rechazó cualquier token inválido antes de que este código
+ * corra. Se decodifica en vez de pedirle a Postgres el mismo dato porque ya
+ * es el mismo valor que lee private.current_tenant_id(), sin el round-trip.
+ */
+function tenantDelJwt(authHeader: string): string | null {
+  try {
+    const token = authHeader.replace(/^Bearer\s+/i, "");
+    const payloadB64 = token.split(".")[1];
+    const normalizado = payloadB64.replace(/-/g, "+").replace(/_/g, "/").padEnd(
+      payloadB64.length + ((4 - (payloadB64.length % 4)) % 4),
+      "=",
+    );
+    const payload = JSON.parse(atob(normalizado));
+    return payload?.app_metadata?.tenant_id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return json({ error: "Method Not Allowed" }, 405);
@@ -62,11 +94,21 @@ Deno.serve(async (req: Request) => {
   const authHeader = req.headers.get("Authorization");
   if (!authHeader) return json({ error: "Falta autenticación" }, 401);
 
+  const tenantId = tenantDelJwt(authHeader);
+  if (!tenantId) return json({ error: "No se pudo determinar el tenant del token" }, 401);
+
   // Cliente scoped al usuario que llama — no service_role. Ver el comentario
   // de arriba: es lo que hace que esta función no necesite reimplementar
   // "¿esta conversación es de este vendedor?", la RLS ya lo resuelve.
   const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     global: { headers: { Authorization: authHeader } },
+    auth: { persistSession: false },
+  });
+
+  // Cliente APARTE, con service_role, únicamente para leer el secreto de
+  // Meta de este tenant — nunca para tocar conversations/messages, que
+  // siguen pasando por el cliente de arriba y sus RLS.
+  const dbSecretos = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
     auth: { persistSession: false },
   });
 
@@ -81,9 +123,14 @@ Deno.serve(async (req: Request) => {
   if (!conversation_id) return json({ error: "Falta conversation_id" }, 400);
   if (!contenido && !template_id) return json({ error: "Falta contenido o template_id" }, 400);
 
-  if (!WHATSAPP_ACCESS_TOKEN) {
+  const { data: accessToken, error: errToken } = await dbSecretos.rpc("obtener_secreto_meta_tenant", {
+    p_tenant: tenantId,
+    p_tipo: "access_token",
+  });
+  if (errToken) return json({ error: `No se pudo leer la credencial de Meta: ${errToken.message}` }, 500);
+  if (!accessToken) {
     return json(
-      { error: "WHATSAPP_ACCESS_TOKEN no está configurado — no se puede enviar todavía. Ver README.md." },
+      { error: "Este tenant todavía no configuró su app de Meta — hacelo desde Configuración." },
       503,
     );
   }
@@ -104,13 +151,18 @@ Deno.serve(async (req: Request) => {
   const telefono = contacto?.telefono;
   if (!telefono) return json({ error: "El contacto no tiene teléfono" }, 400);
 
+  // Filtrado por tenant_id — antes de [9a] esto tomaba CUALQUIER número
+  // activo, sin distinguir de quién era: con un solo tenant nunca se notó,
+  // pero con dos habría dejado que un vendedor mandara desde el número de
+  // OTRO tenant.
   const { data: numero, error: errNumero } = await db
     .from("whatsapp_numbers")
     .select("phone_number_id")
+    .eq("tenant_id", tenantId)
     .eq("activo", true)
     .limit(1)
     .single();
-  if (errNumero || !numero) return json({ error: "No hay un número de WhatsApp activo" }, 500);
+  if (errNumero || !numero) return json({ error: "No hay un número de WhatsApp activo para este tenant" }, 500);
 
   const ventanaAbierta = Boolean(
     conv.ventana_abierta_hasta && new Date(conv.ventana_abierta_hasta) > new Date(),
@@ -159,7 +211,7 @@ Deno.serve(async (req: Request) => {
       `https://graph.facebook.com/${GRAPH_VERSION}/${numero.phone_number_id}/messages`,
       {
         method: "POST",
-        headers: { Authorization: `Bearer ${WHATSAPP_ACCESS_TOKEN}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
         body: JSON.stringify(payloadMeta),
       },
     );
