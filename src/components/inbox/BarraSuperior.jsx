@@ -7,7 +7,12 @@ import CandyGemLogo from "../CandyGemLogo.jsx";
 // 'agent' ni siquiera ve el engranaje, no solo le falla si lo toca.
 export default function BarraSuperior({ onAbrirConfiguracion, onAbrirClaves }) {
   return (
-    <div className="shrink-0 mx-3 sm:mx-5 mt-3 sm:mt-3.5 px-3 sm:px-5 py-2.5 sm:py-0 sm:h-[60px] rounded-2xl sm:rounded-full flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-between candy-glass font-candy-body">
+    // `relative z-50` no es decorativo: `candy-glass` trae `backdrop-filter`, y
+    // eso CREA un contexto de apilamiento. Sin un z-index acá, el menú del
+    // engranaje queda encerrado en el contexto de esta barra y los paneles de la
+    // bandeja —que también son candy-glass y vienen después en el DOM— lo tapan.
+    // El síntoma es un menú que "aparece por detrás" en vez de no aparecer.
+    <div className="relative z-50 shrink-0 mx-3 sm:mx-5 mt-3 sm:mt-3.5 px-3 sm:px-5 py-2.5 sm:py-0 sm:h-[60px] rounded-2xl sm:rounded-full flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-between candy-glass font-candy-body">
       {/* En mobile esta fila lleva el logo Y los botones de cuenta (que en
           desktop van del otro lado de la barra): apilar tres filas comería
           demasiado alto de pantalla en un celular. */}
