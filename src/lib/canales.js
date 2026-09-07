@@ -24,6 +24,14 @@ export const CANALES = {
     etiqueta: "Chat web",
     gradiente: "linear-gradient(135deg, #5b9bff, #b98bff)",
   },
+  // Leads que entran por la API de ingesta (candidato [9a]): el sistema propio
+  // del tenant los empuja. No es una plataforma con marca propia como los de
+  // arriba, así que usa un gris neutro a propósito — que se lea como "vino de
+  // un sistema", no como un canal de mensajería más.
+  api: {
+    etiqueta: "API",
+    gradiente: "linear-gradient(135deg, #8478a0, #5f5480)",
+  },
 };
 
 const CANAL_DEFECTO = { etiqueta: "Canal", gradiente: "linear-gradient(135deg, #9b8fb5, #8478a0)" };

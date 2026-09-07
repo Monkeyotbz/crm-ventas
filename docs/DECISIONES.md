@@ -315,6 +315,22 @@ Diseño completo (tabla `tenant_meta_credentials` + secretos en Vault por tenant
 del tenant por la URL del webhook + pantalla de configuración) queda en el plan aprobado de la
 sesión — se construye a partir de acá.
 
+**Construida y verificada en dos mitades:**
+
+1. **Credenciales de Meta por tenant** (6 sept 2026, commit `f4004a0`). Cada tenant con su propia
+   app de Meta. Probado contra la API real con Hellominus migrado.
+2. **API de ingesta de leads** (7 sept 2026, migración `20260907120000` + `supabase/functions/ingesta-api/`).
+   El sistema propio de un tenant empuja leads con una clave secreta propia, que el admin **crea y
+   revoca solo** desde `src/pages/ClavesApi.jsx`. El lead entra como contacto + conversación, y el
+   Router que ya existía lo clasifica y le crea la oportunidad — no se duplicó nada de esa lógica.
+   Alcance elegido por el usuario: **solo ingesta**. Lectura, operación del CRM y webhooks
+   salientes quedaron explícitamente afuera; si alguna vez se piden, son candidatos nuevos.
+
+   El diseño se apartó del spec original en un punto, por la regla de los dos carriles de venta
+   (ver `CLAUDE.md`): el spec decía copiar el patrón de `chat_widget_keys`, pero esa tabla no tiene
+   policy de escritura y se administra por SQL directo — eso habría dejado al tenant del carril
+   masivo sin poder conectarse sin ayuda de Hellominus, que es justo lo que ese carril no admite.
+
 ### [9b] MCP para tenants
 Estado: APLAZADO
 Procedencia: misma pregunta del usuario, 4 sept 2026.
@@ -325,6 +341,13 @@ Composición: no aplica
 Condición de activación: que [9a] esté `ACEPTADO` y construida — un MCP sin una API debajo no
   tiene qué exponer. Además, que un tenant concreto pida específicamente acceso vía agente de IA
   propio, no solo vía su sistema (eso ya lo cubre [9a] solo).
+
+**Nota del 7 sept 2026:** la primera mitad de esa condición **ya se cumplió** — [9a] está
+construida. La segunda no: nadie pidió todavía acceso vía agente de IA. Sigue `APLAZADO`, y el
+cambio de estado lo decide únicamente el usuario. Ojo con un detalle de alcance: [9a] quedó siendo
+solo INGESTA, así que un MCP encima de ella hoy únicamente podría *crear* leads, no consultar ni
+mover nada. Para que [9b] valga la pena como "operá el CRM por vos", primero haría falta la parte
+de lectura/operación que [9a] dejó afuera.
 
 ---
 

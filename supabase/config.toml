@@ -1,0 +1,47 @@
+# Configuración del proyecto para la CLI de Supabase.
+#
+# Existe sobre todo por `verify_jwt`. Hasta el 7 sept 2026 ese ajuste vivía
+# ÚNICAMENTE en el flag `--no-verify-jwt` que alguien tenía que acordarse de
+# tipear en cada deploy, documentado solo en prosa de los README — el hallazgo
+# H16 de docs/corregir-errores.md. El modo de falla es silencioso y feo:
+# cualquier `supabase functions deploy` sin ese flag reactiva la verificación de
+# JWT, y a partir de ahí Meta (o el sistema de un tenant) recibe 401 en cada
+# petición, sin ningún error visible de nuestro lado.
+#
+# Declarado acá, el ajuste viaja con el repo y deja de depender de la memoria de
+# quien despliega. Los comandos de los README pueden ir sin el flag.
+
+project_id = "jrygtluycndiyvrxjmib"
+
+# --- Edge Functions ---------------------------------------------------------
+# La regla: solo lleva verify_jwt = true la función que invoca un usuario
+# logueado de candyCRM. Las que llama un tercero (Meta, el widget embebido, el
+# sistema de un tenant) o un trigger de Postgres traen su propia autenticación
+# y no pueden pasar por el gateway de JWT, porque quien las llama no tiene uno.
+
+[functions.ingesta-whatsapp]
+# Autentica con la firma HMAC X-Hub-Signature-256 de Meta + el tenant en la URL.
+verify_jwt = false
+
+[functions.ingesta-widget-chat]
+# Autentica con `widget_key`, que es pública por diseño (viaja en el HTML del
+# sitio que embebe el widget).
+verify_jwt = false
+
+[functions.ingesta-api]
+# Autentica con una clave secreta por tenant (`tenant_api_keys`), hasheada en
+# la base, que viaja en el header Authorization.
+verify_jwt = false
+
+[functions.router]
+# Lo llama un trigger de Postgres vía pg_net, con el secreto compartido
+# `x-router-secret`. No hay usuario logueado en esa cadena.
+verify_jwt = false
+
+[functions.envio-whatsapp]
+# La ÚNICA con verify_jwt = true, y es deliberado: la llama el frontend
+# logueado, y el código de la función decodifica `app_metadata.tenant_id` del
+# JWT sin verificar la firma, confiando en que el gateway ya rechazó cualquier
+# token inválido. Si esto pasara a false, cualquiera podría forjar un tenant_id
+# y enviar mensajes desde el número de otro tenant.
+verify_jwt = true

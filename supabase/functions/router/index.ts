@@ -259,6 +259,7 @@ async function aplicar(
   conversationId: number,
   destino: Pipeline,
   esPrimerMensaje: boolean,
+  canal: string,
 ): Promise<{ dealId: number; transferido: boolean }> {
   const { data: existente, error: errBusca } = await db
     .from("deals").select("id, pipeline_id")
@@ -275,7 +276,12 @@ async function aplicar(
       contact_id: contactId,
       pipeline_id: destino.id,
       stage_id: stageId,
-      fuente: "whatsapp",
+      // El canal real del mensaje que originó el deal, no una constante. Antes
+      // esto decía "whatsapp" fijo, así que TODO lead que entraba por el widget
+      // de chat web quedaba atribuido a WhatsApp — corrompía en silencio los
+      // indicadores de origen. Se corrigió al construir la API de ingesta
+      // (candidato [9a]), que habría hecho lo mismo con los leads de API.
+      fuente: canal,
       owner_id: ownerId,
     }).select("id").single();
     if (error) throw new Error("deals insert: " + error.message);
@@ -401,6 +407,7 @@ async function clasificar(mensaje: any) {
 
   const { dealId, transferido } = await aplicar(
     tenantId, conv.contact_id, conv.id, decision.pipeline, esPrimerMensaje,
+    String(mensaje.canal ?? "manual"),
   );
 
   const { error: errDec } = await db.from("router_decisions").insert({

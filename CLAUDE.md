@@ -59,7 +59,8 @@ agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`
 | Ingesta de WhatsApp | `supabase/functions/ingesta-whatsapp/` | Webhook de Meta. **La Callback URL lleva el tenant en el path** (`.../ingesta-whatsapp/<tenant_id>`) — cada tenant registra la suya en su propia app de Meta, ver *Credenciales de Meta por tenant* más abajo |
 | Ingesta del widget de chat web | `supabase/functions/ingesta-widget-chat/` | POST del widget embebido (`widget/candy-chat-widget.js`), autenticado por `widget_key` pública, no por JWT |
 | Router de clasificación | `supabase/functions/router/` | Trigger de Postgres (`private.disparar_router()`, vía `pg_net`) sobre `insert` en `messages` — no el panel de Database Webhooks, que no funciona en este proyecto (ver `docs/DECISIONES.md`, candidato [5]) |
-| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **la única de las cuatro que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Usa un segundo cliente `service_role` SOLO para leer el token de Meta del tenant, nunca para tocar `conversations`/`messages` |
+| API de ingesta de leads | `supabase/functions/ingesta-api/` | POST del sistema propio de un tenant (su formulario, su ERP), autenticado con una clave **secreta** por tenant (`tenant_api_keys`, guardada hasheada) en el header `Authorization`. **Sin CORS a propósito**: es servidor-a-servidor, y que un navegador no pueda llamarla desalienta poner la clave en JavaScript de cliente |
+| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **la única de las cinco que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Usa un segundo cliente `service_role` SOLO para leer el token de Meta del tenant, nunca para tocar `conversations`/`messages` |
 
 Es la excepción de plataforma del `CLAUDE.md` del laboratorio: son endpoints HTTP
 que invoca un tercero, y una carpeta local no puede servir HTTP. La regla que
@@ -98,6 +99,33 @@ detectar solo: un Verify Token guardado con un espacio inicial, y el App Secret 
 del Verify Token. Ninguno da error al guardar — se manifiestan como un `401` en el webhook, que
 parece un bug del código y no lo es. Un App Secret de Meta son 32 caracteres hexadecimales; si lo
 guardado no tiene esa forma, está mal cargado.
+
+## La API de ingesta, y por qué su clave no se parece a la del widget
+
+`supabase/functions/ingesta-api/` (candidato [9a], 7 sept 2026) es por donde el sistema propio de
+un tenant empuja leads. Es **el endpoint más expuesto del proyecto**: lo llama código de terceros
+desde internet. Tres cosas que lo distinguen del resto y no conviene "simplificar" después:
+
+- **La clave se guarda hasheada (SHA-256), nunca en claro.** Es lo contrario de
+  `chat_widget_keys`, que sí guarda la suya en texto plano — pero esa es *publicable* y viaja en el
+  HTML de cualquier sitio que embeba el widget. Esta vive en el servidor del tenant y es un secreto
+  real: se muestra una única vez, al crearla, y ni nosotros podemos recuperarla.
+- **El alta y la revocación son autoservicio** (`crear_api_key` / `revocar_api_key`, con el mismo
+  candado `is_admin` + `current_tenant_id()` que las funciones de Meta). No se copió el patrón de
+  `chat_widget_keys`, que se administra por SQL directo: eso dejaría al tenant del carril masivo
+  sin poder conectarse solo. Pantalla: `src/pages/ClavesApi.jsx`.
+- **Tiene límite de velocidad** (`api_rate_limits` + `registrar_uso_api`, ventana fija de 1 minuto).
+  Es el único lugar del proyecto que lo tiene — el widget sigue sin límite, brecha conocida.
+
+**El lead entra como conversación y el Router hace el resto.** La API no crea oportunidades ni
+resuelve pipelines: inserta el mensaje, y el trigger `private.disparar_router()` (que reacciona a
+CUALQUIER mensaje entrante, no solo de WhatsApp) dispara la clasificación que ya existía. Si algún
+día se agrega otro canal de ingesta, conviene seguir el mismo camino en vez de duplicar esa lógica.
+
+**Idempotencia por `contacts.external_id`**: el identificador del registro en el sistema DEL
+TENANT. Un reintento con el mismo `external_id` actualiza en vez de duplicar. Los emails se
+normalizan a minúsculas en `resolver_contacto_api` porque la base no lo hace sola — no hay `lower()`
+ni índice funcional sobre `contact_channels.valor`.
 
 ## Dónde vive el widget de chat embebible
 
@@ -138,7 +166,11 @@ Al escribir una migración nueva:
 - **Guardar el archivo en `supabase/migrations/`** con el nombre exacto que quedó registrado — si
   no, la base y el repo se separan.
 
-Para leer el esquema de un vistazo sin abrir las 19 migraciones:
+**`verify_jwt` se declara en [`supabase/config.toml`](supabase/config.toml)**, no en el flag
+`--no-verify-jwt` del comando. Antes vivía solo en prosa de los README (hallazgo H16), y olvidarlo
+en un deploy rompía el endpoint en silencio. Si agregás una función nueva, declarala ahí.
+
+Para leer el esquema de un vistazo sin abrir las 20 migraciones:
 [`supabase/schema-referencia.md`](supabase/schema-referencia.md) — generado, no ejecutable, y **no
 es fuente de verdad**: si contradice a una migración, manda la migración.
 
@@ -151,7 +183,7 @@ es fuente de verdad**: si contradice a una migración, manda la migración.
 - **Soporte multi-tenant:** el equipo de Hellominus opera el SaaS de los tenants-cliente vía la tabla `platform_admins` (no vía membresías extra en `team_members`, que sigue siendo un tenant por persona). Para entrar al CRM de otro tenant hay que **abrir una sesión de soporte** (`support_sessions`, con motivo obligatorio y vencimiento a 60 min) y mandar el header `X-Acting-Tenant`; sin sesión activa el header no habilita nada. Las escrituras durante un soporte quedan en `audit_log` con fila anterior/posterior y su `support_session_id`, y el tenant auditado puede leer las sesiones abiertas sobre sus datos. **Las lecturas no se auditan una por una** — Postgres no dispara triggers en `SELECT`; la sesión declarada es el rastro. Detalle en [supabase/README.md](supabase/README.md).
 - **Verticales configurables:** `contacts.sector` dejó de ser un `check` hardcodeado; ahora es la tabla `sectors` por tenant (`contacts.sector_id`), con los 5 rubros de Hellominus sembrados con los mismos slugs de antes.
 - **El proyecto Supabase real EXISTE desde el 25 ago 2026** (`crm-ventas`, ref `jrygtluycndiyvrxjmib`, us-east-1). 36 tablas, todas con RLS, 0 advertencias del linter de seguridad. Credenciales ya en `.env` (gitignored). Usuario `owner` dado de alta: `juansecode2026@gmail.com`.
-  - El esquema son 19 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba. (`supabase/schema-referencia.md` quedó desactualizado: no incluye ni el catálogo turístico ni `tenant_meta_credentials`.)
+  - El esquema son 20 migraciones en `supabase/migrations/`, todas aplicadas — ver la sección *Regla del esquema* más arriba. (`supabase/schema-referencia.md` quedó desactualizado: no incluye ni el catálogo turístico ni `tenant_meta_credentials`.)
   - **Las funciones internas viven en el schema `private`**, no en `public` (estaban expuestas como endpoints RPC públicos). Al escribir una policy nueva hay que calificarlas: `private.current_tenant_id()`, no `current_tenant_id()`.
   - **Los 48 ítems de `docs/tener-en-cuenta-base-de-datos` están implementados** (25 ago 2026), con tres desvíos deliberados respecto del documento — ver ahí mismo.
 - **3 sept/4 sept 2026:** además de WhatsApp (candidato [3], funcionando con mensajes reales) y el Router (candidato [5], `ACEPTADO`), ahora también está construido y probado de punta a punta el canal de **chat web** (Sprint 2 del README): `supabase/functions/ingesta-widget-chat/` + `widget/candy-chat-widget.js`, con resolución atómica de contacto/conversación (mismo patrón que corrigió H3/H4 para WhatsApp) e identidad por email/teléfono tipeados en el chat — no por login de hellominus.com. Entra directo, no por n8n (n8n sigue sin cuenta creada). Falta embeberlo en el sitio real de Hellominus — hoy solo corre contra `widget/prueba.html`.

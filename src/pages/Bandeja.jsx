@@ -5,6 +5,7 @@ import ListaConversaciones from "../components/inbox/ListaConversaciones.jsx";
 import HiloMensajes from "../components/inbox/HiloMensajes.jsx";
 import PanelCopiloto from "../components/inbox/PanelCopiloto.jsx";
 import ConfiguracionMeta from "./ConfiguracionMeta.jsx";
+import ClavesApi from "./ClavesApi.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
 
@@ -23,7 +24,7 @@ import { obtenerMiRol } from "../lib/configuracionMeta.js";
 export default function Bandeja() {
   const [filtro, setFiltro] = useState("todos");
   const [seleccionadaId, setSeleccionadaId] = useState(null);
-  const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta"
+  const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta" | "claves-api"
   const [rol, setRol] = useState(null);
   const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
   const [copilotoAbierto, setCopilotoAbierto] = useState(false); // panel flotante <1024px
@@ -65,6 +66,9 @@ export default function Bandeja() {
   if (pagina === "configuracion-meta") {
     return <ConfiguracionMeta onVolver={() => setPagina("bandeja")} />;
   }
+  if (pagina === "claves-api") {
+    return <ClavesApi onVolver={() => setPagina("bandeja")} />;
+  }
 
   // En mobile, elegir una conversación es "entrar" a ella: la lista y el hilo
   // comparten la misma pantalla. En tablet/desktop este cambio de estado no se
@@ -76,7 +80,10 @@ export default function Bandeja() {
 
   return (
     <div className="h-dvh candy-fondo flex flex-col overflow-hidden">
-      <BarraSuperior onAbrirConfiguracion={esAdmin ? () => setPagina("configuracion-meta") : undefined} />
+      <BarraSuperior
+        onAbrirConfiguracion={esAdmin ? () => setPagina("configuracion-meta") : undefined}
+        onAbrirClaves={esAdmin ? () => setPagina("claves-api") : undefined}
+      />
 
       <div className="flex-1 flex gap-3 sm:gap-3.5 px-3 sm:px-5 pt-3 sm:pt-3.5 pb-3 sm:pb-5 min-h-0">
         {isLoading && <p className="m-auto text-sm text-candy-tinta-tenue font-candy-body">Cargando la bandeja…</p>}
