@@ -3,25 +3,23 @@ import CandyLollipopLogo from "./CandyLollipopLogo.jsx";
 // Marco compartido de las pantallas de acceso (Login, NuevaContrasena,
 // PreparandoEspacio).
 //
-//   < lg  : la foto es una franja arriba y el contenido va en una hoja debajo
-//           (patrón de login de app: Perplexity, Linear).
-//   >= lg : split a pantalla completa — foto a la izquierda, contenido
-//           centrado a la derecha. Es lo que hace que en desktop no parezca
-//           una app móvil metida en un recuadro.
+//   < lg  : a sangre — la foto es una franja arriba y el contenido va en una
+//           hoja debajo (patrón de login de app).
+//   >= lg : una sola tarjeta CENTRADA en la pantalla, con la foto a la
+//           izquierda y el formulario a la derecha. No es un split a sangre:
+//           eso dejaba el formulario descentrado respecto del viewport.
+//
+// La foto va en dos divs distintos y no en uno con clases responsive porque
+// cada orientación necesita su propio encuadre: apaisado en mobile (se ve la
+// sala) y vertical en desktop (hay que correrse a la derecha para agarrar el
+// frasco, si no queda pura pared).
 const FONDO = "url(/login-fondo.jpg)";
 
 export default function MarcoAcceso({ children }) {
   return (
-    <div className="candy-fondo min-h-screen font-candy-body lg:flex">
-      {/* Panel de imagen — solo desktop, ocupa la mitad izquierda a sangre. */}
-      <div
-        className="hidden lg:block lg:w-[52%] xl:w-[56%]"
-        style={{ backgroundImage: FONDO, backgroundSize: "cover", backgroundPosition: "center" }}
-      />
-
-      {/* Columna de contenido. */}
-      <div className="flex min-h-screen flex-col bg-white lg:w-[48%] xl:w-[44%]">
-        {/* Banner — solo mobile/tablet. Se funde en el blanco de la hoja. */}
+    <div className="candy-fondo flex min-h-screen items-center justify-center font-candy-body lg:p-8">
+      <div className="flex min-h-screen w-full flex-col overflow-hidden bg-white lg:min-h-[600px] lg:w-[920px] lg:max-w-full lg:flex-row lg:rounded-[32px] lg:shadow-[0_30px_80px_rgba(80,40,140,0.22)]">
+        {/* Foto — franja superior en mobile. */}
         <div
           className="relative h-[32vh] min-h-[190px] w-full shrink-0 lg:hidden"
           style={{ backgroundImage: FONDO, backgroundSize: "cover", backgroundPosition: "center 35%" }}
@@ -32,8 +30,15 @@ export default function MarcoAcceso({ children }) {
           />
         </div>
 
-        <div className="flex flex-1 flex-col justify-center px-7 pb-9 pt-2 sm:px-10 lg:px-14 lg:pt-10">
-          <div className="mx-auto w-full max-w-[380px]">
+        {/* Foto — columna izquierda en desktop, encuadrada sobre el frasco. */}
+        <div
+          className="hidden shrink-0 lg:block lg:w-[46%]"
+          style={{ backgroundImage: FONDO, backgroundSize: "cover", backgroundPosition: "72% 60%" }}
+        />
+
+        {/* Contenido. */}
+        <div className="flex flex-1 flex-col justify-center px-7 pb-9 pt-2 sm:px-10 lg:px-14 lg:py-12">
+          <div className="mx-auto w-full max-w-[340px]">
             <div className="flex flex-col items-center text-center">
               <CandyLollipopLogo size={44} />
               <div className="mt-2 font-candy-display text-[22px] font-extrabold leading-none text-candy-tinta">
