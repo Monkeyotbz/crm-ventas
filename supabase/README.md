@@ -161,10 +161,24 @@ Cuando se conecte el Flujo 1 de n8n (insert en `leads` de hellominus.com → CRM
 - El `id`/`estado` del lead original en hellominus.com se guarda en `messages.payload_raw` (ya existe para esto) — no hace falta una columna nueva.
 - Pendiente de diseñar cuando se implemente ese flujo: nada protege hoy contra un webhook reintentado insertando el mismo lead dos veces (idempotencia).
 
-### 3. Alta del primer usuario (vos)
+### 3. Alta de usuarios
 
-1. **Authentication → Users → Add user** (o simplemente hacé login con magic link desde la app una vez desplegada — Supabase crea el usuario solo).
-2. **Asignale el tenant en `app_metadata`** — paso obligatorio y distinto de `user_metadata`: `current_tenant_id()` lee de ahí, y a diferencia de `user_metadata`, el usuario no lo puede editar desde el cliente. Solo se puede hacer con la `service_role` key (Dashboard → el propio usuario → *Edit → App Metadata*, o vía API):
+**Desde la migración `20260909120000` el alta es autoservicio.** Cualquiera que se registre
+desde la pantalla de login (`src/pages/Login.jsx`, vista "registro") dispara el trigger
+`private.handle_new_user()`, que le crea su propio tenant, lo deja como `owner`, le siembra el
+pipeline y le escribe `tenant_id` en `app_metadata`. No hay pasos manuales.
+
+El trigger se saltea (guarda `raw_app_meta_data ? 'tenant_id'`) si el usuario ya viene con
+tenant asignado — que es como hay que crear un usuario que deba caer en un tenant **existente**
+(el primer usuario de Hellominus, o un futuro flujo de invitación a un equipo).
+
+#### Alta manual en un tenant existente (el primer usuario de Hellominus)
+
+1. **Authentication → Users → Add user.**
+2. **Asignale el tenant en `app_metadata`** — distinto de `user_metadata`: `current_tenant_id()`
+   lee de ahí, y a diferencia de `user_metadata`, el usuario no lo puede editar desde el cliente.
+   Solo con la `service_role` key (Dashboard → el propio usuario → *Edit → App Metadata*, o vía API).
+   Hacelo **antes** del primer login, así el trigger ve el `tenant_id` y no crea un espacio nuevo:
    ```js
    await supabase.auth.admin.updateUserById('<tu-user-id>', {
      app_metadata: { tenant_id: '<uuid-del-tenant-hellominus>' } // sale de select id from tenants where slug = 'hellominus'

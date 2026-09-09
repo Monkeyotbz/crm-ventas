@@ -1,5 +1,5 @@
 import { supabase } from "../../lib/supabase.js";
-import CandyGemLogo from "../CandyGemLogo.jsx";
+import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 
 // `onAbrirConfiguracion` viene undefined para un rol que no es admin/owner —
 // Bandeja.jsx ya resuelve `obtenerMiRol()` antes de pasarlo, así que un
@@ -19,11 +19,10 @@ export default function BarraSuperior({ onAbrirConfiguracion }) {
           demasiado alto de pantalla en un celular. */}
       <div className="flex items-center justify-between gap-2.5 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          {/* Isotipo traído de la rama de Gabriel (merge del 7 sept) — reemplaza
-              al degradado cónico genérico que había acá. Es el mismo SVG que
-              quedó como favicon en index.html. */}
-          <CandyGemLogo size={28} className="shrink-0" />
-          <div className="font-candy-display text-base sm:text-lg font-extrabold text-candy-tinta">candyCRM</div>
+          {/* Isotipo de marca (logo oficial: paleta lollipop rosa/azul). Es el
+              mismo dibujo que public/candy-lollipop.svg, el favicon. */}
+          <CandyLollipopLogo size={30} className="shrink-0" />
+          <div className="font-candy-display text-base sm:text-lg font-extrabold text-candy-tinta">Candy CRM</div>
         </div>
         <div className="sm:hidden">
           <BotonesCuenta onAbrirConfiguracion={onAbrirConfiguracion} />
