@@ -1,17 +1,25 @@
+import { useEffect, useState } from "react";
 import { supabase } from "../../lib/supabase.js";
+import { iniciales } from "../../lib/cuenta.js";
 import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 
 // `onAbrirConfiguracion` viene undefined para un rol que no es admin/owner —
 // Bandeja.jsx ya resuelve `obtenerMiRol()` antes de pasarlo, así que un
 // 'agent' ni siquiera ve el engranaje, no solo le falla si lo toca.
 //
-// El engranaje ya NO arma su propio menú acá (versión anterior: un dropdown
-// con la lista de destinos). Ahora es un simple toggle que Bandeja.jsx
-// controla, porque el panel que abre (PanelConfiguracion) tiene que
-// coordinarse con el panel flotante del Copiloto — los dos son overlays a la
-// derecha y nunca pueden convivir a la vez — y esa coordinación solo puede
-// vivir donde los dos paneles se ven, que es Bandeja.jsx, no acá.
-export default function BarraSuperior({ onAbrirConfiguracion }) {
+// El botón de cuenta abre "Mi cuenta" (datos personales + cerrar sesión), ya
+// no cierra sesión de un toque. La barra solo se ve en la bandeja: las otras
+// pantallas (catálogo, mi cuenta, configuración) traen su propio encabezado.
+export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onAbrirMiCuenta }) {
+  const [inicial, setInicial] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const u = data?.user;
+      setInicial(iniciales({ nombre: u?.user_metadata?.nombre, email: u?.email }).toUpperCase());
+    });
+  }, []);
+
   return (
     <div className="shrink-0 mx-3 sm:mx-5 mt-3 sm:mt-3.5 px-3 sm:px-5 py-2.5 sm:py-0 sm:h-[60px] rounded-2xl sm:rounded-full flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-center justify-between candy-glass font-candy-body">
       {/* En mobile esta fila lleva el logo Y los botones de cuenta (que en
@@ -19,42 +27,52 @@ export default function BarraSuperior({ onAbrirConfiguracion }) {
           demasiado alto de pantalla en un celular. */}
       <div className="flex items-center justify-between gap-2.5 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          {/* Isotipo de marca (logo oficial: paleta lollipop rosa/azul). Es el
-              mismo dibujo que public/candy-lollipop.svg, el favicon. */}
           <CandyLollipopLogo size={30} className="shrink-0" />
           <div className="font-candy-display text-base sm:text-lg font-extrabold text-candy-tinta">Candy CRM</div>
         </div>
         <div className="sm:hidden">
-          <BotonesCuenta onAbrirConfiguracion={onAbrirConfiguracion} />
+          <BotonesCuenta
+            onAbrirConfiguracion={onAbrirConfiguracion}
+            onAbrirMiCuenta={onAbrirMiCuenta}
+            inicial={inicial}
+          />
         </div>
       </div>
 
-      {/* Panel de hoy y Reportes: pantallas de Sprints posteriores, todavía
-          no construidas — el único destino real hoy es la bandeja.
-          `no-scrollbar` + overflow-x: en mobile las tres pestañas no entran a
-          lo ancho, así que scrollean en vez de romper la barra. */}
+      {/* Panel de hoy y Reportes: pantallas de Sprints posteriores, todavía sin
+          construir. `no-scrollbar` + overflow-x: en mobile las pestañas no
+          entran a lo ancho, así que scrollean en vez de romper la barra. */}
       <div className="no-scrollbar flex min-w-0 gap-1 overflow-x-auto bg-white/50 border border-white/80 rounded-full p-1">
-        <button type="button" className="px-4 py-2 rounded-full text-[13px] font-bold text-white" style={{ background: "linear-gradient(180deg, #ff8fc0, #ff5ca8)" }}>
+        <button type="button" className="px-4 py-2 rounded-full text-[13px] font-bold text-white shrink-0" style={{ background: "linear-gradient(180deg, #ff8fc0, #ff5ca8)" }}>
           Bandeja
         </button>
-        <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60">
+        <button
+          type="button"
+          onClick={onIrACatalogo}
+          className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
+        >
+          Catálogo
+        </button>
+        <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
           Panel de hoy
         </button>
-        <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60">
+        <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
           Reportes
         </button>
       </div>
 
       <div className="hidden sm:block">
-        <BotonesCuenta onAbrirConfiguracion={onAbrirConfiguracion} />
+        <BotonesCuenta
+          onAbrirConfiguracion={onAbrirConfiguracion}
+          onAbrirMiCuenta={onAbrirMiCuenta}
+          inicial={inicial}
+        />
       </div>
     </div>
   );
 }
 
-// Extraído para no duplicar el markup: los mismos botones se muestran junto al
-// logo en mobile y del otro lado de la barra en desktop.
-function BotonesCuenta({ onAbrirConfiguracion }) {
+function BotonesCuenta({ onAbrirConfiguracion, onAbrirMiCuenta, inicial }) {
   return (
     <div className="flex items-center gap-2">
       {onAbrirConfiguracion && (
@@ -72,11 +90,13 @@ function BotonesCuenta({ onAbrirConfiguracion }) {
       )}
       <button
         type="button"
-        onClick={() => supabase.auth.signOut()}
-        className="w-[34px] h-[34px] rounded-full shrink-0"
-        title="Cerrar sesión"
+        onClick={onAbrirMiCuenta}
+        className="w-[34px] h-[34px] rounded-full shrink-0 flex items-center justify-center text-white text-[12px] font-extrabold font-candy-display"
+        title="Mi cuenta"
         style={{ background: "linear-gradient(135deg, #5b9bff, #b98bff)", boxShadow: "0 3px 8px rgba(120,90,220,0.35)" }}
-      />
+      >
+        {inicial}
+      </button>
     </div>
   );
 }
