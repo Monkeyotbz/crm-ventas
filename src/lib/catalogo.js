@@ -54,9 +54,20 @@ export async function listarCatalogo(tipo) {
   const cfg = TIPOS[tipo];
   if (!cfg) throw new Error(`tipo de catálogo desconocido: ${tipo}`);
 
+  // Filtro por tenant EXPLÍCITO, no confiando solo en RLS. Estas tablas tienen
+  // dos policies de SELECT que Postgres combina con OR: una por
+  // `current_tenant_id()` y otra pública por `status = 'published'` (para que el
+  // sitio público del tenant —ej. turismocolombia.fit— lea su catálogo sin
+  // login). Sin este `.eq`, esta pantalla —que es la administración interna, no
+  // el sitio público— mostraría los ítems publicados de CUALQUIER tenant.
+  const { data: sesion } = await supabase.auth.getSession();
+  const tenantId = sesion?.session?.user?.app_metadata?.tenant_id;
+  if (!tenantId) return [];
+
   const { data, error } = await supabase
     .from(cfg.tabla)
     .select(cfg.select)
+    .eq("tenant_id", tenantId)
     .order("sort_order", { ascending: true, nullsFirst: false })
     .order("id", { ascending: true });
 
