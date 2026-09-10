@@ -9,6 +9,7 @@ import ConfiguracionMeta from "./ConfiguracionMeta.jsx";
 import ClavesApi from "./ClavesApi.jsx";
 import MiCuenta from "./MiCuenta.jsx";
 import Catalogo from "./Catalogo.jsx";
+import Panel from "./Panel.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
 import { obtenerModulos } from "../lib/modulos.js";
@@ -28,7 +29,7 @@ import { obtenerModulos } from "../lib/modulos.js";
 export default function Bandeja() {
   const [filtro, setFiltro] = useState("todos");
   const [seleccionadaId, setSeleccionadaId] = useState(null);
-  const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta" | "claves-api" | "mi-cuenta" | "catalogo"
+  const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "panel" | "configuracion-meta" | "claves-api" | "mi-cuenta" | "catalogo"
   const [rol, setRol] = useState(null);
   const [modulos, setModulos] = useState(["crm"]); // qué features tiene activadas este tenant
   const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
@@ -71,6 +72,12 @@ export default function Bandeja() {
   const esAdmin = rol === "owner" || rol === "admin";
   const tieneCatalogo = modulos.includes("catalogo");
 
+  // El panel es del núcleo `crm`: no se gatea ni por módulo ni por rol. Qué
+  // números ve cada uno lo decide la RLS (un 'agent' ve lo suyo, un
+  // 'owner'/'admin' todo el tenant), no una condición acá.
+  if (pagina === "panel") {
+    return <Panel onVolver={() => setPagina("bandeja")} />;
+  }
   if (pagina === "configuracion-meta") {
     return <ConfiguracionMeta onVolver={() => setPagina("bandeja")} />;
   }
@@ -113,6 +120,7 @@ export default function Bandeja() {
       <BarraSuperior
         onAbrirConfiguracion={esAdmin ? abrirConfig : undefined}
         onIrACatalogo={tieneCatalogo ? () => setPagina("catalogo") : undefined}
+        onIrAPanel={() => setPagina("panel")}
         onAbrirMiCuenta={() => setPagina("mi-cuenta")}
       />
 

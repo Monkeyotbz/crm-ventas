@@ -12,7 +12,7 @@ import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 // pantallas (catálogo, mi cuenta, configuración) traen su propio encabezado.
 // `onIrACatalogo` viene undefined para un tenant sin el módulo "catalogo" — la
 // pestaña ni se muestra en ese caso, no solo se deshabilita.
-export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onAbrirMiCuenta }) {
+export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onIrAPanel, onAbrirMiCuenta }) {
   const [inicial, setInicial] = useState("");
 
   useEffect(() => {
@@ -41,9 +41,9 @@ export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onA
         </div>
       </div>
 
-      {/* Panel de hoy y Reportes: pantallas de Sprints posteriores, todavía sin
-          construir. `no-scrollbar` + overflow-x: en mobile las pestañas no
-          entran a lo ancho, así que scrollean en vez de romper la barra. */}
+      {/* Reportes: pantalla de un Sprint posterior, todavía sin construir.
+          `no-scrollbar` + overflow-x: en mobile las pestañas no entran a lo
+          ancho, así que scrollean en vez de romper la barra. */}
       <div className="no-scrollbar flex min-w-0 gap-1 overflow-x-auto bg-white/50 border border-white/80 rounded-full p-1">
         <button type="button" className="px-4 py-2 rounded-full text-[13px] font-bold text-white shrink-0" style={{ background: "linear-gradient(180deg, #ff8fc0, #ff5ca8)" }}>
           Bandeja
@@ -61,9 +61,17 @@ export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onA
             Catálogo
           </button>
         )}
-        <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
-          Panel de hoy
-        </button>
+        {/* "Panel de hoy": las métricas del propio negocio del tenant. Es del
+            núcleo, lo ve cualquier miembro — la RLS decide qué números. */}
+        {onIrAPanel && (
+          <button
+            type="button"
+            onClick={onIrAPanel}
+            className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
+          >
+            Panel de hoy
+          </button>
+        )}
         <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
           Reportes
         </button>
