@@ -14,3 +14,7 @@ supabase/.temp/
 
 # Overrides locales de Claude Code (nunca se commitean)
 .claude/settings.local.json
+
+# Notas de trabajo que pueden contener credenciales de prueba u otra info
+# sensible — nunca van al repo. Carpeta local, se borra cuando ya no sirve.
+notas-locales/
