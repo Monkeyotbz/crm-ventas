@@ -10,6 +10,8 @@ import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 // El botón de cuenta abre "Mi cuenta" (datos personales + cerrar sesión), ya
 // no cierra sesión de un toque. La barra solo se ve en la bandeja: las otras
 // pantallas (catálogo, mi cuenta, configuración) traen su propio encabezado.
+// `onIrACatalogo` viene undefined para un tenant sin el módulo "catalogo" — la
+// pestaña ni se muestra en ese caso, no solo se deshabilita.
 export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onAbrirMiCuenta }) {
   const [inicial, setInicial] = useState("");
 
@@ -46,13 +48,19 @@ export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onA
         <button type="button" className="px-4 py-2 rounded-full text-[13px] font-bold text-white shrink-0" style={{ background: "linear-gradient(180deg, #ff8fc0, #ff5ca8)" }}>
           Bandeja
         </button>
-        <button
-          type="button"
-          onClick={onIrACatalogo}
-          className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
-        >
-          Catálogo
-        </button>
+        {/* "Catálogo" solo para tenants con ese módulo activo (Bandeja.jsx pasa
+            onIrACatalogo undefined si no lo tienen — ver tenants.modulos,
+            migración 20260910120000). Un CRM de ventas que no vende turismo no
+            tiene por qué ver esta pestaña. */}
+        {onIrACatalogo && (
+          <button
+            type="button"
+            onClick={onIrACatalogo}
+            className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
+          >
+            Catálogo
+          </button>
+        )}
         <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
           Panel de hoy
         </button>

@@ -11,6 +11,7 @@ import MiCuenta from "./MiCuenta.jsx";
 import Catalogo from "./Catalogo.jsx";
 import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
+import { obtenerModulos } from "../lib/modulos.js";
 
 // Sprint 1 — bandeja unificada. El envío saliente ya está conectado para
 // WhatsApp (ver HiloMensajes); los demás canales siguen en solo lectura.
@@ -29,6 +30,7 @@ export default function Bandeja() {
   const [seleccionadaId, setSeleccionadaId] = useState(null);
   const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "configuracion-meta" | "claves-api" | "mi-cuenta" | "catalogo"
   const [rol, setRol] = useState(null);
+  const [modulos, setModulos] = useState(["crm"]); // qué features tiene activadas este tenant
   const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
   const [copilotoAbierto, setCopilotoAbierto] = useState(false); // panel flotante <1024px
   const [menuConfigAbierto, setMenuConfigAbierto] = useState(false); // hub del engranaje
@@ -38,6 +40,7 @@ export default function Bandeja() {
   // un 'agent' ni siquiera lo ve, no solo le falla si lo toca.
   useEffect(() => {
     obtenerMiRol().then(setRol).catch(() => setRol(null));
+    obtenerModulos().then(setModulos).catch(() => setModulos(["crm"]));
   }, []);
 
   const { data: conversaciones, isLoading, error } = useQuery({
@@ -66,6 +69,7 @@ export default function Bandeja() {
 
   const activa = conversaciones?.find((c) => c.conversation_id === seleccionadaId) ?? null;
   const esAdmin = rol === "owner" || rol === "admin";
+  const tieneCatalogo = modulos.includes("catalogo");
 
   if (pagina === "configuracion-meta") {
     return <ConfiguracionMeta onVolver={() => setPagina("bandeja")} />;
@@ -76,7 +80,10 @@ export default function Bandeja() {
   if (pagina === "mi-cuenta") {
     return <MiCuenta onVolver={() => setPagina("bandeja")} />;
   }
-  if (pagina === "catalogo") {
+  // Defensa en profundidad: aunque un tenant sin el módulo no ve la pestaña,
+  // se chequea también acá por si `pagina` quedó en "catalogo" (p. ej. el
+  // usuario cambió de tenant sin recargar).
+  if (pagina === "catalogo" && tieneCatalogo) {
     return <Catalogo onVolver={() => setPagina("bandeja")} />;
   }
 
@@ -105,7 +112,7 @@ export default function Bandeja() {
     <div className="h-dvh candy-fondo flex flex-col overflow-hidden">
       <BarraSuperior
         onAbrirConfiguracion={esAdmin ? abrirConfig : undefined}
-        onIrACatalogo={() => setPagina("catalogo")}
+        onIrACatalogo={tieneCatalogo ? () => setPagina("catalogo") : undefined}
         onAbrirMiCuenta={() => setPagina("mi-cuenta")}
       />
 
