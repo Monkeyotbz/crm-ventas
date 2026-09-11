@@ -201,6 +201,55 @@ async function conversacionDe(tenantId: string, contactId: number) {
   return data as number;
 }
 
+/**
+ * Atribución del clic a un anuncio "Click to WhatsApp".
+ *
+ * Meta adjunta un objeto `referral` en el PRIMER mensaje de una conversación que
+ * empezó tocando un anuncio — no en los siguientes. Sin esto, ese lead entra
+ * indistinguible de uno que escribió por su cuenta, y el origen se pierde para
+ * siempre: no hay forma de reconstruirlo después.
+ *
+ * Es el dato que vuelve calculables los indicadores del Grupo 1 de
+ * docs/indicadores-dashboard.md — costo por lead por anuncio, conversión por
+ * anuncio, ROI por campaña. El cruce se hace por `contact_id`: este touchpoint
+ * y los `deals` de ese mismo contacto.
+ *
+ * Mismo criterio que `registrarTouchpoint` en ingesta-api: si falla, se loguea
+ * y se sigue. El lead vale mucho más que su atribución.
+ */
+async function registrarTouchpointWhatsapp(
+  tenantId: string,
+  contactId: number,
+  msg: Record<string, any>,
+) {
+  const referral = msg.referral;
+  if (!referral || typeof referral !== "object") return;
+
+  const texto = (v: unknown) => (typeof v === "string" && v.trim() !== "" ? v.trim() : null);
+
+  const ctwaClid = texto(referral.ctwa_clid);
+  const adId = texto(referral.source_id);
+  const sourceUrl = texto(referral.source_url);
+
+  // Un `referral` sin ningún identificador aprovechable no dice nada: una fila
+  // vacía solo ensucia los informes.
+  if (!ctwaClid && !adId && !sourceUrl) return;
+
+  const { error } = await db.from("contact_touchpoints").insert({
+    tenant_id: tenantId,
+    contact_id: contactId,
+    canal: "whatsapp",
+    ctwa_clid: ctwaClid,
+    // `source_id` de Meta es el id del anuncio (o del post, si source_type
+    // es "post"). No trae campaign_id ni adset_id: esos se resuelven después
+    // contra la Marketing API, no vienen en el webhook.
+    ad_id: adId,
+    referrer: sourceUrl,
+  });
+
+  if (error) console.error("[ingesta-whatsapp] contact_touchpoints:", error.message);
+}
+
 /** Un mensaje entrante: lo guarda y corre la ventana de servicio de 24 h. */
 async function guardarEntrante(
   tenantId: string,
@@ -208,6 +257,7 @@ async function guardarEntrante(
   nombrePerfil: string | null,
 ) {
   const contactId = await contactoDe(tenantId, msg.from, nombrePerfil);
+  await registrarTouchpointWhatsapp(tenantId, contactId, msg);
   const conversationId = await conversacionDe(tenantId, contactId);
 
   // Idempotencia: `unique (conversation_id, externo_id)` — pero es un índice PARCIAL
