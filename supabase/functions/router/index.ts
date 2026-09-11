@@ -247,11 +247,14 @@ async function primeraEtapa(tenantId: string, pipelineId: number): Promise<numbe
 }
 
 /**
- * Aplica la decisión sobre el deal del contacto: lo crea si no existe, o lo
- * mueve de pipeline si corresponde escalarlo.
+ * Aplica la decisión sobre el deal del contacto: lo crea si no tiene ninguno
+ * abierto, o lo mueve de pipeline si corresponde escalarlo.
  *
  * `deals` cuelga del CONTACTO, no de la conversación — por eso se busca por
- * contact_id y no por conversation_id.
+ * contact_id y no por conversation_id. Pero se busca solo entre los ABIERTOS:
+ * la regla es "una oportunidad abierta por contacto", no "una oportunidad por
+ * contacto". La diferencia importa en cualquier negocio recurrente — la misma
+ * persona que reserva en enero y en julio son dos ventas, no una actualizada.
  */
 async function aplicar(
   tenantId: string,
@@ -262,8 +265,16 @@ async function aplicar(
   canal: string,
 ): Promise<{ dealId: number; transferido: boolean }> {
   const { data: existente, error: errBusca } = await db
-    .from("deals").select("id, pipeline_id")
+    .from("deals").select("id, pipeline_id, stage_id")
     .eq("tenant_id", tenantId).eq("contact_id", contactId)
+    // Solo oportunidades ABIERTAS. Antes no se filtraba por estado —y no se
+    // podía, porque la columna no existía— así que un contacto tenía un único
+    // deal para siempre: quien compraba en enero y volvía en julio actualizaba
+    // la venta vieja en vez de generar una nueva, y el historial de la primera
+    // se perdía. Ahora un contacto cuyo deal ya se cerró (ganado o perdido)
+    // vuelve a entrar como oportunidad nueva, que es el caso de cualquier
+    // negocio recurrente: alquileres, reservas, reposición.
+    .is("closed_at", null)
     .order("id", { ascending: false }).limit(1).maybeSingle();
   if (errBusca) throw new Error("deals: " + errBusca.message);
 
@@ -283,8 +294,17 @@ async function aplicar(
       // (candidato [9a]), que habría hecho lo mismo con los leads de API.
       fuente: canal,
       owner_id: ownerId,
+      // De qué conversación nació. Es lo que le permite al panel de detalle
+      // mostrar el hilo del que salió esta oportunidad: `deals` cuelga del
+      // contacto, y un contacto con varias conversaciones no diría cuál fue.
+      conversation_id: conversationId,
     }).select("id").single();
     if (error) throw new Error("deals insert: " + error.message);
+
+    // El evento inicial de deal_events no se escribe acá a propósito: lo pone el
+    // trigger trg_deal_events_creacion, en la misma transacción que el insert
+    // (migración 20260911120000). Escribirlo desde acá dejaría la oportunidad
+    // sin punto de partida si fallara la segunda llamada.
     return { dealId: nuevo.id as number, transferido: false };
   }
 
@@ -303,9 +323,34 @@ async function aplicar(
   }
 
   const { error: errMueve } = await db.from("deals")
-    .update({ pipeline_id: destino.id, stage_id: stageId })
+    .update({
+      pipeline_id: destino.id,
+      stage_id: stageId,
+      // El deal vuelve a la primera etapa del embudo nuevo, así que el reloj de
+      // "cuánto lleva sin moverse" tiene que arrancar de cero. Sin esta línea la
+      // columna mentiría justo en el caso que más importa revisar.
+      stage_changed_at: new Date().toISOString(),
+    })
     .eq("tenant_id", tenantId).eq("id", existente.id);
   if (errMueve) throw new Error("deals update: " + errMueve.message);
+
+  // Esta reclasificación NO puede pasar por public.mover_deal(): esa función
+  // exige que la etapa destino sea del MISMO embudo, y acá el embudo es
+  // justamente lo que cambia. Así que el evento se escribe a mano.
+  //
+  // No es atómico con el update de arriba — es el mismo compromiso que ya tenía
+  // pipeline_transfers unas líneas más abajo. Si algún día hace falta que lo
+  // sea, el camino es una función SQL `reclasificar_deal()` que haga las tres
+  // escrituras juntas, no mover esta lógica a otro lado del cliente.
+  const { error: errEvento } = await db.from("deal_events").insert({
+    tenant_id: tenantId,
+    deal_id: existente.id,
+    de_stage_id: existente.stage_id,
+    a_stage_id: stageId,
+    actor: "bot",
+    motivo: "Reclasificado a " + destino.nombre,
+  });
+  if (errEvento) throw new Error("deal_events: " + errEvento.message);
 
   const { error: errTransfer } = await db.from("pipeline_transfers").insert({
     tenant_id: tenantId,
