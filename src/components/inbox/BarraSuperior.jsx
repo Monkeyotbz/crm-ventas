@@ -12,7 +12,7 @@ import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 // pantallas (catálogo, mi cuenta, configuración) traen su propio encabezado.
 // `onIrACatalogo` viene undefined para un tenant sin el módulo "catalogo" — la
 // pestaña ni se muestra en ese caso, no solo se deshabilita.
-export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onIrAPanel, onAbrirMiCuenta }) {
+export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onIrAPipeline, onIrAPanel, onAbrirMiCuenta }) {
   const [inicial, setInicial] = useState("");
 
   useEffect(() => {
@@ -59,6 +59,17 @@ export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onI
             className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
           >
             Catálogo
+          </button>
+        )}
+        {/* "Pipeline": el tablero de oportunidades. Es del núcleo, sin gating —
+            la RLS decide si un 'agent' ve solo las suyas o un admin todas. */}
+        {onIrAPipeline && (
+          <button
+            type="button"
+            onClick={onIrAPipeline}
+            className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
+          >
+            Pipeline
           </button>
         )}
         {/* "Panel de hoy": las métricas del propio negocio del tenant. Es del
