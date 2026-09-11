@@ -1,16 +1,24 @@
 import { useQuery } from "@tanstack/react-query";
-import { obtenerMetricasPanel } from "../lib/panel.js";
+import { obtenerMetricasPanel, formatearDuracion } from "../lib/panel.js";
 import { formatearDinero } from "../lib/canales.js";
 
 // Panel del tenant — los números del negocio de ESTA empresa. No es el panel
 // de plataforma (cuántos tenants hay, facturación de Candy CRM); ese es otra
 // pantalla, para `platform_admins`, y nunca la ve un tenant-cliente.
 //
-// v1 muestra solo lo que hoy es calculable con datos reales. Lo que falta no se
-// dibuja vacío ni se inventa: cerrado/ganado necesita fecha de cierre en
-// `deals`, el % resuelto por IA necesita que alguien escriba
-// `conversations.resuelta_por`, y el score necesita el agente Analista [7b].
-// Cada uno de esos desbloquea un bloque nuevo acá sin rehacer la pantalla.
+// v2 (11 sep): se agregaron los bloques de cierre (conversión, ciclo de venta,
+// ingreso ganado), autonomía de la IA, tiempo por etapa, embudo de caída y
+// motivos de pérdida. Los cinco dependían de `deals.closed_at`,
+// `pipeline_stages.tipo` y `deal_events`, que recién existen desde esta semana.
+//
+// Los bloques aparecen vacíos mientras nadie mueva oportunidades por el tablero,
+// y eso es a propósito: cada sección distingue "todavía no hay historial" de
+// "hay historial y el número es cero". Confundir esas dos cosas es la forma más
+// fácil de que un panel mienta.
+//
+// Lo que sigue faltando y NO se dibuja: el score/sentimiento por conversación
+// (necesita el agente Analista [7b], APLAZADO) y el % resuelto por IA (nadie
+// escribe `conversations.resuelta_por` todavía).
 export default function Panel({ onVolver }) {
   const { data, isLoading, error } = useQuery({
     queryKey: ["panel"],
@@ -55,6 +63,145 @@ export default function Panel({ onVolver }) {
               />
             </div>
 
+            {/* Cierre. Estas cuatro eran imposibles de calcular hasta el 11 sep
+                — necesitaban closed_at y pipeline_stages.tipo. La ventana es de
+                90 días para que un ciclo de venta largo entre completo. */}
+            <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+              <Tile
+                valor={data.cierre.tasaConversion == null ? "—" : `${data.cierre.tasaConversion}%`}
+                etiqueta="Tasa de cierre"
+                nota={
+                  data.cierre.ganadas + data.cierre.perdidas > 0
+                    ? `${data.cierre.ganadas} ganadas · ${data.cierre.perdidas} perdidas`
+                    : "sin cierres en 90 días"
+                }
+              />
+              <Tile
+                valor={formatearDuracion(data.cierre.horasCicloPromedio)}
+                etiqueta="Ciclo de venta"
+                nota="promedio de lo ganado"
+              />
+              <Tile valor={formatearDinero(data.cierre.ingresoGanado)} etiqueta="Ingreso ganado" nota="últimos 90 días" />
+              <Tile
+                valor={data.cierre.estancadas}
+                etiqueta="Sin moverse"
+                nota="pasaron su umbral de alerta"
+              />
+            </div>
+
+            <Seccion titulo="Cuánto cierra la IA sin ayuda">
+              {!data.hayHistorial ? (
+                <Vacio>
+                  Todavía no hay movimientos registrados. Este número aparece en cuanto empieces a
+                  mover oportunidades por el tablero del Pipeline.
+                </Vacio>
+              ) : (
+                <div className="flex flex-col gap-3">
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-candy-display text-2xl font-extrabold text-candy-tinta">
+                      {data.autonomiaIA.cierresTotales
+                        ? `${Math.round((data.autonomiaIA.cierresBot / data.autonomiaIA.cierresTotales) * 100)}%`
+                        : "—"}
+                    </span>
+                    <span className="text-[12px] text-candy-tinta-media">
+                      de los cierres los hizo el bot
+                      {data.autonomiaIA.cierresTotales > 0 && (
+                        <> ({data.autonomiaIA.cierresBot} de {data.autonomiaIA.cierresTotales})</>
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <BarraSimple
+                      fila={{
+                        etiqueta: "Bot",
+                        cantidad: data.autonomiaIA.movimientosBot,
+                        pct: porcentaje(data.autonomiaIA.movimientosBot, data.autonomiaIA.movimientosBot + data.autonomiaIA.movimientosHumano),
+                      }}
+                      color="#6ee7b7"
+                    />
+                    <BarraSimple
+                      fila={{
+                        etiqueta: "Personas",
+                        cantidad: data.autonomiaIA.movimientosHumano,
+                        pct: porcentaje(data.autonomiaIA.movimientosHumano, data.autonomiaIA.movimientosBot + data.autonomiaIA.movimientosHumano),
+                      }}
+                      color="#b98bff"
+                    />
+                  </div>
+                  <p className="text-[11px] text-candy-tinta-tenue">
+                    Movimientos de etapa por quién los hizo. El bot no puede atribuirse un
+                    movimiento hecho por una persona: el actor lo decide la base, no quien llama.
+                  </p>
+                </div>
+              )}
+            </Seccion>
+
+            <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
+              <Seccion titulo="Dónde se atasca el proceso">
+                {data.tiempoPorEtapa.length === 0 ? (
+                  <Vacio>Sin movimientos suficientes para medir tiempos todavía.</Vacio>
+                ) : (
+                  <div className="flex flex-col gap-2.5">
+                    {data.tiempoPorEtapa.map((t) => (
+                      <div key={t.etapa} className="flex items-center gap-3">
+                        <span className="w-[3px] h-[15px] rounded-sm shrink-0" style={{ background: t.color }} />
+                        <span className="text-[12.5px] text-candy-tinta truncate flex-1">{t.etapa}</span>
+                        <span className="text-[12.5px] font-bold text-candy-tinta">
+                          {formatearDuracion(t.horasPromedio)}
+                        </span>
+                        <span className="text-[10.5px] text-candy-tinta-tenue w-[52px] text-right">
+                          {t.muestras} {t.muestras === 1 ? "paso" : "pasos"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Seccion>
+
+              <Seccion titulo="Por qué se pierden">
+                {data.motivosPerdida.length === 0 ? (
+                  <Vacio>Ninguna oportunidad perdida todavía.</Vacio>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {data.motivosPerdida.map((m) => (
+                      <BarraSimple key={m.motivo} fila={{ etiqueta: m.motivo, cantidad: m.cantidad, pct: m.pct }} color="#f87171" />
+                    ))}
+                  </div>
+                )}
+              </Seccion>
+            </div>
+
+            <Seccion titulo="Embudo: de cada etapa, cuántas siguieron">
+              {data.embudo.length === 0 ? (
+                <Vacio>
+                  El embudo se arma con el historial de movimientos. Aparece en cuanto las
+                  oportunidades empiecen a recorrer etapas.
+                </Vacio>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {data.embudo.map((f) => (
+                    <div key={f.etapa} className="flex items-center gap-3">
+                      <div className="w-[110px] sm:w-[140px] shrink-0 text-[12.5px] font-bold text-candy-tinta truncate">
+                        {f.etapa}
+                      </div>
+                      <div className="flex-1 h-3 rounded-full bg-white/50 border border-white/70 overflow-hidden">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${Math.max(f.pctSiguio ?? 100, 4)}%`, background: f.color }}
+                        />
+                      </div>
+                      <div className="w-[42px] shrink-0 text-right text-[12.5px] font-bold text-candy-tinta">
+                        {f.llegaron}
+                      </div>
+                      <div className="w-[62px] shrink-0 text-right text-[11.5px] text-candy-tinta-media">
+                        {f.pctSiguio == null ? "última" : `${f.pctSiguio}% siguió`}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Seccion>
+
             <Seccion titulo="Pipeline por etapa">
               {data.pipeline.length === 0 ? (
                 <Vacio>Todavía no hay oportunidades en el pipeline.</Vacio>
@@ -98,16 +245,23 @@ export default function Panel({ onVolver }) {
             </Seccion>
 
             <p className="text-[11.5px] text-candy-tinta-tenue leading-relaxed">
-              El análisis de IA por conversación (score, sentimiento, interés) todavía no está
-              activo: se llena cuando entre en funcionamiento el agente Analista. Las métricas de
-              cierre —conversión, ciclo de venta, ingreso ganado— llegan cuando el Kanban registre
-              el cierre de cada oportunidad.
+              Los bloques de cierre, embudo y tiempos se calculan desde el historial de
+              movimientos: se llenan a medida que las oportunidades recorran etapas en el Pipeline.
+              Lo que todavía no está activo es el análisis de IA por conversación (score,
+              sentimiento, interés), que llega con el agente Analista, y el porcentaje de
+              conversaciones resueltas por IA, que necesita que los agentes conversacionales
+              marquen cuándo resolvieron una.
             </p>
           </div>
         )}
       </div>
     </div>
   );
+}
+
+/** Porcentaje entero, 0 si el total es 0 — evita NaN en las barras. */
+function porcentaje(parte, total) {
+  return total ? Math.round((parte / total) * 100) : 0;
 }
 
 function Tile({ valor, etiqueta, nota }) {

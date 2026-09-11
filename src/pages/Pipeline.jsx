@@ -10,6 +10,7 @@ import {
   nivelAlerta,
 } from "../lib/pipeline.js";
 import { estiloCanal, formatearDinero, formatearHora } from "../lib/canales.js";
+import { formatearDuracion } from "../lib/panel.js";
 
 // Tablero de oportunidades — la pantalla que faltaba sobre el modelo de datos
 // que quedó listo el 10-11 sep (pipeline_stages.tipo, deals.closed_at/
@@ -389,28 +390,44 @@ function LineaDeTiempo({ eventos }) {
   }
   return (
     <ul className="flex flex-col gap-3">
-      {eventos.map((e) => (
-        <li key={e.id} className="flex gap-2.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-candy-rosa mt-1.5 shrink-0" />
-          <div className="min-w-0">
-            <p className="text-[12.5px] text-candy-tinta">
-              {e.deEtapa ? (
-                <>
-                  <b>{e.deEtapa}</b> → <b>{e.aEtapa}</b>
-                </>
-              ) : (
-                <>
-                  Creada en <b>{e.aEtapa}</b>
-                </>
-              )}
-            </p>
-            <p className="text-[11px] text-candy-tinta-tenue">
-              {formatearHora(e.createdAt)} · movido por {etiquetaActor(e.actor)}
-              {e.motivo && <> — {e.motivo}</>}
-            </p>
-          </div>
-        </li>
-      ))}
+      {eventos.map((e, i) => {
+        // Cuánto estuvo en la etapa anterior antes de este movimiento. Es el
+        // dato más útil de la línea de tiempo: no "cuándo pasó" sino "cuánto
+        // tardó en pasar". Se calcula al vuelo — guardarlo lo dejaría
+        // desincronizado de las fechas de las que sale.
+        const previo = i > 0 ? eventos[i - 1] : null;
+        const horas = previo
+          ? (new Date(e.createdAt) - new Date(previo.createdAt)) / 3600000
+          : null;
+
+        return (
+          <li key={e.id} className="flex gap-2.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-candy-rosa mt-1.5 shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[12.5px] text-candy-tinta">
+                {e.deEtapa ? (
+                  <>
+                    <b>{e.deEtapa}</b> → <b>{e.aEtapa}</b>
+                  </>
+                ) : (
+                  <>
+                    Creada en <b>{e.aEtapa}</b>
+                  </>
+                )}
+                {horas != null && (
+                  <span className="text-[11px] text-candy-tinta-media font-bold ml-1.5">
+                    +{formatearDuracion(horas)}
+                  </span>
+                )}
+              </p>
+              <p className="text-[11px] text-candy-tinta-tenue">
+                {formatearHora(e.createdAt)} · movido por {etiquetaActor(e.actor)}
+                {e.motivo && <> — {e.motivo}</>}
+              </p>
+            </div>
+          </li>
+        );
+      })}
     </ul>
   );
 }
