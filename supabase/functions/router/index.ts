@@ -46,6 +46,11 @@ type Decision = {
   regla: string | null;
   confianza: number | null;
   senales: string[];
+  // El tipo que devolvió Haiku de verdad, sin importar si el tenant tenía un
+  // embudo para él (en ese caso `pipeline` ya cayó al de por defecto). Null
+  // cuando no hubo clasificación del modelo que reportar — ver migración
+  // 20260913120000_tipo_sugerido_en_router_decisions.sql.
+  tipoSugerido: string | null;
 };
 
 // ---------------------------------------------------------------------------
@@ -114,6 +119,7 @@ async function porReglas(
       regla: regla.nombre,
       confianza: null, // una regla determinística no tiene confianza: matcheó o no
       senales: ["regla: " + regla.nombre],
+      tipoSugerido: null, // una regla dura no pasó por Haiku — no hay nada que descartar
     };
   }
   return null;
@@ -423,6 +429,10 @@ async function clasificar(mensaje: any) {
         regla: null,
         confianza: sem.confianza,
         senales: sem.senales,
+        // Se guarda aunque `destino === porDefecto` (el tenant no tiene ese
+        // embudo): es exactamente el caso que esta columna existe para no
+        // perder — ver 20260913120000.
+        tipoSugerido: sem.tipo,
       };
     } else if (sem) {
       // El modelo respondió pero sin convicción: va al por defecto, y queda
@@ -436,6 +446,9 @@ async function clasificar(mensaje: any) {
           ...sem.senales,
           "confianza " + sem.confianza + " < umbral " + UMBRAL_CONFIANZA,
         ],
+        // Igual vale guardarlo aunque la confianza no alcanzó: ayuda a
+        // calibrar UMBRAL_CONFIANZA con datos reales más adelante.
+        tipoSugerido: sem.tipo,
       };
     } else {
       // Sin capa semántica disponible (falta la API key, o Anthropic falló).
@@ -446,6 +459,7 @@ async function clasificar(mensaje: any) {
         regla: "fallback: ninguna regla matcheó y la capa semántica no respondió",
         confianza: null,
         senales: [],
+        tipoSugerido: null, // no hubo respuesta del modelo — no hay nada que reportar
       };
     }
   }
@@ -464,6 +478,7 @@ async function clasificar(mensaje: any) {
     regla_aplicada: decision.regla,
     confianza: decision.confianza,
     senales: decision.senales,
+    tipo_sugerido: decision.tipoSugerido,
   });
   if (errDec) throw new Error("router_decisions: " + errDec.message);
 
