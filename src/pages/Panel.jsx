@@ -214,15 +214,40 @@ export default function Panel({ onVolver }) {
               )}
             </Seccion>
 
+            {/* Origen y atribución del lead — Grupo 1 de
+                docs/indicadores-dashboard.md. Los dos indicadores de acá tienen
+                niveles de confianza distintos, y por eso solo uno lleva el
+                renglón de cobertura: ver el comentario en panel.js. */}
             <div className="grid gap-4 sm:gap-5 lg:grid-cols-2">
-              <Seccion titulo="Origen de las oportunidades">
-                {data.origen.length === 0 ? (
-                  <Vacio>Sin oportunidades todavía.</Vacio>
+              <Seccion titulo="De dónde vienen los leads">
+                {data.atribucion.clasificacion.length === 0 ? (
+                  <Vacio>Sin contactos todavía.</Vacio>
                 ) : (
-                  <div className="flex flex-col gap-2">
-                    {data.origen.map((o) => (
-                      <BarraSimple key={o.etiqueta} fila={o} color="#ff5ca8" />
-                    ))}
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-2">
+                      {data.atribucion.clasificacion.map((f) => (
+                        <BarraSimple
+                          key={f.clave}
+                          fila={f}
+                          color={COLOR_FUENTE[f.clave] ?? "#9b8fb5"}
+                        />
+                      ))}
+                    </div>
+                    {/* La cobertura va SIEMPRE con este bloque: sin ella,
+                        "2 referidos" se lee como "solo 2 personas nos
+                        visitaron" en vez de "solo 2 tienen el dato". */}
+                    <p className="text-[11px] text-candy-tinta-tenue leading-relaxed">
+                      {data.atribucion.cobertura.conTouchpoint} de{" "}
+                      {data.atribucion.cobertura.totalContactos} contactos tienen origen
+                      registrado.
+                      {data.atribucion.cobertura.conTouchpoint === 0 && (
+                        <>
+                          {" "}
+                          Todo cae en "directo / sin rastro" porque nadie tiene un toque
+                          guardado todavía — no porque hayan llegado solos.
+                        </>
+                      )}
+                    </p>
                   </div>
                 )}
               </Seccion>
@@ -239,6 +264,44 @@ export default function Panel({ onVolver }) {
                 )}
               </Seccion>
             </div>
+
+            {/* #15 — Cobertura 100%: sale de `deals.fuente`, que existe en cada
+                oportunidad. A diferencia del bloque de arriba, acá lo que se lee
+                es verdad completa, sin salvedades. */}
+            <Seccion titulo="Qué canal trae las ventas grandes">
+              {data.atribucion.origenPorPipeline.length === 0 ? (
+                <Vacio>Sin oportunidades todavía.</Vacio>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {data.atribucion.origenPorPipeline.map((f) => (
+                    <div key={`${f.fuente}-${f.tipoEmbudo}`} className="flex items-center gap-3">
+                      <span className="w-[86px] shrink-0 text-[12.5px] font-bold text-candy-tinta truncate">
+                        {f.fuente}
+                      </span>
+                      <span className="text-[10px] font-extrabold rounded-full px-2 py-0.5 bg-candy-tinta/8 text-candy-tinta-media shrink-0">
+                        {f.tipoEmbudo}
+                      </span>
+                      <div className="flex-1 h-2.5 rounded-full bg-white/50 border border-white/70 overflow-hidden min-w-[30px]">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${Math.max(f.pct, 4)}%`, background: "#b98bff" }}
+                        />
+                      </div>
+                      <span className="w-[34px] shrink-0 text-right text-[12.5px] font-bold text-candy-tinta">
+                        {f.cantidad}
+                      </span>
+                      <span className="w-[62px] shrink-0 text-right text-[11.5px] text-candy-tinta-media">
+                        {formatearDinero(f.valor)}
+                      </span>
+                    </div>
+                  ))}
+                  <p className="text-[11px] text-candy-tinta-tenue leading-relaxed">
+                    El canal que trae más leads no es siempre el que trae más dinero — por eso la
+                    columna de la derecha importa más que la del medio.
+                  </p>
+                </div>
+              )}
+            </Seccion>
 
             <Seccion titulo="Actividad de los últimos 14 días">
               <Actividad dias={data.actividad} />
@@ -258,6 +321,16 @@ export default function Panel({ onVolver }) {
     </div>
   );
 }
+
+// Un color por tipo de origen, con intención: el pagado en rosa (es plata que
+// sale), la campaña en azul, el referido en menta (llegó gratis), y el
+// "sin rastro" en gris — no es una categoría real, es la ausencia de dato.
+const COLOR_FUENTE = {
+  pagado: "#ff5ca8",
+  campana: "#5b9bff",
+  referido: "#6ee7b7",
+  directo: "#9b8fb5",
+};
 
 /** Porcentaje entero, 0 si el total es 0 — evita NaN en las barras. */
 function porcentaje(parte, total) {

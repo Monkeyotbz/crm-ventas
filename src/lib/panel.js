@@ -82,12 +82,16 @@ const VACIO = {
     ingresoGanado: 0,
     estancadas: 0,
   },
+  atribucion: {
+    cobertura: { conTouchpoint: 0, totalContactos: 0 },
+    clasificacion: [],
+    origenPorPipeline: [],
+  },
   autonomiaIA: { movimientosBot: 0, movimientosHumano: 0, cierresBot: 0, cierresTotales: 0 },
   tiempoPorEtapa: [],
   embudo: [],
   motivosPerdida: [],
   pipeline: [],
-  origen: [],
   canales: [],
   actividad: [],
   hayDatos: false,
@@ -109,11 +113,18 @@ export async function obtenerMetricasPanel() {
   const desdeActividad = haceDias(DIAS_ACTIVIDAD).toISOString();
   const desdeNuevos = haceDias(DIAS_NUEVOS).toISOString();
 
-  const [deals, etapas, conversaciones, contactos, mensajes, eventos] = await Promise.all([
+  const [deals, etapas, embudos, conversaciones, contactos, mensajes, eventos, toques] =
+    await Promise.all([
     supabase
       .from("deals")
-      .select("id, valor_estimado, probabilidad, fuente, stage_id, created_at, closed_at, stage_changed_at"),
+      .select(
+        "id, valor_estimado, probabilidad, fuente, stage_id, pipeline_id, created_at, closed_at, stage_changed_at",
+      ),
     supabase.from("pipeline_stages").select("id, nombre, orden, color, tipo, horas_alerta"),
+    // Los embudos, para poder cruzar el origen del lead con el TIPO de venta en
+    // que terminó (transaccional / consultivo / expansión). Se consulta el tipo,
+    // no el nombre: el nombre lo elige cada tenant.
+    supabase.from("pipelines").select("id, nombre, tipo"),
     supabase.from("conversations").select("id, canal, estado, created_at"),
     supabase.from("contacts").select("id, origen, created_at"),
     // `messages` no tiene tenant_id: su RLS cuelga de conversations, y por eso
@@ -132,15 +143,23 @@ export async function obtenerMetricasPanel() {
       .select("deal_id, actor, motivo, created_at, de_stage_id, a_stage_id")
       .order("deal_id", { ascending: true })
       .order("created_at", { ascending: true }),
+    // Atribución del origen. La RLS de esta tabla es "tenant + (admin o dueño
+    // del contacto)", así que un vendedor ve los toques de SUS contactos y un
+    // admin los de todo el tenant — misma asimetría que el resto del panel.
+    supabase
+      .from("contact_touchpoints")
+      .select("contact_id, ad_id, ctwa_clid, utm_source, referrer"),
   ]);
 
   for (const [nombre, res] of [
     ["deals", deals],
     ["pipeline_stages", etapas],
+    ["pipelines", embudos],
     ["conversations", conversaciones],
     ["contacts", contactos],
     ["messages", mensajes],
     ["deal_events", eventos],
+    ["contact_touchpoints", toques],
   ]) {
     if (res.error) throw new Error(`${nombre}: ${res.error.message}`);
   }
@@ -150,6 +169,7 @@ export async function obtenerMetricasPanel() {
   const filasContactos = contactos.data ?? [];
   const filasMensajes = mensajes.data ?? [];
   const filasEventos = eventos.data ?? [];
+  const filasToques = toques.data ?? [];
 
   // Índice de etapas por id: lo usan casi todos los bloques de abajo para
   // resolver nombre, color y sobre todo `tipo` (ganada/perdida/abierta).
@@ -345,6 +365,110 @@ export async function obtenerMetricasPanel() {
     }))
     .sort((a, b) => b.cantidad - a.cantidad);
 
+  // --- Atribución del origen del lead (Grupo 1 de docs/indicadores-dashboard.md) ---
+  //
+  // Dos indicadores, con niveles de confianza MUY distintos, y por eso se
+  // presentan separados en la pantalla:
+  //
+  //   #15 origenPorPipeline — cobertura 100%. Sale de `deals` solo, y `fuente`
+  //        existe en cada oportunidad. Lo que se lee acá es verdad completa.
+  //   #2  clasificacion — cobertura parcial. Depende de que exista un
+  //        `contact_touchpoints` para ese contacto, y hoy casi ninguno lo tiene
+  //        (solo los que entraron por ingesta-api o por un anuncio de WhatsApp).
+  //        Por eso viaja junto con su `cobertura`: sin ese número al lado, "2
+  //        referidos" se leería como "solo 2 personas nos visitaron" en vez de
+  //        "solo 2 tienen el dato guardado".
+
+  // #2 — Fuente real. Se clasifica por el toque MÁS informativo de cada
+  // contacto, no por el primero: si alguien tiene un toque con anuncio y otro
+  // sin nada, lo que importa es que hubo un anuncio.
+  const toquesPorContacto = new Map();
+  for (const t of filasToques) {
+    if (t.contact_id == null) continue; // toque anónimo, sin contacto asociado todavía
+    if (!toquesPorContacto.has(t.contact_id)) toquesPorContacto.set(t.contact_id, []);
+    toquesPorContacto.get(t.contact_id).push(t);
+  }
+
+  const PESO = { pagado: 3, campana: 2, referido: 1 };
+  function clasificarToque(t) {
+    if (t.ad_id || t.ctwa_clid) return "pagado";
+    if (t.utm_source) return "campana";
+    if (t.referrer) return "referido";
+    return null; // fila de touchpoint sin ninguna señal de origen
+  }
+
+  const ETIQUETA_FUENTE = {
+    pagado: "Pagado (anuncio)",
+    campana: "Campaña (UTM)",
+    referido: "Referido (otro sitio)",
+    directo: "Directo / sin rastro",
+  };
+
+  const conteoFuente = { pagado: 0, campana: 0, referido: 0, directo: 0 };
+  for (const c of filasContactos) {
+    const suyos = toquesPorContacto.get(c.id) ?? [];
+    let mejor = null;
+    for (const t of suyos) {
+      const clase = clasificarToque(t);
+      if (clase && (!mejor || PESO[clase] > PESO[mejor])) mejor = clase;
+    }
+    // Sin toque, o con toques que no traían ninguna señal: "directo / sin
+    // rastro". Es la categoría honesta — no sabemos de dónde vino, y decir eso
+    // es más útil que repartirlo entre las otras con un supuesto.
+    conteoFuente[mejor ?? "directo"] += 1;
+  }
+
+  const totalContactos = filasContactos.length;
+  const clasificacion = Object.entries(conteoFuente)
+    .filter(([, cantidad]) => cantidad > 0)
+    .map(([clave, cantidad]) => ({
+      clave,
+      etiqueta: ETIQUETA_FUENTE[clave],
+      cantidad,
+      pct: totalContactos ? Math.round((cantidad / totalContactos) * 100) : 0,
+    }))
+    .sort((a, b) => b.cantidad - a.cantidad);
+
+  // #15 — Origen cruzado con embudo. Una fila por combinación real de
+  // (canal de entrada × tipo de embudo), con su valor: el canal que trae MÁS
+  // leads no es siempre el que trae MÁS dinero, y esto es lo que lo muestra.
+  const embudosPorId = new Map((embudos.data ?? []).map((p) => [p.id, p]));
+  const TIPO_EMBUDO = {
+    transaccional: "Transaccional",
+    consultivo: "Consultivo",
+    expansion: "Expansión",
+  };
+
+  const cruce = new Map();
+  for (const d of filasDeals) {
+    const embudo = embudosPorId.get(d.pipeline_id);
+    const tipo = embudo?.tipo ?? "sin-embudo";
+    const clave = `${d.fuente}||${tipo}`;
+    const actual = cruce.get(clave) ?? { fuente: d.fuente, tipo, cantidad: 0, valor: 0 };
+    actual.cantidad += 1;
+    actual.valor += Number(d.valor_estimado ?? 0);
+    cruce.set(clave, actual);
+  }
+
+  const origenPorPipeline = [...cruce.values()]
+    .map((f) => ({
+      fuente: etiquetaOrigen(f.fuente),
+      tipoEmbudo: TIPO_EMBUDO[f.tipo] ?? "Sin embudo",
+      cantidad: f.cantidad,
+      valor: f.valor,
+      pct: filasDeals.length ? Math.round((f.cantidad / filasDeals.length) * 100) : 0,
+    }))
+    .sort((a, b) => b.valor - a.valor || b.cantidad - a.cantidad);
+
+  const atribucion = {
+    cobertura: {
+      conTouchpoint: toquesPorContacto.size,
+      totalContactos,
+    },
+    clasificacion,
+    origenPorPipeline,
+  };
+
   // --- Actividad de los últimos días ---
   const porDia = new Map();
   for (let i = DIAS_ACTIVIDAD - 1; i >= 0; i--) {
@@ -362,12 +486,16 @@ export async function obtenerMetricasPanel() {
   return {
     resumen,
     cierre,
+    atribucion,
     autonomiaIA,
     tiempoPorEtapa,
     embudo,
     motivosPerdida,
     pipeline,
-    origen: distribucion(filasDeals, "fuente"),
+    // `origen` (distribución de deals por fuente) se quitó el 12 sep: el cruce
+    // origen × tipo de embudo de `atribucion.origenPorPipeline` muestra lo mismo
+    // y además el tipo de venta y el valor. Tener los dos era responder la
+    // misma pregunta dos veces en la misma pantalla.
     canales: distribucion(filasConvs, "canal"),
     actividad: [...porDia.values()],
     hayDatos: filasDeals.length + filasConvs.length + filasContactos.length > 0,
