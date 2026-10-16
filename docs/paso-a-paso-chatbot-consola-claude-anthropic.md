@@ -829,4 +829,36 @@ Ejercicio construido y verificado el **16 oct 2026** dentro del repo de candyCRM
 
 Verificado con llamadas reales a la API (modelo `claude-haiku-5-5`): `hola.py` responde y reporta tokens; `chatbot.py` recuerda el contexto (dijo "Te llamas Ana" tras presentarse), `/tokens` calcula el costo, `/guardar` escribe el JSON en `conversaciones/` y `/salir` cierra. `.env`, `.venv` y `conversaciones/` están ignorados por Git: la llave no se sube.
 
-Pendiente: el enlace del commit solo abre en GitHub después de hacer `git push` de la rama.
+## Evidencia de ejecución — Sección 9 (tool use)
+
+Construido y verificado el **16 oct 2026**.
+
+| Qué | Dónde |
+| --- | --- |
+| Commit | [`1b3d6a0` — Tool use en el chatbot de consola: consulta del catálogo de turismo (sección 9)](https://github.com/Monkeyotbz/crm-ventas/commit/1b3d6a06e3511e495884815b8488c2244ad2e99c) |
+| Rama | `juanse-candycrm-ventas`, después `main` |
+| Código | [`catalogo.py`](../agentes-sdk/chatbot-claude/catalogo.py) y [`chatbot.py`](../agentes-sdk/chatbot-claude/chatbot.py) v2.0 |
+
+Cómo se aplicó cada parte de la sección en candyCRM:
+
+- **9.8–9.10 (tool use) — construido.** `consultar_catalogo` lee los tours publicados de Turismo
+  Colombia en Supabase, solo lectura, con la anon key pública y la policy
+  `tours: lectura pública de publicados` (nunca la `service_role`). Claude pide la herramienta;
+  `chatbot.py` la ejecuta y le devuelve el `tool_result`.
+- **9.4–9.6 (WhatsApp + historial + CRM) — ya existía, no se rehízo.** La guía propone FastAPI;
+  candyCRM ya lo resuelve con Edge Functions de Supabase (`ingesta-whatsapp`, `envio-whatsapp`,
+  Router, tablas `conversations`/`messages`).
+- **Conectar este cerebro a WhatsApp real — no se hizo a propósito.** Es el candidato [6]
+  (agentes conversacionales) de `docs/DECISIONES.md`, que sigue APLAZADO.
+
+Verificado con llamadas reales (`claude-haiku-5-5`, US$0.0017 la conversación de prueba):
+
+- "¿Qué tours tienen en Medellín?" → consultó con `lugar: Medellín` y listó los 7 tours reales.
+- "¿Y cuánto cuesta el de la Comuna 13?" → respondió COP 80.000 **sin volver a consultar**
+  (lo tenía en el historial).
+- "¿Cuánto cuesta el de Guatapé?" → consultó con `busqueda: Guatapé` y dijo que no tiene precio
+  publicado, sin inventarlo.
+- Con la base caída, la consulta falló, Claude recibió el error y lo dijo en vez de inventar datos.
+
+Hallazgo: casi ningún tour publicado tiene `price_from`. No es un bug del chatbot; es un dato que
+el tenant Turismo Colombia tiene que completar.
