@@ -816,3 +816,17 @@ if respuesta.stop_reason == "tool_use":
 Es una versión resumida para entender la lógica. La guía del Nivel 2 de agentes lo construye completo, con varias herramientas y manejo de errores.
 
 Chatbot de consola con Claude · v2.0 · 2026-10-10 · Proyecto del Nivel 1 de LLMs del Pensum AI Engineer
+
+## Evidencia de ejecución — Nivel 1 de LLMs
+
+Ejercicio construido y verificado el **16 oct 2026** dentro del repo de candyCRM (`crm-ventas`).
+
+| Qué | Dónde |
+| --- | --- |
+| Commit | [`ffd5048` — Chatbot de consola con Claude para CRM ventas](https://github.com/Monkeyotbz/crm-ventas/commit/ffd50485237cc651f1c4e2ffa76ce2247e431f49) |
+| Rama | `juanse-candycrm-ventas` |
+| Código | [`agentes-sdk/chatbot-claude/`](../agentes-sdk/chatbot-claude/) |
+
+Verificado con llamadas reales a la API (modelo `claude-haiku-5-5`): `hola.py` responde y reporta tokens; `chatbot.py` recuerda el contexto (dijo "Te llamas Ana" tras presentarse), `/tokens` calcula el costo, `/guardar` escribe el JSON en `conversaciones/` y `/salir` cierra. `.env`, `.venv` y `conversaciones/` están ignorados por Git: la llave no se sube.
+
+Pendiente: el enlace del commit solo abre en GitHub después de hacer `git push` de la rama.
