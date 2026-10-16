@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paso a paso para la creación del chatbot consola Claude-Anthropic</title>
+<style>
+:root{--bg:#faf8f4;--card:#fff;--ink:#1f1d1a;--mute:#6b665e;--line:#e6e1d8;--acc:#c4572a;--accbg:#fbeee7;--code:#1e1e22;--codeink:#e8e6e1;--ok:#2f7a4d;--warn:#b4691a}
+@media(prefers-color-scheme:dark){:root{--bg:#171614;--card:#201f1c;--ink:#ece8e1;--mute:#a09a8f;--line:#35322d;--acc:#e8825a;--accbg:#2c211b;--code:#0f0f11;--ok:#5cc08a;--warn:#e0a050}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+header.hero{padding:32px 0 8px}
+.ver{display:inline-block;font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.06em;color:var(--acc);background:var(--accbg);padding:6px 10px;border-radius:99px}
+h1{font-size:clamp(1.9rem,5vw,2.6rem);line-height:1.15;margin:14px 0 10px}
+.lead{color:var(--mute);font-size:1.05rem;margin:0 0 20px}
+.meta{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.meta div{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.meta small{display:block;color:var(--mute);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase}
+.meta b{font-size:.95rem}
+nav.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin:0 -16px;padding:8px 16px;overflow-x:auto;white-space:nowrap}
+nav.top a{display:inline-block;margin-right:6px;padding:4px 10px;border-radius:99px;font-size:.82rem;color:var(--mute);text-decoration:none;border:1px solid var(--line)}
+nav.top a:hover{color:var(--acc);border-color:var(--acc)}
+section{margin-top:44px;scroll-margin-top:56px}
+h2{font-size:1.6rem;margin:0 0 6px;display:flex;gap:12px;align-items:baseline}
+h2 .n{color:var(--acc);font-family:ui-monospace,Menlo,monospace;font-size:1.1rem}
+h3{font-size:1.15rem;margin:26px 0 8px}
+.back{font-size:.8rem;color:var(--mute);text-decoration:none}
+.back:hover{color:var(--acc)}
+p{margin:.5em 0 1em}
+code{font:.88em ui-monospace,Menlo,Consolas,monospace;background:var(--accbg);color:var(--acc);padding:1px 6px;border-radius:5px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.grid .card{margin:0}
+.grid .card b{display:block;margin-bottom:2px}
+.tag{font:700 .72rem ui-monospace,monospace;color:var(--acc);margin-right:6px}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;padding:0;list-style:none;margin:12px 0}
+.toc a{display:flex;gap:10px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink);text-decoration:none;font-size:.93rem}
+.toc a:hover{border-color:var(--acc)}
+.toc span{color:var(--acc);font-family:ui-monospace,monospace;font-weight:700}
+.toc small{display:block;color:var(--mute);font-size:.75rem}
+.term{background:var(--code);color:var(--codeink);border-radius:10px;padding:14px 16px;overflow-x:auto;font:.85rem/1.55 ui-monospace,Menlo,Consolas,monospace;white-space:pre;margin:10px 0}
+.tablewrap{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:9px 12px;text-align:left;vertical-align:top;border-bottom:1px solid var(--line)}
+th{font-size:.7rem;letter-spacing:.07em;text-transform:uppercase;color:var(--mute);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.flow{counter-reset:f;display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin:14px 0}
+.flow div{counter-increment:f;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.85rem;color:var(--mute)}
+.flow div:before{content:counter(f);display:inline-block;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:.75rem;margin-bottom:6px}
+.flow b{display:block;color:var(--ink);font-size:.95rem}
+.phase{margin-top:34px;border-left:4px solid var(--acc);padding-left:14px}
+.phase .k{font:700 .72rem ui-monospace,monospace;letter-spacing:.1em;color:var(--acc)}
+.phase h3{margin:2px 0}
+.phase .t{color:var(--mute);font-size:.85rem}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+.step h4{margin:0 0 8px;font-size:1.05rem;display:flex;gap:10px;align-items:center}
+.step h4 .num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center;font-size:.85rem}
+.codebox{position:relative;margin:10px 0}
+.codebox .lbl{display:flex;justify-content:space-between;align-items:center;background:#2b2b31;color:#b9b5ac;font:.72rem ui-monospace,monospace;padding:6px 10px;border-radius:10px 10px 0 0}
+.codebox button{background:transparent;color:#b9b5ac;border:1px solid #55535a;border-radius:6px;font:inherit;padding:2px 9px;cursor:pointer}
+.codebox button:hover{color:#fff;border-color:#fff}
+.codebox pre{margin:0;background:var(--code);color:var(--codeink);padding:14px 16px;overflow-x:auto;border-radius:0 0 10px 10px;font:.84rem/1.55 ui-monospace,Menlo,Consolas,monospace}
+.check{list-style:none;padding:0;margin:10px 0 0}
+.check li{display:flex;gap:8px;align-items:flex-start;padding:6px 10px;background:color-mix(in srgb,var(--ok) 10%,transparent);border-radius:8px;font-size:.9rem;margin:4px 0}
+.check li:before{content:"✓";color:var(--ok);font-weight:700}
+.callout{border-left:4px solid var(--warn);background:color-mix(in srgb,var(--warn) 10%,transparent);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0;font-size:.92rem}
+.req{font:700 .65rem ui-monospace,monospace;background:var(--acc);color:#fff;padding:2px 6px;border-radius:5px;margin-right:6px}
+ol.n,ul.l{padding-left:22px}
+footer{margin-top:60px;padding-top:16px;border-top:1px solid var(--line);color:var(--mute);font-size:.82rem;text-align:center}
+@media print{nav.top,.codebox button,.back{display:none}body{background:#fff}}
+
+:root{--b1:#2f6fb0;--b2:#7a4fb0}
+@media(prefers-color-scheme:dark){:root{--b1:#6aa6e0;--b2:#b08ae0}}
+.lane{border-radius:12px;padding:12px 14px;margin:14px 0;border:1px solid var(--line);background:var(--card)}
+.lane .lt{font:700 .72rem ui-monospace,monospace;letter-spacing:.1em;margin-bottom:8px}
+.lane.a .lt{color:var(--b1)} .lane.b .lt{color:var(--b2)}
+.lane .flow{margin:0}
+.lane .flow div{background:var(--bg)}
+.lane.a .flow div:before{background:var(--b1)} .lane.b .flow div:before{background:var(--b2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero" id="inicio">
+  <span class="ver">VERSIÓN 2.0 · 10 DE OCTUBRE DE 2026</span>
+  <h1>Paso a paso para la creación del chatbot consola Claude-Anthropic</h1>
+  <p class="lead">Guía paso a paso para construir desde cero un chatbot que corre en la terminal, conversa con Claude a través de la API de Anthropic, recuerda la conversación, muestra la respuesta mientras se escribe y lleva la cuenta de tokens y costo. Es el proyecto del Nivel 1 de LLMs del Pensum AI Engineer.</p>
+  <div class="callout"><b>Novedad en v2.0:</b> se agregó la <a href="#s9">sección 9</a>: para qué sirve este chat, qué no hace, cómo se conecta con WhatsApp y el CRM, y cómo Claude consulta el catálogo con una herramienta (tool use).</div>
+  <div class="meta">
+    <div><small>Lenguaje</small><b>Python 3.10+</b></div>
+    <div><small>SDK</small><b>anthropic</b></div>
+    <div><small>Tiempo</small><b>3–5 horas</b></div>
+    <div><small>Costo</small><b>centavos de dólar</b></div>
+    <div><small>Resultado</small><b>chatbot.py de ~120 líneas</b></div>
+  </div>
+</header>
+
+<nav class="top">
+  <a href="#indice">≡ Índice</a><a href="#s1">1 · Qué es</a><a href="#s2">2 · Lenguajes</a><a href="#s3">3 · Conceptos</a><a href="#s4">4 · Flujo</a><a href="#s5">5 · Paso a paso</a><a href="#s6">6 · Código final</a><a href="#s7">7 · Errores</a><a href="#s8">8 · Siguientes pasos</a><a href="#s9">9 · Para qué sirve</a>
+</nav>
+
+<section id="indice">
+  <h2>Índice</h2>
+  <p>Toca cualquier tema para ir directo a él.</p>
+  <ul class="toc">
+    <li><a href="#s1"><span>1</span>Qué vamos a construir</a></li>
+    <li><a href="#s2"><span>2</span>Lenguajes y tecnologías</a></li>
+    <li><a href="#s3"><span>3</span>Conceptos clave</a></li>
+    <li><a href="#s4"><span>4</span>Cómo fluye un mensaje</a></li>
+    <li><a href="#f1"><span>5.1</span><div>Fase 1 · Preparar el entorno<small>pasos 1–5</small></div></a></li>
+    <li><a href="#f2"><span>5.2</span><div>Fase 2 · Primera llamada a Claude<small>pasos 6–7</small></div></a></li>
+    <li><a href="#f3"><span>5.3</span><div>Fase 3 · Convertirlo en chatbot<small>pasos 8–10</small></div></a></li>
+    <li><a href="#f4"><span>5.4</span><div>Fase 4 · Hacerlo robusto<small>pasos 11–13</small></div></a></li>
+    <li><a href="#f5"><span>5.5</span><div>Fase 5 · Terminar y publicar<small>pasos 14–16</small></div></a></li>
+    <li><a href="#s6"><span>6</span>Código final completo</a></li>
+    <li><a href="#s7"><span>7</span>Errores comunes y solución</a></li>
+    <li><a href="#s8"><span>8</span>Siguientes pasos y fuentes</a></li>
+    <li><a href="#s9"><span>9</span>Para qué sirve, WhatsApp, CRM y catálogo</a></li>
+  </ul>
+</section>
+
+<!-- 1 -->
+<section id="s1">
+  <h2><span class="n">1</span>Qué vamos a construir</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Un programa en Python que abres desde la terminal. Escribes una pregunta, Claude responde en vivo (palabra por palabra) y la conversación continúa recordando lo que se dijo antes. Al final verás cuántos tokens usaste y cuánto costó.</p>
+  <h3>Así se verá en la terminal</h3>
+<div class="term">$ python chatbot.py
+Chatbot con Claude · escribe /ayuda para ver comandos
+
+Tú: ¿Qué es un ERP en una frase?
+Claude: Un ERP es un sistema que integra en una sola plataforma
+las áreas de una empresa: contabilidad, compras, inventario y ventas.
+
+Tú: Dame dos ejemplos usados en Colombia
+Claude: Siesa y SAP Business One son dos de los más usados...
+
+Tú: /tokens
+Entrada: 412 · Salida: 96 · Costo aprox.: US$0.0001
+
+Tú: /salir
+Conversación terminada.</div>
+  <h3>Funciones que tendrá</h3>
+  <div class="grid">
+    <div class="card"><span class="tag">F1</span><b>Conversación con memoria</b>Recuerda los mensajes anteriores dentro de la sesión.</div>
+    <div class="card"><span class="tag">F2</span><b>Respuesta en vivo</b>El texto aparece mientras Claude lo genera (streaming).</div>
+    <div class="card"><span class="tag">F3</span><b>Personalidad configurable</b>Un system prompt define tono, idioma y reglas.</div>
+    <div class="card"><span class="tag">F4</span><b>Comandos</b><code>/salir</code> <code>/limpiar</code> <code>/tokens</code> <code>/guardar</code> <code>/ayuda</code></div>
+    <div class="card"><span class="tag">F5</span><b>Control de costos</b>Cuenta tokens de entrada y salida y estima el costo.</div>
+    <div class="card"><span class="tag">F6</span><b>Manejo de errores</b>No se cae si falla la red, la llave o hay límite de uso.</div>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2><span class="n">2</span>Lenguajes y tecnologías</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>El chatbot se escribe en Python, pero en el proceso tocas otros lenguajes y formatos. Esta tabla dice qué hace cada uno y cuánto necesitas saber.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Lenguaje / tecnología</th><th>Para qué se usa aquí</th><th>Nivel necesario</th></tr>
+    <tr><td><b>Python 3.10+</b></td><td>Todo el programa: bucle de conversación, llamadas a la API, comandos, archivos.</td><td>Variables, listas, diccionarios, funciones, <code>while</code>, <code>try/except</code></td></tr>
+    <tr><td><b>Terminal</b> (Bash, zsh o PowerShell)</td><td>Crear carpetas, entorno virtual, instalar paquetes y correr el programa.</td><td>Unos 8 comandos básicos</td></tr>
+    <tr><td><b>JSON</b></td><td>Formato de los mensajes que se envían a Claude y de las conversaciones guardadas.</td><td>Leer objetos y listas</td></tr>
+    <tr><td><b>HTTP / REST</b></td><td>Lo que pasa por debajo: el SDK hace peticiones HTTPS a la API. No lo programas, pero ayuda a entender los errores.</td><td>Conceptual: petición, respuesta, código 401/429/500</td></tr>
+    <tr><td><b>.env</b></td><td>Archivo donde guardas la API key fuera del código.</td><td>Una línea <code>CLAVE=valor</code></td></tr>
+    <tr><td><b>Git</b></td><td>Control de versiones y publicación en GitHub.</td><td><code>init</code>, <code>add</code>, <code>commit</code>, <code>push</code></td></tr>
+    <tr><td><b>Markdown</b></td><td>El README que explica tu proyecto.</td><td>Títulos, listas y bloques de código</td></tr>
+  </table></div>
+  <h3>Paquetes de Python</h3>
+  <div class="grid">
+    <div class="card"><span class="req">OBLIGATORIO</span><b>anthropic</b>SDK oficial. Se encarga de autenticar, enviar mensajes, hacer streaming y lanzar errores claros.</div>
+    <div class="card"><span class="req">OBLIGATORIO</span><b>python-dotenv</b>Carga la API key desde el archivo <code>.env</code> para no escribirla en el código.</div>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2><span class="n">3</span>Conceptos clave</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Seis ideas que necesitas tener claras antes de escribir código.</p>
+  <div class="grid">
+    <div class="card"><span class="tag">3.1</span><b>API key</b>Contraseña que identifica tu cuenta ante la API. Quien la tenga puede gastar tu saldo: nunca se sube a GitHub ni se comparte.</div>
+    <div class="card"><span class="tag">3.2</span><b>Tokens</b>Pedazos de texto en los que el modelo divide lo que lee y escribe (en español, una palabra son 1 o 2 tokens). Se cobra por tokens de entrada y de salida.</div>
+    <div class="card"><span class="tag">3.3</span><b>Mensajes y roles</b>Cada mensaje tiene un rol: <code>user</code> (tú) o <code>assistant</code> (Claude). Deben alternarse, empezando por <code>user</code>.</div>
+    <div class="card"><span class="tag">3.4</span><b>Historial</b>La API no recuerda nada entre llamadas. La "memoria" es tu programa enviando toda la conversación en cada petición. Por eso el costo crece con cada turno.</div>
+    <div class="card"><span class="tag">3.5</span><b>System prompt</b>Instrucciones fijas que definen cómo se comporta el asistente: idioma, tono, reglas y límites. Va aparte de los mensajes.</div>
+    <div class="card"><span class="tag">3.6</span><b>Streaming</b>En vez de esperar la respuesta completa, la recibes por partes y la imprimes a medida que llega. Se siente más rápido.</div>
+  </div>
+  <h3>Modelos disponibles</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Modelo</th><th>ID para la API</th><th>Entrada / salida (US$ por millón de tokens)</th><th>Cuándo usarlo</th></tr>
+    <tr><td><b>Claude Haiku 5.5</b></td><td><code>claude-haiku-5-5</code></td><td>desde 0.10 / 0.50</td><td><b>Recomendado para este proyecto:</b> rápido y barato</td></tr>
+    <tr><td><b>Claude Sonnet 5.5</b></td><td><code>claude-sonnet-5-5</code></td><td>2 / 10</td><td>Mejor calidad para tareas de trabajo</td></tr>
+    <tr><td><b>Claude Opus 5.5</b></td><td><code>claude-opus-5-5</code></td><td>4 / 20</td><td>Tareas complejas</td></tr>
+  </table></div>
+  <p style="color:var(--mute);font-size:.88rem">Precios a octubre de 2026. Cambian con el tiempo; confírmalos en la página de precios antes de calcular costos para un cliente.</p>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2><span class="n">4</span>Cómo fluye un mensaje</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Esto pasa cada vez que escribes algo y presionas Enter.</p>
+  <div class="flow">
+    <div><b>Tú escribes</b><code>input()</code> lee la línea</div>
+    <div><b>Historial</b>se agrega como rol <code>user</code></div>
+    <div><b>SDK</b>envía system + historial por HTTPS</div>
+    <div><b>Claude</b>genera la respuesta token a token</div>
+    <div><b>Streaming</b>se imprime en la terminal</div>
+    <div><b>Guardar</b>respuesta al historial y suma de tokens</div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2><span class="n">5</span>Construcción paso a paso</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Son 16 pasos en 5 fases. Cada fase termina con algo que funciona. No pases a la siguiente sin que la anterior corra bien.</p>
+
+  <!-- FASE 1 -->
+  <div class="phase" id="f1">
+    <div class="k">FASE 1</div><h3>Preparar el entorno</h3><div class="t">⏱ 30–45 min</div>
+    <p>Objetivo: tener Python, un proyecto aislado, el SDK instalado y la API key guardada de forma segura.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">1</span>Instalar Python 3.10 o superior</h4>
+    <p>Descárgalo de python.org. En Windows, marca la casilla "Add Python to PATH" durante la instalación. Luego verifica la versión:</p>
+    <div class="codebox"><div class="lbl"><span>Terminal</span><button>Copiar</button></div><pre>python --version
+# en macOS o Linux puede ser:
+python3 --version</pre></div>
+    <ul class="check"><li>Ves Python 3.10 o un número mayor</li></ul>
+  </div>
+
+  <div class="step"><h4><span class="num">2</span>Crear la carpeta y el entorno virtual</h4>
+    <p>El entorno virtual (<code>.venv</code>) aísla los paquetes de este proyecto del resto de tu computador.</p>
+    <div class="codebox"><div class="lbl"><span>Terminal</span><button>Copiar</button></div><pre>mkdir chatbot-claude
+cd chatbot-claude
+python -m venv .venv
+
+# Activar en macOS / Linux:
+source .venv/bin/activate
+
+# Activar en Windows (PowerShell):
+.venv\Scripts\Activate.ps1</pre></div>
+    <ul class="check"><li>La terminal muestra <code>(.venv)</code> al inicio de la línea</li></ul>
+  </div>
+
+  <div class="step"><h4><span class="num">3</span>Instalar los paquetes</h4>
+    <div class="codebox"><div class="lbl"><span>Terminal</span><button>Copiar</button></div><pre>pip install anthropic python-dotenv
+pip freeze &gt; requirements.txt</pre></div>
+    <p><code>requirements.txt</code> deja registradas las versiones, para que cualquiera pueda instalar lo mismo con <code>pip install -r requirements.txt</code>.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">4</span>Crear la cuenta y la API key</h4>
+    <ol class="n">
+      <li>Entra a la Claude Console (platform.claude.com) y crea tu cuenta.</li>
+      <li>Carga un saldo pequeño en <b>Billing</b> (5 dólares alcanzan para todo este proyecto).</li>
+      <li>Ve a <b>API Keys → Create Key</b>, ponle un nombre como <code>chatbot-consola</code>.</li>
+      <li>Copia la llave en ese momento: después no se vuelve a mostrar completa.</li>
+      <li>En <b>Limits</b>, configura un límite de gasto mensual bajo.</li>
+    </ol>
+  </div>
+
+  <div class="step"><h4><span class="num">5</span>Guardar la llave en .env y protegerla</h4>
+    <p>Crea dos archivos en la carpeta del proyecto:</p>
+    <div class="codebox"><div class="lbl"><span>.env</span><button>Copiar</button></div><pre>ANTHROPIC_API_KEY=sk-ant-pega-aqui-tu-llave</pre></div>
+    <div class="codebox"><div class="lbl"><span>.gitignore</span><button>Copiar</button></div><pre>.env
+.venv/
+__pycache__/
+conversaciones/</pre></div>
+    <div class="callout"><b>Importante:</b> el <code>.gitignore</code> evita que la llave termine en GitHub. Si una llave se publica por error, revócala de inmediato en la Console y crea otra.</div>
+  </div>
+
+  <!-- FASE 2 -->
+  <div class="phase" id="f2">
+    <div class="k">FASE 2</div><h3>Primera llamada a Claude</h3><div class="t">⏱ 20–30 min</div>
+    <p>Objetivo: comprobar que la llave funciona y entender la estructura de una petición y una respuesta.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">6</span>Escribir hola.py</h4>
+    <div class="codebox"><div class="lbl"><span>hola.py</span><button>Copiar</button></div><pre>from anthropic import Anthropic
+from dotenv import load_dotenv
+
+load_dotenv()            # lee ANTHROPIC_API_KEY desde .env
+client = Anthropic()     # el SDK toma la llave del entorno
+
+respuesta = client.messages.create(
+    model="claude-haiku-5-5",
+    max_tokens=300,
+    messages=[
+        {"role": "user", "content": "Hola, preséntate en una frase."}
+    ],
+)
+
+print(respuesta.content[0].text)
+print(respuesta.usage)</pre></div>
+    <div class="codebox"><div class="lbl"><span>Terminal</span><button>Copiar</button></div><pre>python hola.py</pre></div>
+    <ul class="check"><li>Ves el saludo de Claude y una línea con <code>input_tokens</code> y <code>output_tokens</code></li></ul>
+  </div>
+
+  <div class="step"><h4><span class="num">7</span>Entender las piezas de la petición</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Parámetro</th><th>Qué hace</th></tr>
+      <tr><td><code>model</code></td><td>Qué modelo responde.</td></tr>
+      <tr><td><code>max_tokens</code></td><td>Tope de tokens de la respuesta. Si se alcanza, la respuesta se corta.</td></tr>
+      <tr><td><code>messages</code></td><td>Lista con la conversación: diccionarios con <code>role</code> y <code>content</code>.</td></tr>
+      <tr><td><code>system</code></td><td>(Opcional) Instrucciones fijas de comportamiento. Lo usamos en la Fase 3.</td></tr>
+      <tr><td><code>respuesta.content[0].text</code></td><td>El texto que escribió Claude.</td></tr>
+      <tr><td><code>respuesta.usage</code></td><td>Tokens consumidos: base para calcular el costo.</td></tr>
+      <tr><td><code>respuesta.stop_reason</code></td><td>Por qué paró: <code>end_turn</code> (terminó) o <code>max_tokens</code> (se cortó).</td></tr>
+    </table></div>
+  </div>
+
+  <!-- FASE 3 -->
+  <div class="phase" id="f3">
+    <div class="k">FASE 3</div><h3>Convertirlo en chatbot</h3><div class="t">⏱ 45–60 min</div>
+    <p>Objetivo: conversación continua, con memoria, personalidad y respuesta en vivo.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">8</span>Bucle de conversación con historial</h4>
+    <p>Crea <code>chatbot.py</code>. El bucle <code>while True</code> lee tu mensaje, lo agrega al historial, envía todo el historial y guarda la respuesta.</p>
+    <div class="codebox"><div class="lbl"><span>chatbot.py · versión 1</span><button>Copiar</button></div><pre>from anthropic import Anthropic
+from dotenv import load_dotenv
+
+load_dotenv()
+client = Anthropic()
+historial = []
+
+while True:
+    texto = input("\nTú: ").strip()
+    if texto == "/salir":
+        break
+    if not texto:
+        continue
+
+    historial.append({"role": "user", "content": texto})
+
+    respuesta = client.messages.create(
+        model="claude-haiku-5-5",
+        max_tokens=1024,
+        messages=historial,
+    )
+    texto_claude = respuesta.content[0].text
+    print(f"Claude: {texto_claude}")
+
+    historial.append({"role": "assistant", "content": texto_claude})</pre></div>
+    <ul class="check"><li>Pregunta tu nombre en un mensaje y en el siguiente pregunta "¿cómo me llamo?": debe recordarlo</li></ul>
+  </div>
+
+  <div class="step"><h4><span class="num">9</span>Agregar el system prompt</h4>
+    <p>Define la personalidad una sola vez y pásala en cada llamada con el parámetro <code>system</code>.</p>
+    <div class="codebox"><div class="lbl"><span>chatbot.py · fragmento</span><button>Copiar</button></div><pre>SYSTEM_PROMPT = (
+    "Eres un asistente que responde en español de Colombia, "
+    "de forma clara y breve. Si no sabes algo, dilo."
+)
+
+respuesta = client.messages.create(
+    model="claude-haiku-5-5",
+    max_tokens=1024,
+    system=SYSTEM_PROMPT,
+    messages=historial,
+)</pre></div>
+    <p><b>Prueba:</b> cambia el system prompt a "Eres un asesor comercial de una constructora en Medellín" y compara las respuestas.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">10</span>Respuesta en vivo con streaming</h4>
+    <p>Reemplaza <code>messages.create</code> por <code>messages.stream</code>. El texto se imprime a medida que llega y al final se obtiene el mensaje completo con el uso de tokens.</p>
+    <div class="codebox"><div class="lbl"><span>chatbot.py · fragmento</span><button>Copiar</button></div><pre>print("Claude: ", end="", flush=True)
+
+with client.messages.stream(
+    model="claude-haiku-5-5",
+    max_tokens=1024,
+    system=SYSTEM_PROMPT,
+    messages=historial,
+) as stream:
+    for pedazo in stream.text_stream:
+        print(pedazo, end="", flush=True)
+    final = stream.get_final_message()
+
+print()
+texto_claude = final.content[0].text
+historial.append({"role": "assistant", "content": texto_claude})</pre></div>
+    <ul class="check"><li>El texto aparece poco a poco en vez de todo de golpe</li></ul>
+  </div>
+
+  <!-- FASE 4 -->
+  <div class="phase" id="f4">
+    <div class="k">FASE 4</div><h3>Hacerlo robusto</h3><div class="t">⏱ 45–60 min</div>
+    <p>Objetivo: que no se caiga ante errores, que tenga comandos útiles y que muestre cuánto cuesta.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">11</span>Manejar errores de la API</h4>
+    <p>El SDK lanza errores específicos. Atrápalos para mostrar un mensaje claro y seguir conversando. Si la llamada falla, quita el último mensaje del historial para que los roles sigan alternándose.</p>
+    <div class="tablewrap"><table>
+      <tr><th>Error</th><th>Código</th><th>Qué significa</th></tr>
+      <tr><td><code>AuthenticationError</code></td><td>401</td><td>Llave inválida, mal copiada o revocada</td></tr>
+      <tr><td><code>RateLimitError</code></td><td>429</td><td>Demasiadas peticiones o límite de gasto alcanzado</td></tr>
+      <tr><td><code>APIConnectionError</code></td><td>—</td><td>Sin internet o no se pudo conectar</td></tr>
+      <tr><td><code>APIStatusError</code></td><td>4xx / 5xx</td><td>Cualquier otro error de la API (incluye fallas del servidor)</td></tr>
+    </table></div>
+    <p style="color:var(--mute);font-size:.9rem"><b>Nota:</b> el SDK ya reintenta automáticamente algunos errores temporales antes de lanzar la excepción.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">12</span>Agregar comandos</h4>
+    <div class="tablewrap"><table>
+      <tr><th>Comando</th><th>Acción</th></tr>
+      <tr><td><code>/ayuda</code></td><td>Muestra la lista de comandos</td></tr>
+      <tr><td><code>/limpiar</code></td><td>Borra el historial y empieza una conversación nueva</td></tr>
+      <tr><td><code>/tokens</code></td><td>Muestra tokens usados y costo aproximado</td></tr>
+      <tr><td><code>/guardar</code></td><td>Guarda la conversación en un archivo JSON</td></tr>
+      <tr><td><code>/salir</code></td><td>Termina el programa (también Ctrl+C)</td></tr>
+    </table></div>
+  </div>
+
+  <div class="step"><h4><span class="num">13</span>Contar tokens y estimar el costo</h4>
+    <p>Después de cada respuesta suma <code>final.usage.input_tokens</code> y <code>final.usage.output_tokens</code>. El costo es tokens ÷ 1.000.000 × precio.</p>
+    <div class="codebox"><div class="lbl"><span>Fórmula</span><button>Copiar</button></div><pre>costo = (tokens_entrada / 1_000_000) * PRECIO_ENTRADA \
+      + (tokens_salida  / 1_000_000) * PRECIO_SALIDA</pre></div>
+    <p>Fíjate: los tokens de entrada crecen en cada turno porque se reenvía todo el historial. Usa <code>/limpiar</code> cuando cambies de tema.</p>
+  </div>
+
+  <!-- FASE 5 -->
+  <div class="phase" id="f5">
+    <div class="k">FASE 5</div><h3>Terminar y publicar</h3><div class="t">⏱ 30–45 min</div>
+    <p>Objetivo: guardar conversaciones, documentar el proyecto y subirlo a GitHub como parte de tu portafolio.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">14</span>Guardar conversaciones en JSON</h4>
+    <p>El comando <code>/guardar</code> escribe el historial en <code>conversaciones/AAAA-MM-DD_HH-MM.json</code>. Ese formato es el mismo que espera la API, así que luego podrías recargar una conversación.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">15</span>Escribir el README</h4>
+    <div class="codebox"><div class="lbl"><span>README.md</span><button>Copiar</button></div><pre># Chatbot de consola con Claude
+
+Chatbot en la terminal con memoria, streaming, comandos y conteo de costo.
+
+## Requisitos
+- Python 3.10+
+- Una API key de Anthropic
+
+## Instalación
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env   # y pega tu llave
+
+## Uso
+python chatbot.py
+
+Comandos: /ayuda, /limpiar, /tokens, /guardar, /salir</pre></div>
+    <p>Crea también <code>.env.example</code> con <code>ANTHROPIC_API_KEY=</code> vacío, para que otros sepan qué variable configurar.</p>
+  </div>
+
+  <div class="step"><h4><span class="num">16</span>Versionar con Git y subir a GitHub</h4>
+    <div class="codebox"><div class="lbl"><span>Terminal</span><button>Copiar</button></div><pre>git init
+git add .
+git status              # confirma que .env NO aparece
+git commit -m "Chatbot de consola con Claude v1.0"
+git branch -M main
+git remote add origin https://github.com/TU-USUARIO/chatbot-claude.git
+git push -u origin main</pre></div>
+    <ul class="check">
+      <li><code>.env</code> no aparece en GitHub</li>
+      <li>El README explica cómo correrlo</li>
+      <li>Proyecto del Nivel 1 de LLMs completado</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2><span class="n">6</span>Código final completo</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <h3>Estructura de carpetas</h3>
+<div class="term">chatbot-claude/
+├── .venv/              # entorno virtual (no se sube)
+├── conversaciones/     # JSON guardados (no se sube)
+├── .env                # tu API key (no se sube)
+├── .env.example
+├── .gitignore
+├── chatbot.py
+├── hola.py
+├── requirements.txt
+└── README.md</div>
+  <h3>chatbot.py</h3>
+  <div class="codebox"><div class="lbl"><span>chatbot.py · v1.0</span><button>Copiar</button></div><pre>"""Chatbot de consola con Claude · v1.0 · 2026-10-10"""
+import json
+from datetime import datetime
+from pathlib import Path
+
+from anthropic import (
+    Anthropic,
+    APIConnectionError,
+    APIStatusError,
+    AuthenticationError,
+    RateLimitError,
+)
+from dotenv import load_dotenv
+
+# ---------- Configuración ----------
+MODELO = "claude-haiku-5-5"
+MAX_TOKENS = 1024
+SYSTEM_PROMPT = (
+    "Eres un asistente que responde en español de Colombia, "
+    "de forma clara y breve. Si no sabes algo, dilo."
+)
+# US$ por millón de tokens (verifica en la página de precios)
+PRECIO_ENTRADA = 0.10
+PRECIO_SALIDA = 0.50
+CARPETA = Path("conversaciones")
+
+AYUDA = """Comandos:
+  /ayuda    muestra esta lista
+  /limpiar  empieza una conversación nueva
+  /tokens   tokens usados y costo aproximado
+  /guardar  guarda la conversación en JSON
+  /salir    termina el programa"""
+
+
+def costo(entrada, salida):
+    return entrada / 1_000_000 * PRECIO_ENTRADA + salida / 1_000_000 * PRECIO_SALIDA
+
+
+def guardar(historial):
+    CARPETA.mkdir(exist_ok=True)
+    archivo = CARPETA / f"{datetime.now():%Y-%m-%d_%H-%M}.json"
+    archivo.write_text(json.dumps(historial, ensure_ascii=False, indent=2), encoding="utf-8")
+    return archivo
+
+
+def responder(client, historial):
+    """Envía el historial, imprime en vivo y devuelve el mensaje final."""
+    print("Claude: ", end="", flush=True)
+    with client.messages.stream(
+        model=MODELO,
+        max_tokens=MAX_TOKENS,
+        system=SYSTEM_PROMPT,
+        messages=historial,
+    ) as stream:
+        for pedazo in stream.text_stream:
+            print(pedazo, end="", flush=True)
+        final = stream.get_final_message()
+    print()
+    if final.stop_reason == "max_tokens":
+        print("[Respuesta cortada: sube MAX_TOKENS si necesitas más]")
+    return final
+
+
+def main():
+    load_dotenv()
+    client = Anthropic()  # lee ANTHROPIC_API_KEY
+    historial = []
+    tokens_entrada = 0
+    tokens_salida = 0
+
+    print("Chatbot con Claude · escribe /ayuda para ver comandos")
+
+    while True:
+        try:
+            texto = input("\nTú: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nConversación terminada.")
+            break
+
+        if not texto:
+            continue
+
+        # ---------- Comandos ----------
+        if texto == "/salir":
+            print("Conversación terminada.")
+            break
+        if texto == "/ayuda":
+            print(AYUDA)
+            continue
+        if texto == "/limpiar":
+            historial.clear()
+            print("Historial borrado. Nueva conversación.")
+            continue
+        if texto == "/tokens":
+            total = costo(tokens_entrada, tokens_salida)
+            print(f"Entrada: {tokens_entrada} · Salida: {tokens_salida} · Costo aprox.: US${total:.4f}")
+            continue
+        if texto == "/guardar":
+            if historial:
+                print(f"Guardado en {guardar(historial)}")
+            else:
+                print("No hay nada que guardar todavía.")
+            continue
+
+        # ---------- Conversación ----------
+        historial.append({"role": "user", "content": texto})
+        try:
+            final = responder(client, historial)
+        except AuthenticationError:
+            print("\n[Error] API key inválida. Revisa el archivo .env.")
+            historial.pop()
+            break
+        except RateLimitError:
+            print("\n[Error] Límite de uso alcanzado. Espera un momento o revisa tu saldo.")
+            historial.pop()
+            continue
+        except APIConnectionError:
+            print("\n[Error] Sin conexión con la API. Revisa tu internet.")
+            historial.pop()
+            continue
+        except APIStatusError as e:
+            print(f"\n[Error {e.status_code}] {e.message}")
+            historial.pop()
+            continue
+
+        historial.append({"role": "assistant", "content": final.content[0].text})
+        tokens_entrada += final.usage.input_tokens
+        tokens_salida += final.usage.output_tokens
+
+
+if __name__ == "__main__":
+    main()</pre></div>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2><span class="n">7</span>Errores comunes y solución</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <div class="tablewrap"><table>
+    <tr><th>Lo que ves</th><th>Causa probable</th><th>Solución</th></tr>
+    <tr><td><code>ModuleNotFoundError: No module named 'anthropic'</code></td><td>El entorno virtual no está activo o no instalaste el paquete</td><td>Activa <code>.venv</code> y corre <code>pip install anthropic python-dotenv</code></td></tr>
+    <tr><td><code>'python' no se reconoce como comando</code></td><td>Python no está en el PATH (Windows)</td><td>Reinstala marcando "Add Python to PATH" o usa <code>py</code></td></tr>
+    <tr><td>Error de autenticación (401)</td><td>Llave mal copiada, con espacios o revocada</td><td>Revisa <code>.env</code>, sin comillas ni espacios; crea otra llave si es necesario</td></tr>
+    <tr><td>Error 429 o de saldo</td><td>Sin créditos o límite de gasto alcanzado</td><td>Revisa Billing y Limits en la Console</td></tr>
+    <tr><td>Error 400 sobre roles</td><td>Dos mensajes seguidos con el mismo rol en el historial</td><td>Asegúrate de quitar el mensaje del usuario cuando falla una llamada (<code>historial.pop()</code>)</td></tr>
+    <tr><td>Error 404 del modelo</td><td>ID de modelo mal escrito o retirado</td><td>Copia el ID exacto de la página de modelos</td></tr>
+    <tr><td>La respuesta se corta</td><td><code>max_tokens</code> muy bajo</td><td>Sube <code>MAX_TOKENS</code></td></tr>
+    <tr><td>En PowerShell no deja activar el entorno</td><td>Política de ejecución de scripts</td><td><code>Set-ExecutionPolicy -Scope CurrentUser RemoteSigned</code></td></tr>
+  </table></div>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2><span class="n">8</span>Siguientes pasos y fuentes</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Con el chatbot funcionando, estas mejoras te llevan al Nivel 2 de LLMs y Agentes del pensum:</p>
+  <div class="grid">
+    <div class="card"><span class="tag">8.1</span><b>Tool use</b>Darle herramientas: consultar el clima, calcular o leer un archivo. Es el primer paso hacia un agente.</div>
+    <div class="card"><span class="tag">8.2</span><b>Salidas estructuradas</b>Pedir JSON validado con Pydantic, por ejemplo para extraer datos de una factura.</div>
+    <div class="card"><span class="tag">8.3</span><b>Leer documentos</b>Enviar un PDF y conversar sobre él; luego pasar a RAG con varios documentos.</div>
+    <div class="card"><span class="tag">8.4</span><b>Prompt caching</b>Cachear el system prompt largo para reducir costo y latencia.</div>
+    <div class="card"><span class="tag">8.5</span><b>Interfaz web</b>Llevar el mismo chatbot a una página con Streamlit o a una API con FastAPI.</div>
+    <div class="card"><span class="tag">8.6</span><b>WhatsApp</b>Conectarlo a WhatsApp Business: base del asistente de preventa inmobiliaria (caso R1.1).</div>
+  </div>
+  <h3>Fuentes oficiales</h3>
+  <ul class="l">
+    <li>SDK de Python: <code>platform.claude.com/docs/en/cli-sdks-libraries/sdks/python</code></li>
+    <li>Modelos y precios: <code>platform.claude.com/docs/en/models/overview</code></li>
+    <li>Documentación general: <code>platform.claude.com/docs</code></li>
+  </ul>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2><span class="n">9</span>Para qué sirve este chat y cómo se conecta con WhatsApp y el CRM</h2>
+  <a class="back" href="#indice">↑ Índice</a>
+  <p>Esta sección responde cuatro preguntas: qué es realmente el chat de consola, qué puedes hacer con él, qué <b>no</b> hace, y cómo se conecta después con WhatsApp y un CRM de ventas.</p>
+
+  <h3>9.1 Qué es realmente el chat de consola</h3>
+  <p>El chat de consola tiene tres piezas. Entenderlas por separado es lo que permite reutilizarlo después en WhatsApp.</p>
+  <div class="tablewrap"><table>
+    <tr><th>Pieza</th><th>Qué hace</th><th>En el código</th><th>¿Se reutiliza en WhatsApp?</th></tr>
+    <tr><td><b>La puerta</b></td><td>Recibe lo que escribe la persona y muestra la respuesta.</td><td><code>input()</code> y <code>print()</code></td><td><b>No.</b> Se cambia por WhatsApp.</td></tr>
+    <tr><td><b>El cerebro</b></td><td>Guarda el historial, aplica el system prompt, llama a Claude, cuenta tokens.</td><td><code>historial</code>, <code>SYSTEM_PROMPT</code>, <code>responder()</code></td><td><b>Sí.</b> Es lo que construyes y afinas aquí.</td></tr>
+    <tr><td><b>Claude</b></td><td>Genera el texto de la respuesta.</td><td><code>client.messages.stream(...)</code></td><td><b>Sí.</b> Es la misma API.</td></tr>
+  </table></div>
+  <div class="callout"><b>Quien responde es Claude, no la consola.</b> La consola es solo una pantalla de entrada y salida para probar el cerebro sin depender de nada más.</div>
+
+  <h3>9.2 Cuál es el objetivo de construirlo</h3>
+  <p>El objetivo no es tener un chatbot de terminal para clientes. Es construir y afinar el cerebro en el entorno más simple posible, antes de conectarlo a canales más complejos.</p>
+  <div class="grid">
+    <div class="card"><span class="tag">9.2.1</span><b>Probar system prompts</b>Cambias una línea (tono, reglas, rol) y ves el efecto al instante. Ejemplo: de "asesor comercial de una constructora" a "soporte de un ERP".</div>
+    <div class="card"><span class="tag">9.2.2</span><b>Entender la memoria</b>Ver con tus propios ojos que la API no recuerda nada y que tú reenvías el historial. Es la base de cualquier conversación por WhatsApp.</div>
+    <div class="card"><span class="tag">9.2.3</span><b>Medir costos</b>Con <code>/tokens</code> calculas cuánto cuesta una conversación típica y puedes cotizar por volumen a un cliente.</div>
+    <div class="card"><span class="tag">9.2.4</span><b>Demos en vivo</b>En una reunión abres la consola y muestras cómo respondería el bot, incluso con los documentos del cliente (cuando agregues RAG).</div>
+    <div class="card"><span class="tag">9.2.5</span><b>Asistente interno</b>Una herramienta para ti y Gabo: redactar propuestas, resumir correos, explicar errores de código.</div>
+    <div class="card"><span class="tag">9.2.6</span><b>Cimiento del Nivel 2 y 3</b>Sobre este mismo código se agregan RAG (documentos), herramientas (consultar el ERP) y finalmente WhatsApp.</div>
+  </div>
+
+  <h3>9.3 Lo que este chat NO hace por sí solo</h3>
+  <div class="tablewrap"><table>
+    <tr><th>No hace</th><th>Por qué</th><th>Qué lo resuelve</th></tr>
+    <tr><td>Recibir mensajes de WhatsApp</td><td>Un programa de consola no está escuchando internet.</td><td>Un servidor web (FastAPI) con un <i>webhook</i></td></tr>
+    <tr><td>Conectarse al CRM</td><td>No sabe qué es un lead, un deal ni una etapa de ventas.</td><td>Código que llame a la API del CRM</td></tr>
+    <tr><td>Recordar a cada cliente</td><td>Su historial vive en una lista en memoria y se pierde al cerrar.</td><td>Base de datos con un historial por número de teléfono (Supabase)</td></tr>
+    <tr><td>Funcionar solo, 24/7</td><td>Corre mientras tengas la terminal abierta.</td><td>Un servidor desplegado en la nube</td></tr>
+  </table></div>
+
+  <h3>9.4 La lógica: cómo se conecta con WhatsApp</h3>
+  <p>El cerebro no "le pasa información a WhatsApp" por iniciativa propia: <b>reacciona a lo que llega</b>. Hay dos formas de que arranque una conversación, y en ambas el ciclo es el mismo: alguien escribe, el cerebro genera una respuesta con Claude, se envía por WhatsApp, y cuando la persona contesta, el ciclo vuelve a empezar.</p>
+
+  <div class="lane a"><div class="lt">FLUJO A · EL CLIENTE ESCRIBE PRIMERO (el caso más común)</div>
+    <div class="flow">
+      <div><b>Cliente</b>escribe por WhatsApp: "Hola, ¿tienen apartamentos de 2 alcobas?"</div>
+      <div><b>Meta</b>recibe el mensaje y lo envía a tu servidor (webhook)</div>
+      <div><b>Cerebro</b>carga el historial de ese número desde la base de datos</div>
+      <div><b>Claude</b>genera la respuesta con system prompt + historial (+ RAG)</div>
+      <div><b>WhatsApp</b>tu servidor envía la respuesta al cliente</div>
+      <div><b>CRM</b>se guarda el mensaje y se actualiza el lead</div>
+    </div>
+  </div>
+
+  <div class="lane b"><div class="lt">FLUJO B · EL BOT ESCRIBE PRIMERO (seguimiento de leads)</div>
+    <div class="flow">
+      <div><b>CRM</b>detecta un lead sin respuesta hace 2 días</div>
+      <div><b>Cerebro</b>pide a Claude redactar un mensaje de seguimiento</div>
+      <div><b>WhatsApp</b>envía el mensaje al cliente</div>
+      <div><b>Cliente</b>responde por WhatsApp</div>
+      <div><b>Cerebro</b>recibe la respuesta, la suma al historial y pide a Claude la siguiente respuesta</div>
+      <div><b>Se repite</b>hasta que cierre, agende visita o pase a un asesor humano</div>
+    </div>
+  </div>
+
+  <div class="callout"><b>Ojo con la dirección del flujo.</b> La consola no le entrega nada a WhatsApp, y WhatsApp tampoco "devuelve" la respuesta a la consola. En producción la consola desaparece: el servidor ejecuta el mismo cerebro cada vez que llega un mensaje. Además, WhatsApp Business solo permite escribir primero (fuera de la ventana de conversación activa) con plantillas de mensaje aprobadas previamente por Meta, así que el Flujo B requiere ese paso.</div>
+
+  <h3>9.5 Ejemplo del ciclo completo</h3>
+<div class="term">[Cliente · WhatsApp]  Hola, vi el proyecto Torre Laureles. ¿Cuánto cuesta el tipo B?
+        ↓ webhook
+[Servidor]  historial del número +57 3xx... → vacío (primer mensaje)
+[Cerebro]   busca en documentos (RAG) → ficha del tipo B
+[Claude]    "¡Hola! El apartamento tipo B tiene 68 m² y 2 alcobas, desde
+             $XXX millones [ficha_torre_laureles.pdf]. ¿Quieres agendar una visita?"
+        ↓
+[Cliente · WhatsApp]  Sí, ¿el sábado?
+        ↓ webhook
+[Servidor]  historial del número → ya tiene los dos mensajes anteriores
+[Claude]    entiende que "el sábado" es la visita al tipo B
+[CRM]       lead: etapa "Visita solicitada" · interés: tipo B · Torre Laureles</div>
+  <p>Fíjate en la lógica del historial: en el segundo mensaje el cliente solo escribió "Sí, ¿el sábado?". Claude lo entiende porque el servidor le reenvía toda la conversación anterior. Es exactamente el mismo mecanismo de <code>historial</code> que ya construiste en la consola.</p>
+
+  <h3>9.6 Qué se reutiliza y qué se agrega</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Elemento</th><th>En la consola (Nivel 1)</th><th>En WhatsApp + CRM (producción)</th></tr>
+    <tr><td>Entrada</td><td><code>input()</code></td><td>Webhook de Meta → FastAPI</td></tr>
+    <tr><td>Salida</td><td><code>print()</code></td><td>API de WhatsApp Business (enviar mensaje)</td></tr>
+    <tr><td>Historial</td><td>Lista <code>historial</code> en memoria</td><td>Tabla en Supabase, un historial por teléfono</td></tr>
+    <tr><td>System prompt</td><td>Constante en <code>chatbot.py</code></td><td><b>El mismo</b> (aquí lo afinas)</td></tr>
+    <tr><td>Llamada a Claude</td><td><code>messages.stream</code></td><td><b>La misma</b> (sin streaming visible, se envía el texto completo)</td></tr>
+    <tr><td>Documentos</td><td>No tiene</td><td>RAG con pgvector (Nivel 2)</td></tr>
+    <tr><td>CRM</td><td>No tiene</td><td>Guardar mensajes, crear lead, cambiar etapa</td></tr>
+    <tr><td>Control de costo</td><td><code>/tokens</code></td><td>Registro de tokens por cliente y por mes</td></tr>
+    <tr><td>Errores</td><td>Mensaje en pantalla</td><td>Reintentos, alertas y mensaje de respaldo al cliente</td></tr>
+  </table></div>
+
+  <h3>9.7 Ruta sugerida de construcción</h3>
+  <div class="tablewrap"><table>
+    <tr><th>Cuándo (sugerido)</th><th>Nivel</th><th>Qué construyes</th><th>Resultado</th></tr>
+    <tr><td>Octubre 2026</td><td>Nivel 1</td><td>Chat de consola (esta guía)</td><td>Cerebro básico con memoria, system prompt y costos</td></tr>
+    <tr><td>Octubre 2026</td><td>Nivel 2</td><td>RAG con documentos reales de un cliente</td><td>Respuestas con datos verificables y citas</td></tr>
+    <tr><td>Noviembre 2026</td><td>Nivel 3</td><td>FastAPI + WhatsApp + Supabase + CRM</td><td>Piloto con un cliente real, en un horario limitado</td></tr>
+    <tr><td>Diciembre 2026</td><td>Ajuste</td><td>Medir conversaciones, costos y errores; ajustar el system prompt</td><td>Versión estable para ofrecer a más clientes</td></tr>
+  </table></div>
+  <p style="color:var(--mute);font-size:.88rem">Las fechas son una sugerencia de ritmo, no un compromiso: dependen del tiempo que le dediques y de lo rápido que Meta apruebe la cuenta de WhatsApp Business.</p>
+
+  <h3>9.8 Tool use: cuando Claude consulta el catálogo</h3>
+  <p>Un <b>tool</b> (herramienta) es una función de tu código que Claude puede pedir que se ejecute. Sirve para datos vivos y estructurados: el catálogo de unidades, precios y disponibilidad que vende el agente. La respuesta final se redacta <b>después</b> de consultar el catálogo, no antes.</p>
+  <div class="lane a"><div class="lt">FLUJO C · CLAUDE CONSULTA EL CATÁLOGO ANTES DE RESPONDER</div>
+    <div class="flow">
+      <div><b>Cliente</b>"¿Hay tipo B disponible en Torre Laureles?"</div>
+      <div><b>Claude</b>decide que necesita datos y pide usar <code>consultar_catalogo</code></div>
+      <div><b>Tu código</b>ejecuta la consulta en Supabase o en el ERP</div>
+      <div><b>Resultado</b>se devuelve a Claude (<code>tool_result</code>)</div>
+      <div><b>Claude</b>redacta la respuesta con los datos reales</div>
+      <div><b>WhatsApp + CRM</b>se envía y se guarda el interés del lead</div>
+    </div>
+  </div>
+  <div class="callout"><b>Claude no toca el catálogo ni el ERP.</b> Solo pide usar la herramienta; tu código la ejecuta y le devuelve el resultado. Esa separación te da control: puedes limitar la herramienta a solo lectura y decidir qué datos expone.</div>
+
+  <h3>9.9 RAG vs. herramienta</h3>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>RAG (Nivel 2)</th><th>Tool use</th></tr>
+    <tr><td><b>Qué consulta</b></td><td>Texto de documentos</td><td>Datos estructurados en vivo</td></tr>
+    <tr><td><b>Ejemplo</b></td><td>Reglamento de PH, ficha técnica</td><td>Precio y disponibilidad del tipo B hoy</td></tr>
+    <tr><td><b>Dónde vive</b></td><td>Base vectorial</td><td>Base de datos, catálogo o ERP</td></tr>
+    <tr><td><b>Quién decide consultar</b></td><td>Tu código, siempre, en cada pregunta</td><td>Claude, solo cuando lo necesita</td></tr>
+  </table></div>
+  <p>En un asistente de preventa se usan juntos: RAG para explicar el proyecto y la herramienta para confirmar qué hay disponible y a qué precio.</p>
+
+  <h3>9.10 Cómo se ve en código</h3>
+  <div class="codebox"><div class="lbl"><span>chatbot.py · fragmento (idea)</span><button>Copiar</button></div><pre>HERRAMIENTAS = [{
+    "name": "consultar_catalogo",
+    "description": "Consulta unidades disponibles, áreas y precios de un proyecto inmobiliario.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "proyecto": {"type": "string"},
+            "tipo": {"type": "string"},
+        },
+        "required": ["proyecto"],
+    },
+}]
+
+respuesta = client.messages.create(
+    model="claude-haiku-5-5", max_tokens=1024,
+    system=SYSTEM_PROMPT, tools=HERRAMIENTAS, messages=historial,
+)
+
+if respuesta.stop_reason == "tool_use":
+    bloque = next(b for b in respuesta.content if b.type == "tool_use")
+    datos = consultar_catalogo(**bloque.input)   # tu función: Supabase, ERP, etc.
+
+    historial.append({"role": "assistant", "content": respuesta.content})
+    historial.append({"role": "user", "content": [
+        {"type": "tool_result", "tool_use_id": bloque.id,
+         "content": json.dumps(datos, ensure_ascii=False)}
+    ]})
+    # Se llama a Claude otra vez con el historial: ahora redacta la respuesta final</pre></div>
+  <p style="color:var(--mute);font-size:.88rem">Es una versión resumida para entender la lógica. La guía del Nivel 2 de agentes lo construye completo, con varias herramientas y manejo de errores.</p>
+</section>
+
+<footer>Chatbot de consola con Claude · v2.0 · 2026-10-10 · Proyecto del Nivel 1 de LLMs del Pensum AI Engineer</footer>
+</div>
+
+<script>
+document.querySelectorAll('.codebox button').forEach(function(b){
+  b.addEventListener('click',function(){
+    var t=b.closest('.codebox').querySelector('pre').innerText;
+    var done=function(){b.textContent='¡Copiado!';setTimeout(function(){b.textContent='Copiar'},1500)};
+    if(navigator.clipboard){navigator.clipboard.writeText(t).then(done,done)}else{done()}
+  });
+});
+</script>
+</body>
+</html>
