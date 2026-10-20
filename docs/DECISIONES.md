@@ -426,6 +426,16 @@ Condición de activación: ninguna pendiente — se acepta de entrada.
   manda todas las preguntas en una sola petición.
 - 28 de los 32 tours no tienen precio publicado: el sistema debe decirlo, no rellenarlo.
 
+**Primera evaluación de la recuperación (20 oct 2026, 45 preguntas, `agentes-sdk/validacion-rag/`)
+`[medido]`:** recall@1 97,3 %, recall@6 100 %, MRR 0,98; contexto media 963 tokens por turno
+`[estimado]`; latencia de la búsqueda p95 249 ms (desde el PC del usuario). Las metas de recuperación
+de la guía se cumplen. **Lo único medido que falla:** las preguntas con condiciones («día completo,
+saliendo de Medellín», recall@1 75 % en el tipo `filtro`) → candidato a búsqueda híbrida (filtro
+exacto + similitud). **Y el «no lo sé» no se puede decidir con un umbral:** la similitud del mejor
+resultado va de 0,33 a 0,74 con respuesta y de 0,37 a 0,60 sin ella; el mejor umbral posible equivale
+a aceptar todo. Falta medir la **fidelidad** (lo que Claude responde con lo recuperado), que es lo
+que decide el «no lo sé».
+
 **Metas de la guía, todavía sin medir (`[por verificar]`):** recall@k ≥ 95 %, MRR ≥ 0,8, < 1.200
 tokens de catálogo por turno, p95 de recuperación < 300 ms, 0 inventos.
 

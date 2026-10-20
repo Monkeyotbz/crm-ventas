@@ -1,0 +1,1019 @@
+{
+  "etiqueta": "base",
+  "k": 6,
+  "modelo": "voyage-3.5",
+  "tokens_voyage": 421,
+  "metricas": {
+    "recall1": 0.972972972972973,
+    "recall3": 0.972972972972973,
+    "recallK": 1,
+    "mrr": 0.9783783783783785,
+    "mejor_umbral": {
+      "u": 0.3,
+      "ex": 0.8222222222222222,
+      "cons": 1,
+      "rech": 0
+    },
+    "contexto_tokens_media": 962.8666666666667,
+    "latencia_p50_ms": 204.19720000000007,
+    "latencia_p95_ms": 248.5056000000004
+  },
+  "filas": [
+    {
+      "id": "R01",
+      "tipo": "explicita",
+      "pregunta": "Quiero el tour de Guatapé",
+      "sin_respuesta": false,
+      "esperados": [
+        "guatape-piedra-del-penol"
+      ],
+      "rango": 1,
+      "sim_top1": 0.625387910718814,
+      "sim_acierto": 0.625387910718814,
+      "ms": 506.7358999999999,
+      "contexto_tokens_est": 942,
+      "top": [
+        "guatape-piedra-del-penol 0.63",
+        "travesia-salto-del-angel-jardin 0.55",
+        "travesia-resguardo-indigena-jardin 0.51",
+        "graffiti-tour-comuna-13 0.51",
+        "travesia-cristo-rey-jardin 0.51",
+        "parque-arvi-medellin 0.50"
+      ]
+    },
+    {
+      "id": "R02",
+      "tipo": "explicita",
+      "pregunta": "¿Tienen algo en Hacienda Nápoles?",
+      "sin_respuesta": false,
+      "esperados": [
+        "hacienda-napoles"
+      ],
+      "rango": 1,
+      "sim_top1": 0.33414771149782,
+      "sim_acierto": 0.33414771149782,
+      "ms": 200.40999999999985,
+      "contexto_tokens_est": 923,
+      "top": [
+        "hacienda-napoles 0.33",
+        "isla-del-encanto-cartagena 0.25",
+        "tour-gastronomico-medellin 0.25",
+        "palmarito-beach-club 0.25",
+        "isla-tierra-bomba 0.24",
+        "centro-historico-plaza-botero 0.24"
+      ]
+    },
+    {
+      "id": "R03",
+      "tipo": "explicita",
+      "pregunta": "Quiero conocer la Comuna 13",
+      "sin_respuesta": false,
+      "esperados": [
+        "graffiti-tour-comuna-13",
+        "city-tour-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.415180921554565,
+      "sim_acierto": 0.415180921554565,
+      "ms": 204.07359999999971,
+      "contexto_tokens_est": 938,
+      "top": [
+        "graffiti-tour-comuna-13 0.42",
+        "city-tour-medellin 0.34",
+        "travesia-resguardo-indigena-jardin 0.34",
+        "bora-bora-beach-club-cartagena 0.33",
+        "palmarito-beach-club 0.33",
+        "pao-pao-beach-club-cartagena 0.32"
+      ]
+    },
+    {
+      "id": "R04",
+      "tipo": "explicita",
+      "pregunta": "Información del Parque Arví",
+      "sin_respuesta": false,
+      "esperados": [
+        "parque-arvi-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.523969606279421,
+      "sim_acierto": 0.523969606279421,
+      "ms": 204.19720000000007,
+      "contexto_tokens_est": 927,
+      "top": [
+        "parque-arvi-medellin 0.52",
+        "hacienda-napoles 0.43",
+        "travesia-gallito-de-roca-jardin 0.42",
+        "parque-explora-jardin-botanico 0.41",
+        "travesia-resguardo-indigena-jardin 0.40",
+        "travesia-salto-del-angel-jardin 0.40"
+      ]
+    },
+    {
+      "id": "R05",
+      "tipo": "explicita",
+      "pregunta": "Quiero ir a Isla Cholón",
+      "sin_respuesta": false,
+      "esperados": [
+        "isla-cholon-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.636313221674371,
+      "sim_acierto": 0.636313221674371,
+      "ms": 148.4339,
+      "contexto_tokens_est": 1063,
+      "top": [
+        "isla-cholon-cartagena 0.64",
+        "tour-5-islas-vip-deportivo 0.56",
+        "isla-del-sol-cartagena 0.56",
+        "isla-tierra-bomba 0.56",
+        "isla-del-encanto-cartagena 0.55",
+        "tour-4-islas-cartagena 0.55"
+      ]
+    },
+    {
+      "id": "R06",
+      "tipo": "explicita",
+      "pregunta": "¿Hacen el viaje a Playa Blanca?",
+      "sin_respuesta": false,
+      "esperados": [
+        "playa-blanca-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.567257795766462,
+      "sim_acierto": 0.567257795766462,
+      "ms": 159.60239999999976,
+      "contexto_tokens_est": 1028,
+      "top": [
+        "playa-blanca-cartagena 0.57",
+        "tour-4-islas-cartagena 0.50",
+        "palmarito-beach-club 0.49",
+        "pao-pao-beach-club-cartagena 0.49",
+        "playa-tranquila-cartagena 0.49",
+        "tour-5-islas-vip-deportivo 0.48"
+      ]
+    },
+    {
+      "id": "R07",
+      "tipo": "explicita",
+      "pregunta": "Quiero subir a la Piedra del Peñol",
+      "sin_respuesta": false,
+      "esperados": [
+        "guatape-piedra-del-penol"
+      ],
+      "rango": 1,
+      "sim_top1": 0.523809090966257,
+      "sim_acierto": 0.523809090966257,
+      "ms": 203.46579999999994,
+      "contexto_tokens_est": 1000,
+      "top": [
+        "guatape-piedra-del-penol 0.52",
+        "travesia-cristo-rey-jardin 0.45",
+        "travesia-salto-del-angel-jardin 0.45",
+        "travesia-filo-de-oro-jardin 0.44",
+        "graffiti-tour-comuna-13 0.43",
+        "palmarito-beach-club 0.43"
+      ]
+    },
+    {
+      "id": "R08",
+      "tipo": "explicita",
+      "pregunta": "¿Se puede ver el gallito de roca?",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-gallito-de-roca-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.49422752788395,
+      "sim_acierto": 0.49422752788395,
+      "ms": 205.60710000000017,
+      "contexto_tokens_est": 989,
+      "top": [
+        "travesia-gallito-de-roca-jardin 0.49",
+        "travesia-cristo-rey-jardin 0.33",
+        "graffiti-tour-comuna-13 0.31",
+        "travesia-salto-del-angel-jardin 0.31",
+        "travesia-filo-de-oro-jardin 0.31",
+        "guatape-piedra-del-penol 0.30"
+      ]
+    },
+    {
+      "id": "R09",
+      "tipo": "vaga",
+      "pregunta": "algo tranquilo para mi esposo",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-del-amor-jardin",
+        "playa-tranquila-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.406736421384324,
+      "sim_acierto": 0.406736421384324,
+      "ms": 205.72649999999976,
+      "contexto_tokens_est": 924,
+      "top": [
+        "travesia-del-amor-jardin 0.41",
+        "playa-tranquila-cartagena 0.33",
+        "isla-tierra-bomba 0.30",
+        "palmarito-beach-club 0.30",
+        "parque-arvi-medellin 0.30",
+        "sibarita-cena-gourmet-cartagena 0.29"
+      ]
+    },
+    {
+      "id": "R10",
+      "tipo": "vaga",
+      "pregunta": "una fiesta con música y licor en el mar",
+      "sin_respuesta": false,
+      "esperados": [
+        "bahia-rumbera-bote-deportivo"
+      ],
+      "rango": 1,
+      "sim_top1": 0.534371376037598,
+      "sim_acierto": 0.534371376037598,
+      "ms": 204.16389999999956,
+      "contexto_tokens_est": 1025,
+      "top": [
+        "bahia-rumbera-bote-deportivo 0.53",
+        "sibarita-cena-gourmet-cartagena 0.51",
+        "bora-bora-beach-club-cartagena 0.46",
+        "tour-5-islas-vip-deportivo 0.46",
+        "palmarito-beach-club 0.43",
+        "isla-del-sol-cartagena 0.43"
+      ]
+    },
+    {
+      "id": "R11",
+      "tipo": "vaga",
+      "pregunta": "caminata exigente en la montaña",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-salto-del-angel-jardin",
+        "travesia-filo-de-oro-jardin",
+        "travesia-cristo-rey-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.510791839455589,
+      "sim_acierto": 0.510791839455589,
+      "ms": 204.34979999999996,
+      "contexto_tokens_est": 1008,
+      "top": [
+        "travesia-filo-de-oro-jardin 0.51",
+        "travesia-salto-del-angel-jardin 0.51",
+        "travesia-cristo-rey-jardin 0.49",
+        "parque-arvi-medellin 0.43",
+        "travesia-finca-cafetera-jardin 0.41",
+        "travesia-resguardo-indigena-jardin 0.41"
+      ]
+    },
+    {
+      "id": "R12",
+      "tipo": "vaga",
+      "pregunta": "un plan romántico para nuestro aniversario",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-del-amor-jardin",
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.726467333032708,
+      "sim_acierto": 0.726467333032708,
+      "ms": 212.28139999999985,
+      "contexto_tokens_est": 983,
+      "top": [
+        "travesia-del-amor-jardin 0.73",
+        "sibarita-cena-gourmet-cartagena 0.52",
+        "travesia-filo-de-oro-jardin 0.46",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "isla-del-encanto-cartagena 0.45",
+        "tour-5-islas-vip-deportivo 0.45"
+      ]
+    },
+    {
+      "id": "R13",
+      "tipo": "vaga",
+      "pregunta": "quiero aprender cómo se hace el café",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-de-cafe-jardin",
+        "travesia-finca-cafetera-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.577802215683593,
+      "sim_acierto": 0.577802215683593,
+      "ms": 197.29410000000007,
+      "contexto_tokens_est": 915,
+      "top": [
+        "travesia-finca-cafetera-jardin 0.58",
+        "tour-de-cafe-jardin 0.57",
+        "tour-gastronomico-medellin 0.43",
+        "centro-historico-plaza-botero 0.39",
+        "city-tour-chiva-cartagena 0.39",
+        "travesia-filo-de-oro-jardin 0.39"
+      ]
+    },
+    {
+      "id": "R14",
+      "tipo": "vaga",
+      "pregunta": "algo con piscina y hamacas para descansar todo el día",
+      "sin_respuesta": false,
+      "esperados": [
+        "pao-pao-beach-club-cartagena",
+        "palmarito-beach-club",
+        "bora-bora-beach-club-cartagena",
+        "isla-del-encanto-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.581429533490212,
+      "sim_acierto": 0.581429533490212,
+      "ms": 205.4434999999994,
+      "contexto_tokens_est": 1035,
+      "top": [
+        "pao-pao-beach-club-cartagena 0.58",
+        "isla-del-encanto-cartagena 0.56",
+        "palmarito-beach-club 0.55",
+        "isla-cholon-cartagena 0.52",
+        "bora-bora-beach-club-cartagena 0.51",
+        "isla-del-sol-cartagena 0.51"
+      ]
+    },
+    {
+      "id": "R15",
+      "tipo": "vaga",
+      "pregunta": "quiero probar la comida típica paisa",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-gastronomico-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.602509331254484,
+      "sim_acierto": 0.602509331254484,
+      "ms": 203.92659999999978,
+      "contexto_tokens_est": 972,
+      "top": [
+        "tour-gastronomico-medellin 0.60",
+        "pao-pao-beach-club-cartagena 0.56",
+        "playa-tranquila-cartagena 0.53",
+        "sibarita-cena-gourmet-cartagena 0.52",
+        "isla-del-encanto-cartagena 0.51",
+        "palmarito-beach-club 0.51"
+      ]
+    },
+    {
+      "id": "R16",
+      "tipo": "vaga",
+      "pregunta": "una cena elegante con vino y mariscos",
+      "sin_respuesta": false,
+      "esperados": [
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.618632894199109,
+      "sim_acierto": 0.618632894199109,
+      "ms": 197.10279999999966,
+      "contexto_tokens_est": 943,
+      "top": [
+        "sibarita-cena-gourmet-cartagena 0.62",
+        "travesia-del-amor-jardin 0.48",
+        "tour-5-islas-vip-deportivo 0.42",
+        "bora-bora-beach-club-cartagena 0.42",
+        "pao-pao-beach-club-cartagena 0.40",
+        "playa-tranquila-cartagena 0.40"
+      ]
+    },
+    {
+      "id": "R17",
+      "tipo": "vaga",
+      "pregunta": "conocer la historia reciente de la ciudad",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-historico-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.372610434604935,
+      "sim_acierto": 0.372610434604935,
+      "ms": 316.41010000000006,
+      "contexto_tokens_est": 888,
+      "top": [
+        "tour-historico-medellin 0.37",
+        "centro-historico-plaza-botero 0.32",
+        "graffiti-tour-comuna-13 0.30",
+        "city-tour-chiva-cartagena 0.30",
+        "city-tour-medellin 0.28",
+        "bahia-rumbera-bote-deportivo 0.25"
+      ]
+    },
+    {
+      "id": "R18",
+      "tipo": "vaga",
+      "pregunta": "arte callejero y transformación social",
+      "sin_respuesta": false,
+      "esperados": [
+        "graffiti-tour-comuna-13"
+      ],
+      "rango": 1,
+      "sim_top1": 0.431217257307932,
+      "sim_acierto": 0.431217257307932,
+      "ms": 201.69830000000002,
+      "contexto_tokens_est": 888,
+      "top": [
+        "graffiti-tour-comuna-13 0.43",
+        "city-tour-chiva-cartagena 0.37",
+        "centro-historico-plaza-botero 0.34",
+        "city-tour-medellin 0.32",
+        "tour-historico-medellin 0.31",
+        "bahia-rumbera-bote-deportivo 0.29"
+      ]
+    },
+    {
+      "id": "R19",
+      "tipo": "vaga",
+      "pregunta": "algo cultural con comunidades indígenas y artesanías",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-resguardo-indigena-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.525309801101685,
+      "sim_acierto": 0.525309801101685,
+      "ms": 207.21849999999995,
+      "contexto_tokens_est": 919,
+      "top": [
+        "travesia-resguardo-indigena-jardin 0.53",
+        "city-tour-chiva-cartagena 0.48",
+        "guatape-piedra-del-penol 0.46",
+        "bahia-rumbera-bote-deportivo 0.44",
+        "graffiti-tour-comuna-13 0.44",
+        "centro-historico-plaza-botero 0.44"
+      ]
+    },
+    {
+      "id": "R20",
+      "tipo": "vaga",
+      "pregunta": "un lugar de ciencia interactivo para los niños",
+      "sin_respuesta": false,
+      "esperados": [
+        "parque-explora-jardin-botanico"
+      ],
+      "rango": 1,
+      "sim_top1": 0.535061478614807,
+      "sim_acierto": 0.535061478614807,
+      "ms": 145.54529999999977,
+      "contexto_tokens_est": 902,
+      "top": [
+        "parque-explora-jardin-botanico 0.54",
+        "hacienda-napoles 0.41",
+        "travesia-gallito-de-roca-jardin 0.39",
+        "parque-arvi-medellin 0.39",
+        "graffiti-tour-comuna-13 0.38",
+        "travesia-cristo-rey-jardin 0.38"
+      ]
+    },
+    {
+      "id": "R21",
+      "tipo": "vaga",
+      "pregunta": "safari y animales",
+      "sin_respuesta": false,
+      "esperados": [
+        "hacienda-napoles"
+      ],
+      "rango": 1,
+      "sim_top1": 0.50842221005957,
+      "sim_acierto": 0.50842221005957,
+      "ms": 160.28049999999985,
+      "contexto_tokens_est": 976,
+      "top": [
+        "hacienda-napoles 0.51",
+        "travesia-gallito-de-roca-jardin 0.43",
+        "parque-arvi-medellin 0.41",
+        "travesia-salto-del-angel-jardin 0.40",
+        "sibarita-cena-gourmet-cartagena 0.39",
+        "travesia-filo-de-oro-jardin 0.39"
+      ]
+    },
+    {
+      "id": "R22",
+      "tipo": "vaga",
+      "pregunta": "una isla privada de lujo en lancha rápida",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-5-islas-vip-deportivo"
+      ],
+      "rango": 1,
+      "sim_top1": 0.57689365286269,
+      "sim_acierto": 0.57689365286269,
+      "ms": 203.85469999999987,
+      "contexto_tokens_est": 1063,
+      "top": [
+        "tour-5-islas-vip-deportivo 0.58",
+        "isla-del-encanto-cartagena 0.52",
+        "tour-4-islas-cartagena 0.52",
+        "isla-tierra-bomba 0.51",
+        "isla-del-sol-cartagena 0.51",
+        "isla-cholon-cartagena 0.50"
+      ]
+    },
+    {
+      "id": "R23",
+      "tipo": "vaga",
+      "pregunta": "una cascada donde bañarme",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-filo-de-oro-jardin",
+        "travesia-cristo-rey-jardin",
+        "travesia-salto-del-angel-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.521660270888841,
+      "sim_acierto": 0.521660270888841,
+      "ms": 194.89019999999982,
+      "contexto_tokens_est": 1037,
+      "top": [
+        "travesia-filo-de-oro-jardin 0.52",
+        "travesia-cristo-rey-jardin 0.52",
+        "travesia-salto-del-angel-jardin 0.51",
+        "bora-bora-beach-club-cartagena 0.47",
+        "isla-del-encanto-cartagena 0.46",
+        "isla-cholon-cartagena 0.46"
+      ]
+    },
+    {
+      "id": "R24",
+      "tipo": "filtro",
+      "pregunta": "tours fáciles en Medellín",
+      "sin_respuesta": false,
+      "esperados": [
+        "centro-historico-plaza-botero",
+        "city-tour-medellin",
+        "graffiti-tour-comuna-13",
+        "parque-explora-jardin-botanico",
+        "tour-gastronomico-medellin",
+        "tour-historico-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.704837981298982,
+      "sim_acierto": 0.704837981298982,
+      "ms": 216.40949999999975,
+      "contexto_tokens_est": 842,
+      "top": [
+        "city-tour-medellin 0.70",
+        "tour-historico-medellin 0.70",
+        "centro-historico-plaza-botero 0.68",
+        "graffiti-tour-comuna-13 0.67",
+        "tour-gastronomico-medellin 0.66",
+        "parque-explora-jardin-botanico 0.66"
+      ]
+    },
+    {
+      "id": "R25",
+      "tipo": "filtro",
+      "pregunta": "algo difícil, de más de seis horas",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-salto-del-angel-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.376432634804688,
+      "sim_acierto": 0.376432634804688,
+      "ms": 203.5599000000002,
+      "contexto_tokens_est": 971,
+      "top": [
+        "travesia-salto-del-angel-jardin 0.38",
+        "city-tour-chiva-cartagena 0.33",
+        "travesia-filo-de-oro-jardin 0.33",
+        "sibarita-cena-gourmet-cartagena 0.33",
+        "hacienda-napoles 0.32",
+        "graffiti-tour-comuna-13 0.32"
+      ]
+    },
+    {
+      "id": "R26",
+      "tipo": "filtro",
+      "pregunta": "una excursión de día completo saliendo de Medellín",
+      "sin_respuesta": false,
+      "esperados": [
+        "guatape-piedra-del-penol",
+        "hacienda-napoles"
+      ],
+      "rango": 5,
+      "sim_top1": 0.710694555404296,
+      "sim_acierto": 0.667845328578642,
+      "ms": 204.9469999999992,
+      "contexto_tokens_est": 906,
+      "top": [
+        "parque-arvi-medellin 0.71",
+        "city-tour-medellin 0.68",
+        "parque-explora-jardin-botanico 0.68",
+        "tour-historico-medellin 0.67",
+        "hacienda-napoles 0.67",
+        "guatape-piedra-del-penol 0.66"
+      ]
+    },
+    {
+      "id": "R27",
+      "tipo": "filtro",
+      "pregunta": "planes de noche en Cartagena",
+      "sin_respuesta": false,
+      "esperados": [
+        "city-tour-chiva-cartagena",
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.495176792432262,
+      "sim_acierto": 0.495176792432262,
+      "ms": 190.88250000000062,
+      "contexto_tokens_est": 938,
+      "top": [
+        "city-tour-chiva-cartagena 0.50",
+        "sibarita-cena-gourmet-cartagena 0.48",
+        "travesia-del-amor-jardin 0.45",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "pao-pao-beach-club-cartagena 0.42",
+        "playa-tranquila-cartagena 0.41"
+      ]
+    },
+    {
+      "id": "R28",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto cuesta el graffiti tour?",
+      "sin_respuesta": false,
+      "esperados": [
+        "graffiti-tour-comuna-13"
+      ],
+      "rango": 1,
+      "sim_top1": 0.646971304624418,
+      "sim_acierto": 0.646971304624418,
+      "ms": 219.1215000000002,
+      "contexto_tokens_est": 862,
+      "top": [
+        "graffiti-tour-comuna-13 0.65",
+        "city-tour-medellin 0.58",
+        "centro-historico-plaza-botero 0.50",
+        "city-tour-chiva-cartagena 0.50",
+        "tour-de-cafe-jardin 0.49",
+        "travesia-resguardo-indigena-jardin 0.49"
+      ]
+    },
+    {
+      "id": "R29",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto vale el tour de café en Jardín?",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-de-cafe-jardin",
+        "travesia-finca-cafetera-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.681738037959465,
+      "sim_acierto": 0.681738037959465,
+      "ms": 204.38909999999942,
+      "contexto_tokens_est": 968,
+      "top": [
+        "travesia-finca-cafetera-jardin 0.68",
+        "tour-de-cafe-jardin 0.68",
+        "travesia-filo-de-oro-jardin 0.59",
+        "travesia-resguardo-indigena-jardin 0.57",
+        "travesia-cristo-rey-jardin 0.56",
+        "travesia-gallito-de-roca-jardin 0.55"
+      ]
+    },
+    {
+      "id": "R30",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto cuesta la travesía Filo de Oro?",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-filo-de-oro-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.550357261363971,
+      "sim_acierto": 0.550357261363971,
+      "ms": 205.3671000000004,
+      "contexto_tokens_est": 1024,
+      "top": [
+        "travesia-filo-de-oro-jardin 0.55",
+        "travesia-resguardo-indigena-jardin 0.50",
+        "travesia-finca-cafetera-jardin 0.49",
+        "travesia-salto-del-angel-jardin 0.49",
+        "city-tour-medellin 0.48",
+        "travesia-cristo-rey-jardin 0.48"
+      ]
+    },
+    {
+      "id": "R31",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Cuánto cuesta el tour a Guatapé?",
+      "sin_respuesta": false,
+      "esperados": [
+        "guatape-piedra-del-penol"
+      ],
+      "rango": 1,
+      "sim_top1": 0.665664931108503,
+      "sim_acierto": 0.665664931108503,
+      "ms": 204.3913999999986,
+      "contexto_tokens_est": 967,
+      "top": [
+        "guatape-piedra-del-penol 0.67",
+        "travesia-salto-del-angel-jardin 0.58",
+        "graffiti-tour-comuna-13 0.57",
+        "travesia-resguardo-indigena-jardin 0.57",
+        "city-tour-medellin 0.55",
+        "baru-islas-del-rosario 0.55"
+      ]
+    },
+    {
+      "id": "R32",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Qué precio tiene Isla Cholón?",
+      "sin_respuesta": false,
+      "esperados": [
+        "isla-cholon-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.587451321260594,
+      "sim_acierto": 0.587451321260594,
+      "ms": 190.02100000000064,
+      "contexto_tokens_est": 1069,
+      "top": [
+        "isla-cholon-cartagena 0.59",
+        "tour-5-islas-vip-deportivo 0.53",
+        "isla-del-sol-cartagena 0.53",
+        "palmarito-beach-club 0.52",
+        "isla-tierra-bomba 0.52",
+        "isla-del-encanto-cartagena 0.52"
+      ]
+    },
+    {
+      "id": "R33",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Cuánto cuesta la cena Sibarita?",
+      "sin_respuesta": false,
+      "esperados": [
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.535570788583528,
+      "sim_acierto": 0.535570788583528,
+      "ms": 219.26289999999972,
+      "contexto_tokens_est": 988,
+      "top": [
+        "sibarita-cena-gourmet-cartagena 0.54",
+        "bora-bora-beach-club-cartagena 0.44",
+        "palmarito-beach-club 0.43",
+        "pao-pao-beach-club-cartagena 0.42",
+        "isla-del-encanto-cartagena 0.42",
+        "baru-islas-del-rosario 0.42"
+      ]
+    },
+    {
+      "id": "R34",
+      "tipo": "sin_respuesta",
+      "pregunta": "tour en Tokio con sushi",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.471467598422396,
+      "sim_acierto": null,
+      "ms": 194.6164000000008,
+      "contexto_tokens_est": 982,
+      "top": [
+        "sibarita-cena-gourmet-cartagena 0.47",
+        "tour-gastronomico-medellin 0.44",
+        "tour-5-islas-vip-deportivo 0.40",
+        "baru-islas-del-rosario 0.40",
+        "isla-del-sol-cartagena 0.40",
+        "travesia-del-amor-jardin 0.40"
+      ]
+    },
+    {
+      "id": "R35",
+      "tipo": "sin_respuesta",
+      "pregunta": "quiero subir a la Torre Eiffel",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.501836895942688,
+      "sim_acierto": null,
+      "ms": 214.61759999999958,
+      "contexto_tokens_est": 881,
+      "top": [
+        "graffiti-tour-comuna-13 0.50",
+        "parque-arvi-medellin 0.48",
+        "travesia-salto-del-angel-jardin 0.47",
+        "travesia-cristo-rey-jardin 0.47",
+        "centro-historico-plaza-botero 0.46",
+        "parque-explora-jardin-botanico 0.45"
+      ]
+    },
+    {
+      "id": "R36",
+      "tipo": "sin_respuesta",
+      "pregunta": "un paquete para esquiar en la nieve",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.368037662985186,
+      "sim_acierto": null,
+      "ms": 205.41110000000117,
+      "contexto_tokens_est": 975,
+      "top": [
+        "isla-del-sol-cartagena 0.37",
+        "pao-pao-beach-club-cartagena 0.36",
+        "travesia-del-amor-jardin 0.36",
+        "travesia-salto-del-angel-jardin 0.36",
+        "bora-bora-beach-club-cartagena 0.36",
+        "tour-5-islas-vip-deportivo 0.35"
+      ]
+    },
+    {
+      "id": "R37",
+      "tipo": "sin_respuesta",
+      "pregunta": "tour por Bogotá y Monserrate",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.583756846673585,
+      "sim_acierto": null,
+      "ms": 177.33579999999893,
+      "contexto_tokens_est": 842,
+      "top": [
+        "centro-historico-plaza-botero 0.58",
+        "city-tour-medellin 0.58",
+        "tour-historico-medellin 0.57",
+        "graffiti-tour-comuna-13 0.55",
+        "tour-gastronomico-medellin 0.55",
+        "parque-explora-jardin-botanico 0.54"
+      ]
+    },
+    {
+      "id": "R38",
+      "tipo": "sin_respuesta",
+      "pregunta": "un hotel en Santa Marta",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.461638684468116,
+      "sim_acierto": null,
+      "ms": 193.41379999999845,
+      "contexto_tokens_est": 1032,
+      "top": [
+        "isla-del-encanto-cartagena 0.46",
+        "palmarito-beach-club 0.46",
+        "pao-pao-beach-club-cartagena 0.45",
+        "isla-del-sol-cartagena 0.45",
+        "bora-bora-beach-club-cartagena 0.44",
+        "tour-5-islas-vip-deportivo 0.44"
+      ]
+    },
+    {
+      "id": "R39",
+      "tipo": "sin_respuesta",
+      "pregunta": "vuelos baratos a Miami",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.483376177146891,
+      "sim_acierto": null,
+      "ms": 242.80449999999837,
+      "contexto_tokens_est": 1019,
+      "top": [
+        "pao-pao-beach-club-cartagena 0.48",
+        "bora-bora-beach-club-cartagena 0.48",
+        "palmarito-beach-club 0.47",
+        "isla-del-sol-cartagena 0.46",
+        "isla-del-encanto-cartagena 0.46",
+        "playa-tranquila-cartagena 0.46"
+      ]
+    },
+    {
+      "id": "R40",
+      "tipo": "sin_respuesta",
+      "pregunta": "clases de surf en San Andrés",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.45604613685333,
+      "sim_acierto": null,
+      "ms": 204.4945000000007,
+      "contexto_tokens_est": 1025,
+      "top": [
+        "pao-pao-beach-club-cartagena 0.46",
+        "isla-del-sol-cartagena 0.44",
+        "bora-bora-beach-club-cartagena 0.44",
+        "palmarito-beach-club 0.43",
+        "playa-blanca-cartagena 0.42",
+        "playa-tranquila-cartagena 0.42"
+      ]
+    },
+    {
+      "id": "R41",
+      "tipo": "sin_respuesta",
+      "pregunta": "excursión a Machu Picchu",
+      "sin_respuesta": true,
+      "esperados": [],
+      "rango": null,
+      "sim_top1": 0.604652809542083,
+      "sim_acierto": null,
+      "ms": 204.9356000000007,
+      "contexto_tokens_est": 1006,
+      "top": [
+        "travesia-salto-del-angel-jardin 0.60",
+        "travesia-resguardo-indigena-jardin 0.58",
+        "travesia-cristo-rey-jardin 0.58",
+        "guatape-piedra-del-penol 0.57",
+        "travesia-filo-de-oro-jardin 0.57",
+        "parque-arvi-medellin 0.56"
+      ]
+    },
+    {
+      "id": "R42",
+      "tipo": "contexto",
+      "pregunta": "¿Qué plan gastronómico hay?",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-gastronomico-medellin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.741745577738481,
+      "sim_acierto": 0.741745577738481,
+      "ms": 205.57409999999982,
+      "contexto_tokens_est": 859,
+      "top": [
+        "tour-gastronomico-medellin 0.74",
+        "city-tour-medellin 0.64",
+        "centro-historico-plaza-botero 0.63",
+        "tour-historico-medellin 0.63",
+        "sibarita-cena-gourmet-cartagena 0.61",
+        "graffiti-tour-comuna-13 0.59"
+      ]
+    },
+    {
+      "id": "R43",
+      "tipo": "contexto",
+      "pregunta": "¿Qué nos recomiendan?",
+      "sin_respuesta": false,
+      "esperados": [
+        "travesia-del-amor-jardin",
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.680492719426534,
+      "sim_acierto": 0.680492719426534,
+      "ms": 160.6315999999988,
+      "contexto_tokens_est": 944,
+      "top": [
+        "travesia-del-amor-jardin 0.68",
+        "sibarita-cena-gourmet-cartagena 0.54",
+        "tour-gastronomico-medellin 0.46",
+        "city-tour-chiva-cartagena 0.45",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "travesia-filo-de-oro-jardin 0.45"
+      ]
+    },
+    {
+      "id": "R44",
+      "tipo": "contexto",
+      "pregunta": "¿Hay algo con café?",
+      "sin_respuesta": false,
+      "esperados": [
+        "tour-de-cafe-jardin",
+        "travesia-finca-cafetera-jardin"
+      ],
+      "rango": 1,
+      "sim_top1": 0.564263973490238,
+      "sim_acierto": 0.564263973490238,
+      "ms": 248.5056000000004,
+      "contexto_tokens_est": 949,
+      "top": [
+        "travesia-finca-cafetera-jardin 0.56",
+        "tour-de-cafe-jardin 0.56",
+        "travesia-filo-de-oro-jardin 0.45",
+        "travesia-cristo-rey-jardin 0.42",
+        "travesia-resguardo-indigena-jardin 0.41",
+        "parque-explora-jardin-botanico 0.40"
+      ]
+    },
+    {
+      "id": "R45",
+      "tipo": "contexto",
+      "pregunta": "¿Algo con música y fiesta?",
+      "sin_respuesta": false,
+      "esperados": [
+        "bahia-rumbera-bote-deportivo",
+        "city-tour-chiva-cartagena"
+      ],
+      "rango": 1,
+      "sim_top1": 0.597236668898862,
+      "sim_acierto": 0.597236668898862,
+      "ms": 190.35310000000027,
+      "contexto_tokens_est": 992,
+      "top": [
+        "city-tour-chiva-cartagena 0.60",
+        "bahia-rumbera-bote-deportivo 0.59",
+        "sibarita-cena-gourmet-cartagena 0.56",
+        "pao-pao-beach-club-cartagena 0.47",
+        "playa-tranquila-cartagena 0.47",
+        "palmarito-beach-club 0.47"
+      ]
+    }
+  ]
+}
