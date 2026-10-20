@@ -24,9 +24,15 @@ CADA_CUANTAS_SIN_ANALISIS = 10
 RESULTADO = sorted(glob.glob(str(BANCO / "resultados" / "*_v4-interes.json")))[-1]
 
 
+# El banco de pruebas dice "web"; el dominio canal_type de la base se llama "chat_web". Un valor
+# fuera del dominio rechaza la fila, así que se traduce aquí.
+CANAL_EN_BASE = {"web": "chat_web"}
+
+
 def canal_de(contexto: str) -> str:
     m = re.search(r"canal (\w+)", contexto)
-    return m.group(1) if m else "web"
+    canal = m.group(1) if m else "web"
+    return CANAL_EN_BASE.get(canal, canal)
 
 
 def nombre_de(contexto: str) -> str:
@@ -80,9 +86,12 @@ def main():
 -- Qué hace, todo en UNA transacción (si algo falla, no queda nada a medias):
 --   - renombra el tenant del usuario a 'demo-pruebas' (el embudo y las etapas ya vienen hechos);
 --   - crea {len(datos)} contactos y conversaciones con sus mensajes, y los análisis del Analista;
---   - APAGA los triggers del Router y del Analista mientras inserta los mensajes. Sin eso, cada
---     mensaje entrante dispararía a Haiku (gasto real) y al Router (crearía oportunidades que
---     ensucian las métricas), y los análisis que se ven serían otros distintos a los cargados.
+--   - APAGA tres triggers de `messages` mientras inserta, y los vuelve a encender al final:
+--       * trg_disparar_router y trg_disparar_analista: sin apagarlos, cada mensaje entrante
+--         dispararía a Haiku (gasto real) y al Router (crearía oportunidades que ensucian las
+--         métricas), y los análisis que se ven serían otros distintos a los cargados;
+--       * trg_validar_plantilla: rechaza todo mensaje saliente de WhatsApp si la conversación no
+--         tiene la ventana de 24 h abierta, y las conversaciones de ejemplo no la tienen.
 --   - NO envía nada a WhatsApp: eso solo lo hace la función de envío saliente.
 --
 -- El tenant no cambia de id (solo de nombre), así que el token del usuario ya lo trae: no hace
@@ -96,7 +105,7 @@ declare
   v_user uuid;
   v_tenant uuid;
   v_slug_actual text;
-  v_n bigint;
+  v_cuenta bigint;
   c jsonb;
   m jsonb;
   v_contact bigint;
@@ -132,17 +141,18 @@ begin
   if v_slug_actual in ('hellominus', 'turismo-colombia') then
     raise exception 'El usuario % pertenece al tenant real "%": no se adopta. Usar un usuario NUEVO.', v_email, v_slug_actual;
   end if;
-  select count(*) into v_n from public.contacts where tenant_id = v_tenant;
-  if v_n > 0 then raise exception 'El tenant "%" ya tiene % contactos: no es un tenant vacío, no se adopta.', v_slug_actual, v_n; end if;
-  select count(*) into v_n from public.conversations where tenant_id = v_tenant;
-  if v_n > 0 then raise exception 'El tenant "%" ya tiene % conversaciones: no se adopta.', v_slug_actual, v_n; end if;
-  select count(*) into v_n from public.team_members where tenant_id = v_tenant and user_id <> v_user;
-  if v_n > 0 then raise exception 'El tenant "%" tiene otros miembros: no se adopta.', v_slug_actual; end if;
+  select count(*) into v_cuenta from public.contacts where tenant_id = v_tenant;
+  if v_cuenta > 0 then raise exception 'El tenant "%" ya tiene % contactos: no es un tenant vacío, no se adopta.', v_slug_actual, v_cuenta; end if;
+  select count(*) into v_cuenta from public.conversations where tenant_id = v_tenant;
+  if v_cuenta > 0 then raise exception 'El tenant "%" ya tiene % conversaciones: no se adopta.', v_slug_actual, v_cuenta; end if;
+  select count(*) into v_cuenta from public.team_members where tenant_id = v_tenant and user_id <> v_user;
+  if v_cuenta > 0 then raise exception 'El tenant "%" tiene otros miembros: no se adopta.', v_slug_actual; end if;
 
   update public.tenants set slug = v_slug, nombre = 'Demo (pruebas)' where id = v_tenant;
 
   alter table public.messages disable trigger trg_disparar_router;
   alter table public.messages disable trigger trg_disparar_analista;
+  alter table public.messages disable trigger trg_validar_plantilla;
 
   v_total := jsonb_array_length(datos);
   for v_i in 0 .. v_total - 1 loop
@@ -178,6 +188,7 @@ begin
 
   alter table public.messages enable trigger trg_disparar_router;
   alter table public.messages enable trigger trg_disparar_analista;
+  alter table public.messages enable trigger trg_validar_plantilla;
 
   raise notice 'Listo: el tenant "%" (antes "%") tiene % conversaciones. Recargar la página con el usuario %.', v_slug, v_slug_actual, v_total, v_email;
 end
