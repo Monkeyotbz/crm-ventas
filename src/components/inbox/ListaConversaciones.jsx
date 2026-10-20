@@ -1,4 +1,4 @@
-import { CANALES, estiloCanal, formatearHora, iniciales } from "../../lib/canales.js";
+import { CANALES, estiloCanal, estiloScoreLista, formatearHora, iniciales } from "../../lib/canales.js";
 
 const FILTROS = [{ id: "todos", etiqueta: "Todos" }, ...Object.entries(CANALES).map(([id, c]) => ({ id, etiqueta: c.etiqueta }))];
 
@@ -44,6 +44,7 @@ export default function ListaConversaciones({ conversaciones, filtro, onFiltro, 
         {visibles.map((c) => {
           const chs = estiloCanal(c.canal);
           const seleccionada = c.conversation_id === seleccionadaId;
+          const sc = estiloScoreLista(c.score);
           return (
             <div
               key={c.conversation_id}
@@ -74,6 +75,15 @@ export default function ListaConversaciones({ conversaciones, filtro, onFiltro, 
                   {c.ultimo_mensaje_direccion === "out" && <span className="text-candy-tinta-tenue">Vos: </span>}
                   {c.ultimo_mensaje_contenido ?? "—"}
                 </div>
+              </div>
+              <div
+                className="shrink-0 self-center min-w-[26px] text-right font-candy-display text-[13px] font-extrabold"
+                style={{ color: sc.color }}
+                title={sc.etiqueta}
+                role="img"
+                aria-label={sc.etiqueta}
+              >
+                {sc.texto}
               </div>
             </div>
           );

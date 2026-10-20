@@ -75,6 +75,22 @@ export function estiloScore(score) {
   return { fg: "#7a6a99", bg: "rgba(150,120,200,0.14)" };
 }
 
+/**
+ * Score para la LISTA de la bandeja (opción C del canvas del 19 oct 2026): solo el
+ * número, en color, sin fondo. Va sobre vidrio claro y en 11 px, así que usa tonos
+ * más oscuros que `estiloScore` para llegar a 4.5:1; el color nunca va solo, siempre
+ * acompaña al número y a la etiqueta del lector de pantalla.
+ *
+ * Los cortes (75 / 50) son los mismos que `nivel_interes` en la base y que el panel
+ * Copiloto. Es una estimación de la IA, no un dato: por eso la lista NO se ordena por él.
+ */
+export function estiloScoreLista(score) {
+  if (score == null) return { texto: "—", color: "#6f6590", nivel: null, etiqueta: "Sin análisis de IA todavía" };
+  if (score >= 75) return { texto: String(score), color: "#a3195b", nivel: "alto", etiqueta: `Interés alto según la IA, ${score} de 100` };
+  if (score >= 50) return { texto: String(score), color: "#2453a6", nivel: "medio", etiqueta: `Interés medio según la IA, ${score} de 100` };
+  return { texto: String(score), color: "#5f5480", nivel: "bajo", etiqueta: `Interés bajo según la IA, ${score} de 100` };
+}
+
 /** Formatea una hora relativa simple: "10:24" si es hoy, "vie" si esta semana, fecha corta si no. */
 export function formatearHora(iso) {
   if (!iso) return "";

@@ -60,7 +60,8 @@ agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`
 | Ingesta del widget de chat web | `supabase/functions/ingesta-widget-chat/` | POST del widget embebido (`widget/candy-chat-widget.js`), autenticado por `widget_key` pública, no por JWT |
 | Router de clasificación | `supabase/functions/router/` | Trigger de Postgres (`private.disparar_router()`, vía `pg_net`) sobre `insert` en `messages` — no el panel de Database Webhooks, que no funciona en este proyecto (ver `docs/DECISIONES.md`, candidato [5]) |
 | API de ingesta de leads | `supabase/functions/ingesta-api/` | POST del sistema propio de un tenant (su formulario, su ERP), autenticado con una clave **secreta** por tenant (`tenant_api_keys`, guardada hasheada) en el header `Authorization`. **Sin CORS a propósito**: es servidor-a-servidor, y que un navegador no pueda llamarla desalienta poner la clave en JavaScript de cliente |
-| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **la única de las cinco que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Usa un segundo cliente `service_role` SOLO para leer el token de Meta del tenant, nunca para tocar `conversations`/`messages` |
+| Agente Analista [7b] | `supabase/functions/analista/` | Trigger de Postgres (`private.disparar_analista()`, vía `pg_net`) sobre `insert` en `messages` entrantes, con el secreto `x-analista-secret` (Vault + secreto de la función). **No le escribe al cliente**: solo llena `conversation_insights`, que muestra el panel Copiloto |
+| Envío saliente de WhatsApp | `supabase/functions/envio-whatsapp/` | Lo llama el frontend logueado (`HiloMensajes.jsx`) — **la única de las seis que corre con el JWT de quien la invoca, no con `service_role`**: RLS decide si la conversación es de ese vendedor. Usa un segundo cliente `service_role` SOLO para leer el token de Meta del tenant, nunca para tocar `conversations`/`messages` |
 
 Es la excepción de plataforma del `CLAUDE.md` del laboratorio: son endpoints HTTP
 que invoca un tercero, y una carpeta local no puede servir HTTP. La regla que
@@ -99,6 +100,34 @@ detectar solo: un Verify Token guardado con un espacio inicial, y el App Secret 
 del Verify Token. Ninguno da error al guardar — se manifiestan como un `401` en el webhook, que
 parece un bug del código y no lo es. Un App Secret de Meta son 32 caracteres hexadecimales; si lo
 guardado no tiene esa forma, está mal cargado.
+
+## El agente Analista: qué hace y qué NO conviene "simplificar"
+
+`supabase/functions/analista/` (candidato [7b], 18-19 oct 2026) lee una conversación y escribe, en
+`conversation_insights`, lo que el panel Copiloto le muestra al vendedor: score, sentimiento, resumen,
+presupuesto, próxima acción y sugerencia. **Solo informa al vendedor humano; nunca le escribe al
+cliente ni toca deals.** Es la memoria compartida que leerán después los agentes conversacionales
+[6a]-[6d] (siguen APLAZADOS). Cuatro decisiones que no son obvias:
+
+- **El score sale de un tramo, no de un número libre.** El modelo clasifica bien pero calibra mal: en
+  el banco de pruebas ponía el número 5-10 puntos por debajo del tramo que él mismo elegía. Ahora
+  elige primero uno de 5 tramos (`decidido` 90-100, `propuesta` 75-89, `interes` 50-74, `curiosidad`
+  25-49, `sin_intencion` 0-24) y el código fuerza el número dentro. Quitar los tramos "para
+  simplificar" devuelve el sesgo a la baja que hacía subestimar a los clientes calientes.
+- **No usa `temperature`.** Haiku 5.5 la rechaza con 400 y el modelo se cambia por variable de entorno
+  (`ANALISTA_MODELO`, hoy Haiku 4.5, el mismo que ya funciona con la llave del Router).
+- **El prompt se mide, no se opina.** `agentes-sdk/validacion-analista/` tiene 30 conversaciones
+  INVENTADAS con la nota esperada y `evaluar.py`, que lee el `SYSTEM_PROMPT` directo de `index.ts`.
+  Cualquier cambio al prompt se vuelve a correr ahí (de 20/30 a 27/30 en score con las 4 rondas del
+  19 oct; sentimiento 30/30; presupuesto sin inventar 30/30). Las bandas esperadas son una propuesta
+  del asistente: el criterio final es del usuario.
+- **La escritura de `conversation_insights` es solo del lado servidor.** La policy original era
+  `for all` y dejaba que el vendedor editara su propio score desde el navegador; ahora el navegador
+  solo lee (`select`). Cada análisis deja tokens y costo estimado en `analista_ejecuciones`.
+
+**Límite conocido:** espera mínima de 120 s por conversación y sin barrido periódico (`pg_cron` no
+está habilitado), así que el último mensaje de una ráfaga puede quedar sin analizar hasta que llegue
+otro. **El score es una estimación, no un dato:** no debe ordenar la bandeja por defecto.
 
 ## La API de ingesta, y por qué su clave no se parece a la del widget
 
@@ -171,11 +200,14 @@ consulta.
 
 **Lo que todavía NO pasa, y es la brecha que queda:** nada avanza un deal solo. El Router lo crea en
 la primera etapa (`supabase/functions/router/index.ts`) y ahí queda; el único `update` de `stage_id`
-del repo es una reclasificación de embudo, que lo **devuelve** a la primera etapa. Además el Router
-busca el deal existente por `contact_id` **sin filtrar por estado**, así que hoy un contacto tiene un
-solo deal para siempre — ya se decidió que la regla correcta es *un deal abierto por contacto*, y
-ahora es implementable porque `closed_at` existe. Mientras eso siga así, el Panel de hoy no puede
-mostrar conversión, ciclo de venta ni ingreso ganado, y lo dice al pie de la pantalla.
+del repo es una reclasificación de embudo, que lo **devuelve** a la primera etapa. Mover un deal sigue
+siendo cosa de un humano vía `mover_deal()`.
+
+**Ya resuelto (corregido el 19 oct 2026; este párrafo decía lo contrario):** la regla *un deal
+abierto por contacto* **está implementada**. `aplicar()` del Router filtra con `.is("closed_at", null)`
+(commit `11f8902`): un contacto cuyo deal ya se cerró vuelve a entrar como oportunidad nueva. Si el
+Panel de hoy todavía no muestra conversión o ingreso ganado, es porque nada cierra deals solo, no por
+esa regla — y lo dice al pie de la pantalla.
 
 ## Dónde vive el widget de chat embebible
 
@@ -237,7 +269,7 @@ es fuente de verdad**: si contradice a una migración, manda la migración.
   - **Las funciones internas viven en el schema `private`**, no en `public` (estaban expuestas como endpoints RPC públicos). Al escribir una policy nueva hay que calificarlas: `private.current_tenant_id()`, no `current_tenant_id()`.
   - **Los 48 ítems de `docs/tener-en-cuenta-base-de-datos` están implementados** (25 ago 2026), con tres desvíos deliberados respecto del documento — ver ahí mismo.
 - **3 sept/4 sept 2026:** además de WhatsApp (candidato [3], funcionando con mensajes reales) y el Router (candidato [5], `ACEPTADO`), ahora también está construido y probado de punta a punta el canal de **chat web** (Sprint 2 del README): `supabase/functions/ingesta-widget-chat/` + `widget/candy-chat-widget.js`, con resolución atómica de contacto/conversación (mismo patrón que corrigió H3/H4 para WhatsApp) e identidad por email/teléfono tipeados en el chat — no por login de hellominus.com. Entra directo, no por n8n (n8n sigue sin cuenta creada). Falta embeberlo en el sitio real de Hellominus — hoy solo corre contra `widget/prueba.html`.
-- **4 sept 2026 — Sprint 1: bandeja unificada.** `src/pages/Bandeja.jsx` + `src/components/inbox/` — lista de conversaciones (filtro por canal), hilo de mensajes, panel copiloto (score/sentimiento/sugerencia de `conversation_insights`, hoy vacíos porque el agente Analista [7b] no existe todavía). Lee de la vista `inbox_conversaciones` (migración `20260904202843`), que resuelve contacto + último mensaje + deal más reciente + insights en una sola fila — evita joins anidados frágiles desde el cliente. Verificado con datos reales de producción (el contacto JSC). Ya **no** es solo lectura: el composer de WhatsApp envía de verdad (ver abajo). El Kanban de deals (drag-and-drop entre etapas) sigue sin construir — no estaba en el mockup de `CandyInbox.dc.html`, es una pantalla aparte. Su **base de datos sí está lista** desde el 10 sep (`mover_deal()`, `deal_events`, vista `pipeline_tablero`).
+- **4 sept 2026 — Sprint 1: bandeja unificada.** `src/pages/Bandeja.jsx` + `src/components/inbox/` — lista de conversaciones (filtro por canal), hilo de mensajes, panel copiloto (score/sentimiento/resumen/presupuesto/próxima acción/sugerencia de `conversation_insights`; vacíos hasta el 19 oct 2026, cuando el agente Analista [7b] se construyó y desplegó — ver *El agente Analista* abajo). Lee de la vista `inbox_conversaciones` (migración `20260904202843`), que resuelve contacto + último mensaje + deal más reciente + insights en una sola fila — evita joins anidados frágiles desde el cliente. Verificado con datos reales de producción (el contacto JSC). Ya **no** es solo lectura: el composer de WhatsApp envía de verdad (ver abajo). El Kanban de deals (drag-and-drop entre etapas) sigue sin construir — no estaba en el mockup de `CandyInbox.dc.html`, es una pantalla aparte. Su **base de datos sí está lista** desde el 10 sep (`mover_deal()`, `deal_events`, vista `pipeline_tablero`).
 - **La bandeja es responsive en tres breakpoints** (7 sept 2026): abajo de 768px se ve un panel a la vez (lista o hilo, con botón de volver), entre 768 y 1023 lista+hilo, y desde 1024 las tres columnas del diseño original. El Copiloto abajo de 1024px es un panel flotante — el mismo componente y los mismos datos que la tercera columna. Por eso **ningún panel trae su propio ancho fijo**: lo decide el contenedor de `Bandeja.jsx` según el breakpoint.
 - **6 sept 2026 — envío saliente de WhatsApp, verificado contra la API real.** `supabase/functions/envio-whatsapp/` — respeta la ventana de 24h (texto libre si está abierta, plantilla aprobada si no) y guarda el `wamid` como `externo_id` para engancharse al tracking de estado que ya tenía `ingesta-whatsapp`. Probado de punta a punta con mensajes reales: entrante con firma HMAC válida y saliente con `wamid` + `entregado=true`. El camino de plantilla sigue **sin** probarse contra Meta: `message_templates` está vacía, nadie sometió una plantilla todavía. Los canales que no son WhatsApp siguen con el aviso de "responder llega pronto".
 - **Hellominus usa el número de PRUEBA de Meta** (`+1 555-644-0707`), no un número propio. Para conectar uno real hace falta completar la **verificación de empresa** en Meta for Developers, que pide documentos legales que Hellominus todavía no tiene (la empresa no está constituida). Decisión explícita del usuario de posponerlo — no es un olvido. Ese número de prueba es imborrable y ocupa el único lugar disponible hasta que la verificación se apruebe.
