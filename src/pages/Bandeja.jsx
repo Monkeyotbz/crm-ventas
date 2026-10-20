@@ -14,6 +14,7 @@ import Pipeline from "./Pipeline.jsx";
 import { TANDA_CONVERSACIONES, contarPorInteres, listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
 import { obtenerModulos } from "../lib/modulos.js";
+import { esAdminPlataforma, URL_LABORATORIO_RAG } from "../lib/plataforma.js";
 
 // Sprint 1 — bandeja unificada. El envío saliente ya está conectado para
 // WhatsApp (ver HiloMensajes); los demás canales siguen en solo lectura.
@@ -38,6 +39,7 @@ export default function Bandeja() {
   const [vistaMobile, setVistaMobile] = useState("lista"); // "lista" | "hilo" — solo <768px
   const [copilotoAbierto, setCopilotoAbierto] = useState(false); // panel flotante <1024px
   const [menuConfigAbierto, setMenuConfigAbierto] = useState(false); // hub del engranaje
+  const [esPlataforma, setEsPlataforma] = useState(false); // equipo de Hellominus, no admin de un tenant
   const queryClient = useQueryClient();
 
   // Solo admin/owner ven el ícono de Configuración de Meta (candidato [9a]) —
@@ -45,6 +47,7 @@ export default function Bandeja() {
   useEffect(() => {
     obtenerMiRol().then(setRol).catch(() => setRol(null));
     obtenerModulos().then(setModulos).catch(() => setModulos(["crm"]));
+    if (URL_LABORATORIO_RAG) esAdminPlataforma().then(setEsPlataforma).catch(() => setEsPlataforma(false));
   }, []);
 
   // El filtro por canal y el de interés se aplican en la base. `keepPreviousData`
@@ -157,6 +160,7 @@ export default function Bandeja() {
         onIrAPipeline={() => setPagina("pipeline")}
         onIrAPanel={() => setPagina("panel")}
         onAbrirMiCuenta={() => setPagina("mi-cuenta")}
+        urlLaboratorio={esPlataforma ? URL_LABORATORIO_RAG : undefined}
       />
 
       <div className="flex-1 flex gap-3 sm:gap-3.5 px-3 sm:px-5 pt-3 sm:pt-3.5 pb-3 sm:pb-5 min-h-0">

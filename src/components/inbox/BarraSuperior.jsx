@@ -12,7 +12,7 @@ import CandyLollipopLogo from "../CandyLollipopLogo.jsx";
 // pantallas (catálogo, mi cuenta, configuración) traen su propio encabezado.
 // `onIrACatalogo` viene undefined para un tenant sin el módulo "catalogo" — la
 // pestaña ni se muestra en ese caso, no solo se deshabilita.
-export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onIrAPipeline, onIrAPanel, onAbrirMiCuenta }) {
+export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onIrAPipeline, onIrAPanel, onAbrirMiCuenta, urlLaboratorio }) {
   const [inicial, setInicial] = useState("");
 
   useEffect(() => {
@@ -82,6 +82,19 @@ export default function BarraSuperior({ onAbrirConfiguracion, onIrACatalogo, onI
           >
             Panel de hoy
           </button>
+        )}
+        {/* "Laboratorio RAG": solo para administradores de PLATAFORMA (Bandeja.jsx pasa
+            urlLaboratorio undefined al resto). Abre otra pestaña: es una herramienta externa
+            (Streamlit), no una pantalla del CRM. Ocultarlo no protege nada; ver lib/plataforma.js. */}
+        {urlLaboratorio && (
+          <a
+            href={urlLaboratorio}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-media hover:text-candy-tinta shrink-0"
+          >
+            Laboratorio RAG ↗
+          </a>
         )}
         <button type="button" disabled className="px-4 py-2 rounded-full text-[13px] font-bold text-candy-tinta-tenue cursor-not-allowed opacity-60 shrink-0">
           Reportes
