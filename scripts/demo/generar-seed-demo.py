@@ -160,8 +160,11 @@ begin
     v_n := jsonb_array_length(c -> 'mensajes');
     v_ult := v_ahora - make_interval(hours => (c ->> 'horas_atras')::int);
 
+    -- contacts.origen es el dominio fuente_type (chat_web, whatsapp, instagram, messenger, linkedin,
+    -- meta_ads, manual, api): un valor inventado como 'demo' lo rechaza. Se usa el canal de la
+    -- conversación, que es un valor válido y además es de dónde vendría ese lead de verdad.
     insert into public.contacts (tenant_id, nombre, origen, owner_id)
-    values (v_tenant, c ->> 'nombre', 'demo', v_user) returning id into v_contact;
+    values (v_tenant, c ->> 'nombre', c ->> 'canal', v_user) returning id into v_contact;
 
     insert into public.conversations (tenant_id, contact_id, canal, estado, ultimo_mensaje_at, owner_id)
     values (v_tenant, v_contact, c ->> 'canal', 'abierta', v_ult, v_user) returning id into v_conv;
