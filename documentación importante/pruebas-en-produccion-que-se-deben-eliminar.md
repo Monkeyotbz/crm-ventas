@@ -34,8 +34,8 @@ hechos, en vez de dejar que corran.
 
 | Qué | Dónde | Creado | Cómo se borra | Estado |
 |---|---|---|---|---|
-| Tenant `demo-pruebas` con ~60 conversaciones de ejemplo | Supabase `crm-ventas`, tenant `demo-pruebas` | *(pendiente de crear)* | `scripts/demo/limpiar-tenant-demo.sql` | ⏳ por crear |
-| Usuario de prueba del tenant demo | Supabase Auth | *(pendiente de crear)* | Panel de Supabase → Authentication → Users → borrar | ⏳ por crear |
+| Tenant `demo-pruebas` con ~60 conversaciones de ejemplo | Supabase `crm-ventas`, tenant `demo-pruebas` | *(pendiente de sembrar)* | `scripts/demo/limpiar-tenant-demo.sql` | ⏳ por crear |
+| Usuario de prueba del tenant demo | Supabase Auth | 2026-10-20 | Panel de Supabase → Authentication → Users → borrar | ✅ creado; su tenant se renombra a `demo-pruebas` al sembrar |
 | Fragmentos del RAG en `kb_chunks` del tenant `demo-pruebas` (hasta 32 de catálogo) | Supabase `crm-ventas` | *(pendiente de crear)* | Se borran solos con el tenant: `scripts/demo/limpiar-tenant-demo.sql` recorre toda tabla con `tenant_id`, incluida `kb_chunks` | ⏳ por crear |
 
 ### Rastros en el tenant real (decididos, no se borran)
@@ -46,19 +46,34 @@ hechos, en vez de dejar que corran.
 | `conversation_insights` de esa misma conversación (score 35, neutro) | Es el análisis verdadero que muestra el panel Copiloto. La conversación es real |
 | Secreto `analista_secret` en Vault y `ANALISTA_SECRET` en la función | Es configuración, no una prueba |
 
+## Ojo: crear un usuario crea un tenant solo
+
+En este CRM, al dar de alta un usuario en Supabase Auth el trigger `on_auth_user_created` le crea
+**automáticamente un tenant nuevo** (con el usuario de dueño y un embudo de 7 etapas). Por eso
+`sembrar-tenant-demo.sql` **no crea** otro tenant: **adopta** el que Supabase ya le dio al usuario de
+prueba y lo renombra a `demo-pruebas`. Tiene candados: se niega si el tenant es real (`hellominus`,
+`turismo-colombia`), si ya tiene contactos o conversaciones, o si tiene otros miembros.
+
+Consecuencia al limpiar: al borrar el usuario de prueba desde Authentication, **no queda ningún tenant
+huérfano**, porque ese tenant es el propio `demo-pruebas`, que el script de limpieza ya borró.
+Si algún día se crea un usuario de prueba y NO se siembra, quedará un tenant automático vacío
+(`<correo>-<hash>`): hay que borrarlo también.
+
 ## Cómo se borra
 
 1. Abrir el SQL Editor de Supabase (proyecto `crm-ventas`) y correr
    [`scripts/demo/limpiar-tenant-demo.sql`](../scripts/demo/limpiar-tenant-demo.sql).
    Borra **solo** lo que cuelga del tenant con slug `demo-pruebas`; no toca ningún otro tenant.
-2. Borrar el usuario de prueba desde Authentication → Users.
+2. Borrar el usuario de prueba desde Authentication → Users, y comprobar en `select slug from tenants`
+   que no quedó ningún tenant raro (solo `hellominus`, `turismo-colombia` y los reales).
 3. Verificar que no quedó nada (debe devolver **0** en todas las columnas):
 
 ```sql
 select
   (select count(*) from tenants where slug = 'demo-pruebas') as tenants_demo,
   (select count(*) from conversations c join tenants t on t.id = c.tenant_id where t.slug = 'demo-pruebas') as conversaciones_demo,
-  (select count(*) from auth.users where email like '%+demo@%' or email like 'demo-pruebas%') as usuarios_demo;
+  (select count(*) from team_members m join tenants t on t.id = m.tenant_id where t.slug = 'demo-pruebas') as miembros_demo,
+  (select count(*) from kb_chunks k join tenants t on t.id = k.tenant_id where t.slug = 'demo-pruebas') as fragmentos_rag_demo;
 ```
 
 4. Anotar la fecha en **Última limpieza**, arriba, y mover la fila de la tabla a *Historial*.

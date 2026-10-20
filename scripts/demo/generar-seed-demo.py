@@ -67,19 +67,26 @@ def main():
 -- Para borrarlo todo: scripts/demo/limpiar-tenant-demo.sql
 --
 -- ANTES DE CORRERLO:
---   1. Crear el usuario de prueba en Authentication → Users (con contraseña).
---   2. Cambiar el correo en la línea v_email de abajo por el de ese usuario.
+--   1. Crear el usuario de prueba en Authentication → Users (con contraseña, Auto Confirm).
+--   2. Pegar este script en el SQL Editor y, AHÍ (no en este archivo), cambiar el correo de la
+--      línea v_email por el del usuario. Así el correo no llega a git.
+--
+-- CÓMO FUNCIONA EL TENANT: al crear un usuario, el trigger on_auth_user_created le crea solo un
+-- tenant nuevo (con el usuario de dueño y un embudo de 7 etapas). Este script NO crea otro: ADOPTA
+-- ese, lo renombra a 'demo-pruebas' y lo llena. Por eso tiene candados: se niega si el tenant del
+-- usuario es uno real (hellominus, turismo-colombia), si ya tiene contactos o conversaciones, o si
+-- tiene otros miembros. Un script que adopta tenants ajenos sería peligroso.
 --
 -- Qué hace, todo en UNA transacción (si algo falla, no queda nada a medias):
---   - crea el tenant, un embudo 'Ventas' con sus etapas, y deja al usuario como owner;
+--   - renombra el tenant del usuario a 'demo-pruebas' (el embudo y las etapas ya vienen hechos);
 --   - crea {len(datos)} contactos y conversaciones con sus mensajes, y los análisis del Analista;
 --   - APAGA los triggers del Router y del Analista mientras inserta los mensajes. Sin eso, cada
 --     mensaje entrante dispararía a Haiku (gasto real) y al Router (crearía oportunidades que
 --     ensucian las métricas), y los análisis que se ven serían otros distintos a los cargados.
 --   - NO envía nada a WhatsApp: eso solo lo hace la función de envío saliente.
 --
--- Después de correrlo, el usuario de prueba tiene que CERRAR SESIÓN y volver a entrar: el tenant
--- viaja en el token, y el token viejo no lo trae.
+-- El tenant no cambia de id (solo de nombre), así que el token del usuario ya lo trae: no hace
+-- falta cerrar sesión. Si la sesión se abrió ANTES de correr esto, basta recargar la página.
 
 do $demo$
 declare
@@ -88,7 +95,8 @@ declare
   datos constant jsonb := $demo_json${payload}$demo_json$;
   v_user uuid;
   v_tenant uuid;
-  v_pipe bigint;
+  v_slug_actual text;
+  v_n bigint;
   c jsonb;
   m jsonb;
   v_contact bigint;
@@ -104,33 +112,34 @@ begin
   if v_email like 'REEMPLAZAR%' then
     raise exception 'Falta cambiar v_email por el correo del usuario de prueba.';
   end if;
-  select id into v_user from auth.users where email = v_email;
+  select u.id, (u.raw_app_meta_data ->> 'tenant_id')::uuid into v_user, v_tenant
+    from auth.users u where u.email = v_email;
   if v_user is null then
     raise exception 'No existe un usuario de Auth con el correo %. Crearlo primero en Authentication → Users.', v_email;
+  end if;
+  if v_tenant is null then
+    raise exception 'El usuario % no tiene tenant asignado (el trigger de alta no corrió).', v_email;
   end if;
   if exists (select 1 from public.tenants where slug = v_slug) then
     raise exception 'El tenant % ya existe. Correr primero scripts/demo/limpiar-tenant-demo.sql.', v_slug;
   end if;
 
-  insert into public.tenants (nombre, slug, modulos)
-  values ('Demo (pruebas)', v_slug, array['crm']) returning id into v_tenant;
+  select slug into v_slug_actual from public.tenants where id = v_tenant;
+  if v_slug_actual is null then
+    raise exception 'El tenant % del usuario no existe.', v_tenant;
+  end if;
+  -- CANDADOS: nunca se adopta un tenant real ni uno que ya tenga trabajo adentro.
+  if v_slug_actual in ('hellominus', 'turismo-colombia') then
+    raise exception 'El usuario % pertenece al tenant real "%": no se adopta. Usar un usuario NUEVO.', v_email, v_slug_actual;
+  end if;
+  select count(*) into v_n from public.contacts where tenant_id = v_tenant;
+  if v_n > 0 then raise exception 'El tenant "%" ya tiene % contactos: no es un tenant vacío, no se adopta.', v_slug_actual, v_n; end if;
+  select count(*) into v_n from public.conversations where tenant_id = v_tenant;
+  if v_n > 0 then raise exception 'El tenant "%" ya tiene % conversaciones: no se adopta.', v_slug_actual, v_n; end if;
+  select count(*) into v_n from public.team_members where tenant_id = v_tenant and user_id <> v_user;
+  if v_n > 0 then raise exception 'El tenant "%" tiene otros miembros: no se adopta.', v_slug_actual; end if;
 
-  insert into public.team_members (user_id, tenant_id, rol) values (v_user, v_tenant, 'owner');
-
-  update auth.users
-     set raw_app_meta_data = coalesce(raw_app_meta_data, '{{}}'::jsonb) || jsonb_build_object('tenant_id', v_tenant)
-   where id = v_user;
-
-  insert into public.pipelines (tenant_id, nombre, tipo, orden)
-  values (v_tenant, 'Ventas', 'consultivo', 1) returning id into v_pipe;
-  insert into public.pipeline_stages (tenant_id, pipeline_id, nombre, orden, color, tipo, horas_alerta) values
-    (v_tenant, v_pipe, 'Nuevo', 1, '#22d3ee', 'abierta', 48),
-    (v_tenant, v_pipe, 'Contactado', 2, '#22d3ee', 'abierta', 48),
-    (v_tenant, v_pipe, 'Calificado', 3, '#a78bfa', 'abierta', 48),
-    (v_tenant, v_pipe, 'Propuesta', 4, '#a78bfa', 'abierta', 48),
-    (v_tenant, v_pipe, 'Negociación', 5, '#a78bfa', 'abierta', 48),
-    (v_tenant, v_pipe, 'Ganado', 6, '#34d399', 'ganada', null),
-    (v_tenant, v_pipe, 'Perdido', 7, '#64748b', 'perdida', null);
+  update public.tenants set slug = v_slug, nombre = 'Demo (pruebas)' where id = v_tenant;
 
   alter table public.messages disable trigger trg_disparar_router;
   alter table public.messages disable trigger trg_disparar_analista;
@@ -170,7 +179,7 @@ begin
   alter table public.messages enable trigger trg_disparar_router;
   alter table public.messages enable trigger trg_disparar_analista;
 
-  raise notice 'Listo: tenant % con % conversaciones. El usuario % debe cerrar sesión y volver a entrar.', v_slug, v_total, v_email;
+  raise notice 'Listo: el tenant "%" (antes "%") tiene % conversaciones. Recargar la página con el usuario %.', v_slug, v_slug_actual, v_total, v_email;
 end
 $demo$;
 """
