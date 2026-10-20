@@ -412,6 +412,20 @@ Condición de activación: ninguna pendiente — se acepta de entrada.
 - El traspaso da por hecho el tenant `demo-pruebas`; los scripts existen pero el tenant **todavía
   no estaba creado** el 20 oct. La ingesta (paso 4) depende de crearlo.
 
+**Avance del 20 oct 2026 (pasos 1-4 del traspaso hechos):** migración `20260920120000` aplicada
+(columna a `vector(1024)`, `match_kb_chunks`, restricción única); ingesta de los 32 tours a
+`demo-pruebas` — **32 filas, 6.784 tokens `[medido]`, y una segunda corrida con 0 tokens y las mismas
+32 filas `[medido]`** (idempotente). Hallazgos `[medido]`, muestra pequeña de 5 consultas:
+- La búsqueda por significado funciona donde la de palabra exacta no: «algo tranquilo para mi esposo»
+  recupera «Travesía del amor» (Jardín) y «Playa tranquila» sin compartir una sola palabra.
+- **Una pregunta SIN respuesta («tour en Tokio con sushi») obtuvo similitud 0,47, MÁS ALTA que un
+  acierto vago legítimo (0,41).** Un umbral fijo de similitud no puede separar «no hay respuesta» de
+  «pregunta vaga»: el «no lo sé» tiene que decidirlo el modelo que lee lo recuperado (o un reranker),
+  no `min_similitud`. Condiciona los pasos 8 y 9.
+- Voyage sin método de pago limita a **3 peticiones/min y 10.000 tokens/min**: el set de evaluación
+  manda todas las preguntas en una sola petición.
+- 28 de los 32 tours no tienen precio publicado: el sistema debe decirlo, no rellenarlo.
+
 **Metas de la guía, todavía sin medir (`[por verificar]`):** recall@k ≥ 95 %, MRR ≥ 0,8, < 1.200
 tokens de catálogo por turno, p95 de recuperación < 300 ms, 0 inventos.
 

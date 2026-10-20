@@ -75,6 +75,25 @@ restantes salen como "sin precio publicado". Es un hueco del dato del tenant, no
 importa: el asistente debe decir "consulta el precio con el operador" y no inventarlo. El catálogo
 completo suma ≈ 5.100 tokens `[estimado]`, y la meta es < 1.200 por turno.
 
+## Primera corrida real (20 oct 2026) `[medido]`
+
+| Corrida | Fragmentos | Tokens de Voyage | Filas en `kb_chunks` |
+|---|---|---|---|
+| 1 | 32 nuevos | 6.784 | 32 |
+| 2 (misma entrada) | 32 sin cambios | **0** | **32** (idempotente) |
+
+Costo de la corrida 1: ≈ US$0,0004 `[calculado]`. Todo en `demo-pruebas`; ninguna fila en un tenant real.
+
+## Lo aprendido al probar la búsqueda `[medido, 5 consultas]`
+
+- Encuentra por significado: «una fiesta con música y licor en el mar» → *Bahía Rumbera en bote
+  deportivo* (similitud 0,53). «Algo tranquilo para mi esposo» → *Travesía del amor* (0,41).
+- **El umbral de similitud NO distingue una pregunta sin respuesta de una vaga:** «tour en Tokio con
+  sushi» obtuvo 0,47 con *Cena gourmet Cartagena*, más que el acierto vago de arriba. «No lo sé» lo
+  tiene que decidir quien lee lo recuperado, no `min_similitud`.
+- Sin método de pago, Voyage limita a 3 peticiones y 10.000 tokens por minuto (HTTP 429). Mandar las
+  preguntas del set de evaluación juntas, en una sola petición.
+
 ## Pendiente de este tramo
 
 Recuperación (`match_kb_chunks`), respuesta con citas, set de evaluación y métricas por consulta:
