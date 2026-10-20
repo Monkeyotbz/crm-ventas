@@ -162,3 +162,23 @@ cliente (precio incorrecto) y 1 inyección de rol sobre algo inexistente. Antes 
 - 52 preguntas y un catálogo de 32 fichas es una muestra chica.
 - Con 4 respuestas con dato sin respaldo, una sola respuesta mueve la cifra 2,7 puntos.
 - No se midió el aislamiento entre tenants ni la latencia total con el embedding de la pregunta.
+
+---
+
+## Aislamiento entre tenants (paso 6 del traspaso) — 20 oct 2026 `[medido]`
+
+Script reproducible: `scripts/rag/probar-aislamiento.sql`. La RLS decide con el tenant que viaja en el
+token (`app_metadata.tenant_id`); se simuló ese mismo mecanismo con dos usuarios de empresas distintas.
+
+| Caso | Quién consulta | Resultado | |
+|---|---|---|---|
+| A | Usuario del tenant demo | ve 32 de 32 fragmentos, de 1 solo tenant; `match_kb_chunks` devuelve 6 de 6 | cumple |
+| B | Usuario de Hellominus (otra empresa) | ve **0** fragmentos, 0 del demo; `match_kb_chunks` devuelve 0 | cumple |
+| C | Logueado sin tenant en el token | 0 y 0 | cumple |
+| D | Sin sesión (anon) | tabla: 0 filas; función: `42501 permission denied` | cumple |
+| E | Usuario normal intenta escribir un fragmento | `42501 violates row-level security policy`, sin fila nueva | cumple |
+
+**Límites:** (1) simula el token, no es un login real de punta a punta; (2) hay un solo tenant con datos,
+así que **no se puede observar** el riesgo conocido de HNSW con muchos tenants (el índice busca los
+vecinos de toda la tabla y la RLS filtra después, lo que podría dejar a un tenant chico con menos
+resultados de los pedidos) `[por verificar]`. Repetirlo con varios tenants cargados antes de vender.
