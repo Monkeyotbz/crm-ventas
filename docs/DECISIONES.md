@@ -252,11 +252,38 @@ Composición: un solo agente, sin orquestador
 Condición de activación: Fase 1 cerrada.
 
 ### [7b] Agente Analista
-Estado: APLAZADO
+Estado: ACEPTADO (16-18 oct 2026, decisión explícita del usuario)
 Procedencia: `docs/hoja-de-ruta-construccion.md` (Paso 05)
-Mecanismo: script SDK sin loop
+Mecanismo: Edge Function de Supabase (no "script SDK sin loop" como decía la
+  entrada original — se corrige acá: es `supabase/functions/analista/`, la misma
+  forma de plataforma que el Router [5], porque lo dispara un trigger de
+  Postgres y una carpeta local no puede servir HTTP)
 Composición: un solo agente, sin orquestador
-Condición de activación: Fase 1 cerrada.
+Condición de activación: **saltada por decisión explícita del usuario, no
+  cumplida.** La original era "Fase 1 cerrada". El usuario pidió construirlo el
+  18 oct 2026 porque es lo más visible del producto: llena el panel Copiloto de
+  la Bandeja, que hoy dice "Todavía no analizó esta conversación ningún agente
+  de IA". Es el agente de menor riesgo del plan: **solo informa al vendedor
+  humano, nunca le escribe al cliente.**
+
+  **Qué hace:** lee la conversación y escribe una fila en `conversation_insights`
+  (score, sentimiento, resumen, sugerencia, presupuesto extraído, próxima
+  acción). Esa misma fila es la memoria compartida que leerán después los
+  agentes conversacionales [6a]-[6d] (ver [6]), así que construirlo primero no
+  se pierde.
+
+  **Decisiones de diseño tomadas:** modelo Haiku (corre una vez por
+  conversación, no por usuario); disparo desde un trigger de Postgres como el
+  Router, **con espera mínima entre análisis de la misma conversación** para no
+  multiplicar el gasto; permisos de escritura solo del lado servidor
+  (`service_role`), el navegador solo lee por RLS; tokens y costo de cada
+  análisis medidos desde el primer día. Quien construye usa Sonnet, y Opus solo
+  para el prompt del Analista y la revisión de seguridad final (RLS entre
+  tenants).
+
+  **Qué NO es:** no es el panel de plataforma ni un indicador del Panel de hoy
+  (eso, si se quiere, es una entrega posterior), y no actúa sobre deals ni
+  conversaciones.
 
 ### [7c] Agente de Recuperación
 Estado: APLAZADO

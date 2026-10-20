@@ -1,4 +1,4 @@
-import { estiloScore, estiloSentimiento, formatearDinero } from "../../lib/canales.js";
+import { estiloScore, estiloSentimiento, formatearDinero, formatearHace } from "../../lib/canales.js";
 
 export default function PanelCopiloto({ conversacion }) {
   // Igual que ListaConversaciones: el ancho lo pone el contenedor. Este mismo
@@ -43,7 +43,7 @@ export default function PanelCopiloto({ conversacion }) {
         <div className="text-[10px] uppercase tracking-wide text-candy-tinta-media font-bold mb-1">Score IA / Sentimiento</div>
         {conversacion.score == null && conversacion.sentimiento == null ? (
           <p className="text-[12px] text-candy-tinta-tenue leading-snug">
-            Todavía no analizó esta conversación ningún agente de IA.
+            Todavía no hay análisis de IA para esta conversación.
           </p>
         ) : (
           <div className="flex items-center gap-2.5">
@@ -59,6 +59,27 @@ export default function PanelCopiloto({ conversacion }) {
         )}
       </div>
 
+      {conversacion.resumen && (
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-candy-tinta-media font-bold mb-1">Resumen</div>
+          <p className="text-[12px] text-candy-tinta leading-snug">{conversacion.resumen}</p>
+        </div>
+      )}
+
+      {conversacion.presupuesto_extraido && (
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-candy-tinta-media font-bold mb-1">Presupuesto que mencionó</div>
+          <div className="text-[13px] text-candy-tinta font-semibold">{conversacion.presupuesto_extraido}</div>
+        </div>
+      )}
+
+      {conversacion.proxima_accion_sugerida && (
+        <div>
+          <div className="text-[10px] uppercase tracking-wide text-candy-tinta-media font-bold mb-1">Próxima acción</div>
+          <div className="text-[13px] text-candy-tinta font-semibold">{conversacion.proxima_accion_sugerida}</div>
+        </div>
+      )}
+
       <div
         className="rounded-[14px] p-[13px] border"
         style={{
@@ -71,9 +92,15 @@ export default function PanelCopiloto({ conversacion }) {
           Sugerencia del copiloto
         </div>
         <p className="text-xs leading-relaxed text-candy-tinta">
-          {conversacion.sugerencia ?? "Sin sugerencia todavía — hace falta el agente Analista, que sigue sin construirse."}
+          {conversacion.sugerencia ?? "Sin sugerencia todavía: el analista la genera cuando el cliente escribe."}
         </p>
       </div>
+
+      {conversacion.insight_analizado_at && (
+        <p className="text-[10px] text-candy-tinta-tenue text-center">
+          Análisis de IA · {formatearHace(conversacion.insight_analizado_at)}
+        </p>
+      )}
     </div>
   );
 }

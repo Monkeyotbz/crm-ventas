@@ -45,3 +45,8 @@ verify_jwt = false
 # token inválido. Si esto pasara a false, cualquiera podría forjar un tenant_id
 # y enviar mensajes desde el número de otro tenant.
 verify_jwt = true
+
+[functions.analista]
+# Lo llama un trigger de Postgres vía pg_net, con el secreto compartido
+# `x-analista-secret`. No hay usuario logueado en esa cadena.
+verify_jwt = false

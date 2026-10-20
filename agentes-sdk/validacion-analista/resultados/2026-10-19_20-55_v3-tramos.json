@@ -1,0 +1,840 @@
+{
+  "resumen": {
+    "etiqueta": "v3-tramos",
+    "modelo": "claude-haiku-4-5-20251001",
+    "fecha": "2026-10-19T20:55:33",
+    "conversaciones": 30,
+    "aciertos_score": 25,
+    "aciertos_sentimiento": 30,
+    "aciertos_presupuesto": 30,
+    "tokens_entrada": 55015,
+    "tokens_salida": 8167,
+    "costo_usd_estimado": 0.0959
+  },
+  "filas": [
+    {
+      "id": "A01",
+      "grupo": "alto",
+      "titulo": "Distribuidora pide precio y fecha de arranque",
+      "esperado": {
+        "score_min": 75,
+        "score_max": 95,
+        "sentimiento": [
+          "positivo",
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 78,
+        "sentimiento": "positivo",
+        "resumen": "Distribuidora con 12 sucursales y 25 vendedores necesita ordenar seguimiento comercial. Cliente pregunta precio y disponibilidad de arranque este mes.",
+        "sugerencia": "El cliente tiene necesidad clara, datos concretos (25 vendedores, 12 sucursales) y urgencia implícita (este mes). Envía cotización rápido antes de que consulte competencia. Refuerza cómo el sistema mejora la coordinación entre sucursales.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar cotización hoy con opción de implementación este mes.",
+        "score_crudo": 78
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.9
+    },
+    {
+      "id": "A02",
+      "grupo": "alto",
+      "titulo": "Viaje con fechas, personas y presupuesto",
+      "esperado": {
+        "score_min": 80,
+        "score_max": 98,
+        "sentimiento": [
+          "positivo",
+          "neutro"
+        ],
+        "presupuesto": "6 millones"
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 82,
+        "sentimiento": "positivo",
+        "resumen": "Laura busca un paquete de 4 noches en Cartagena para 3 personas (20-24 dic) con presupuesto de hasta 6 millones COP. Ya pregunta por opciones y forma de pago, indicando intención clara de avanzar.",
+        "presupuesto_extraido": "Hasta 6 millones en total",
+        "sugerencia": "El cliente tiene los datos concretos listos y pregunta por el siguiente paso. Envía hoy las opciones de alojamiento dentro del presupuesto con desglose de precios y métodos de pago disponibles para cerrar rápido.",
+        "proxima_accion_sugerida": "Enviar opciones de alojamiento en Cartagena con precios desglosados y métodos de pago hoy mismo.",
+        "score_crudo": 82
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.3
+    },
+    {
+      "id": "A03",
+      "grupo": "alto",
+      "titulo": "Constructora con presupuesto aprobado pide propuesta",
+      "esperado": {
+        "score_min": 80,
+        "score_max": 98,
+        "sentimiento": [
+          "positivo"
+        ],
+        "presupuesto": "40 millones"
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 82,
+        "sentimiento": "positivo",
+        "resumen": "Constructora con 3 proyectos en marcha solicita propuesta formal tras ver demo. Tiene presupuesto aprobado de 40 millones para este año.",
+        "presupuesto_extraido": "40 millones para este año",
+        "sugerencia": "El cliente está en la fase de decisión con datos concretos (volumen de proyectos y presupuesto). Envía la cotización adaptada a sus 3 proyectos de forma inmediata para mantener el momentum positivo.",
+        "proxima_accion_sugerida": "Enviar propuesta formal adaptada a los 3 proyectos hoy mismo.",
+        "score_crudo": 82
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "A04",
+      "grupo": "alto",
+      "titulo": "Pide el link de pago",
+      "esperado": {
+        "score_min": 88,
+        "score_max": 100,
+        "sentimiento": [
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "decidido",
+        "score": 95,
+        "sentimiento": "positivo",
+        "resumen": "Cliente ya revisó la cotización y solicita directamente el link de pago. Decisión tomada: quiere avanzar con el plan de 5 usuarios.",
+        "sugerencia": "El cliente está listo para comprar. Envía el link de pago sin demora para cerrar la venta hoy. Confirma en el mensaje que es para el plan de 5 usuarios que cotizaste.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar link de pago inmediatamente para el plan de 5 usuarios.",
+        "score_crudo": 95
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.7
+    },
+    {
+      "id": "A05",
+      "grupo": "alto",
+      "titulo": "Molesto por la demora, pero firma hoy",
+      "esperado": {
+        "score_min": 65,
+        "score_max": 92,
+        "sentimiento": [
+          "negativo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "decidido",
+        "score": 92,
+        "sentimiento": "negativo",
+        "resumen": "Cliente está listo para firmar hoy si recibe la cotización. Molesto por demora de 3 días en entrega de propuesta.",
+        "presupuesto_extraido": null,
+        "sugerencia": "Envía la cotización inmediatamente, sin esperar a revisión. El cliente está decidido pero irritado por el retraso; cualquier demora más lo perderá con la competencia.",
+        "proxima_accion_sugerida": "Enviar cotización hoy mismo por WhatsApp, máximo en 2 horas.",
+        "score_crudo": 92
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "A06",
+      "grupo": "alto",
+      "titulo": "Cliente actual quiere ampliar",
+      "esperado": {
+        "score_min": 78,
+        "score_max": 98,
+        "sentimiento": [
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 82,
+        "sentimiento": "positivo",
+        "resumen": "Cliente actual de candyCRM (5 usuarios) busca expandirse a 15 usuarios y agregar integración con Instagram. Pide cotización con datos concretos sobre volumen.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar cotización por expansión a 15 usuarios + módulo Instagram hoy.",
+        "sugerencia": "Cliente satisfecho que ya paga y conoce el producto; es una venta de expansión con alta probabilidad. Envía la cotización rápidamente y menciona descuentos por volumen o por antigüedad si aplican.",
+        "score_crudo": 82
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    },
+    {
+      "id": "A07",
+      "grupo": "alto",
+      "titulo": "Reserva tour con fecha y forma de pago",
+      "esperado": {
+        "score_min": 85,
+        "score_max": 100,
+        "sentimiento": [
+          "positivo",
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "decidido",
+        "score": 92,
+        "sentimiento": "positivo",
+        "resumen": "Camilo quiere reservar el tour a Guatapé para este sábado para 4 personas. Ya está en el paso de confirmar el método de pago (pregunta por Nequi).",
+        "presupuesto_extraido": null,
+        "sugerencia": "El cliente está listo para pagar. Confirma rápido que aceptan Nequi o presenta las opciones de pago disponibles para cerrar la venta hoy. Incluye el link de pago o los datos para transferencia inmediata.",
+        "proxima_accion_sugerida": "Confirmar métodos de pago aceptados y enviar link de pago o instrucciones para completar la reserva hoy.",
+        "score_crudo": 92
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "A08",
+      "grupo": "alto",
+      "titulo": "Fecha límite y rango de presupuesto mensual",
+      "esperado": {
+        "score_min": 78,
+        "score_max": 96,
+        "sentimiento": [
+          "positivo",
+          "neutro"
+        ],
+        "presupuesto": "2 y 3 millones"
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 82,
+        "sentimiento": "positivo",
+        "resumen": "Grupo Comercial Antioquia necesita el CRM operativo antes del 1 de diciembre y tiene presupuesto definido. Pregunta sobre modalidad de contrato anual.",
+        "presupuesto_extraido": "Entre 2 y 3 millones mensuales",
+        "sugerencia": "El cliente está en fase activa de decisión con urgencia clara (fecha límite) y presupuesto concreto. Responde inmediatamente sobre opciones de contrato anual y propón una cotización que se ajuste a su rango presupuestario.",
+        "proxima_accion_sugerida": "Enviar propuesta de contrato anual con precio en rango 2-3M mensuales y plan de implementación para cumplir fecha del 1 de diciembre.",
+        "score_crudo": 82
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.3
+    },
+    {
+      "id": "M01",
+      "grupo": "medio",
+      "titulo": "Interesado, pero lo consulta con el socio",
+      "esperado": {
+        "score_min": 45,
+        "score_max": 70,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "interes",
+        "score": 58,
+        "sentimiento": "positivo",
+        "resumen": "Agencia Creativa Lumen muestra interés en el plan básico del CRM. Rechaza la demo inmediata pero se compromete a consultar con su socio antes de decidir.",
+        "sugerencia": "El cliente está interesado pero depende de la aprobación del socio. Mantén la puerta abierta: propón un timing para el follow-up (ej. «me dices algo en 2-3 días») y prepárate para responder preguntas técnicas o de precio cuando retome el contacto.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Hacer follow-up en 2-3 días preguntando por los resultados de la conversación con el socio.",
+        "score_crudo": 58
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.6
+    },
+    {
+      "id": "M02",
+      "grupo": "medio",
+      "titulo": "Pregunta detalles de un tour",
+      "esperado": {
+        "score_min": 45,
+        "score_max": 72,
+        "sentimiento": [
+          "positivo",
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 35,
+        "sentimiento": "positivo",
+        "resumen": "Valentina pregunta sobre tours en Medellín y muestra interés específico en el tour de Comuna 13, pidiendo detalles sobre su duración. Conversación en fase muy inicial.",
+        "sugerencia": "Proporciona la duración del tour y aprovecha para incluir otros detalles relevantes (precio, fechas disponibles, qué incluye) para avanzar hacia una propuesta concreta. El cliente mostró preferencia por una opción específica, así que es buen momento para profundizar.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Responder duración del tour Comuna 13 e incluir precio y próximas fechas disponibles.",
+        "score_crudo": 35
+      },
+      "ok_score": false,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.0
+    },
+    {
+      "id": "M03",
+      "grupo": "medio",
+      "titulo": "Pide prueba gratis",
+      "esperado": {
+        "score_min": 50,
+        "score_max": 72,
+        "sentimiento": [
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 38,
+        "sentimiento": "positivo",
+        "resumen": "Pequeña inmobiliaria interesada en integración con WhatsApp Business. Pregunta por prueba gratis pero sin decisión clara.",
+        "sugerencia": "El cliente muestra interés en la funcionalidad específica (integración WhatsApp) y pide prueba. Ofrece acceso gratis con límite de tiempo claro para crear urgencia y avanzar a propuesta.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar enlace de prueba gratis hoy con instrucciones de integración WhatsApp Business.",
+        "score_crudo": 38
+      },
+      "ok_score": false,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.0
+    },
+    {
+      "id": "M04",
+      "grupo": "medio",
+      "titulo": "Compara con la competencia",
+      "esperado": {
+        "score_min": 45,
+        "score_max": 72,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 35,
+        "sentimiento": "neutro",
+        "resumen": "Cliente está evaluando opciones de CRM y compara vuestro producto con competidores (HubSpot y Pipedrive). Pregunta por diferenciadores y precio, pero sin señales de decisión inmediata.",
+        "presupuesto_extraido": null,
+        "sugerencia": "Es el primer contacto y ya menciona competidores directos: responde rápido con un comparativo claro de vuestros puntos fuertes y una propuesta de demo o llamada para hablar precios según sus necesidades específicas. Evita solo listar features; enfócate en qué resuelve mejor para empresas como Soluciones TI.",
+        "proxima_accion_sugerida": "Enviar comparativa visual con competidores y proponer videollamada de 20 min para entender su caso y mostrar demo personalizada.",
+        "score_crudo": 35
+      },
+      "ok_score": false,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.8
+    },
+    {
+      "id": "M05",
+      "grupo": "medio",
+      "titulo": "Proyecto para el próximo año",
+      "esperado": {
+        "score_min": 35,
+        "score_max": 60,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 35,
+        "sentimiento": "neutro",
+        "resumen": "Constructora interesada en cotizar software para gestión de obra, pero está en fase de diseños y la implementación sería el próximo año. El horizonte de decisión es lejano.",
+        "presupuesto_extraido": null,
+        "sugerencia": "El cliente muestra interés real pero con timeline extendido. Es una oportunidad de nutrir la relación ahora para convertirla cuando inicien obras. Enfócate en educación sobre el software y cómo prepararlos para la implementación futura.",
+        "proxima_accion_sugerida": "Enviar propuesta comercial ligera y agendar seguimiento para Q1 del próximo año cuando inicien la obra.",
+        "score_crudo": 35
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "M06",
+      "grupo": "medio",
+      "titulo": "Pidió propuesta y dejó de contestar",
+      "esperado": {
+        "score_min": 35,
+        "score_max": 62,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 35,
+        "sentimiento": "neutro",
+        "resumen": "Cliente mostró interés inicial pidiendo propuesta, pero no responde a seguimientos sobre la cotización ya enviada. Conversación estancada sin feedback.",
+        "presupuesto_extraido": null,
+        "sugerencia": "El cliente no ha revisado o no responde a la propuesta enviada. Prueba con un contacto diferente (llamada, SMS) o pide confirmación de que llegó el correo. Si hay silencio prolongado, podría haber perdido interés.",
+        "proxima_accion_sugerida": "Llamar hoy para confirmar que recibió la propuesta y despejar dudas en vivo.",
+        "score_crudo": 35
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "M07",
+      "grupo": "medio",
+      "titulo": "Agencia extranjera pide tarifas (en inglés)",
+      "esperado": {
+        "score_min": 55,
+        "score_max": 82,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 78,
+        "sentimiento": "positivo",
+        "resumen": "Agencia de viajes en Miami busca paquetes de tours a Colombia para grupos de 10-15 personas. Solicita tarifas directamente.",
+        "sugerencia": "Este es un lead cualificado con necesidad concreta (grupos de tamaño específico) y urgencia implícita en la solicitud de tarifas. Responde rápidamente con cotización que incluya opciones para ese rango de personas; aprovecha para preguntar fechas y tipo de experiencia que buscan.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar cotización de paquetes para grupos de 10-15 personas hoy, solicitando fechas tentativas.",
+        "score_crudo": 78
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.2
+    },
+    {
+      "id": "M08",
+      "grupo": "medio",
+      "titulo": "Solo pregunta el precio",
+      "esperado": {
+        "score_min": 30,
+        "score_max": 60,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 28,
+        "sentimiento": "neutro",
+        "resumen": "El cliente pregunta por precio sin haber manifestado una necesidad específica. La conversación es muy breve para concluir intención de compra real.",
+        "sugerencia": "Responde con una pregunta de apertura para entender qué busca antes de hablar de precios. Sin contexto de problema o producto de interés, corre riesgo de ser spam o consulta vaga.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Preguntar qué producto o servicio le interesa y cuál es su necesidad específica.",
+        "score_crudo": 28
+      },
+      "ok_score": false,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    },
+    {
+      "id": "B01",
+      "grupo": "bajo",
+      "titulo": "No sabe qué venden",
+      "esperado": {
+        "score_min": 15,
+        "score_max": 40,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 28,
+        "sentimiento": "neutro",
+        "resumen": "Sofía pregunta qué hace la empresa. Conversación muy inicial, sin contexto sobre su necesidad o intención de compra.",
+        "presupuesto_extraido": null,
+        "sugerencia": "Responde de forma clara y breve qué hacen, luego pregunta por su situación específica o qué la llevó a contactar. Busca entender su necesidad real antes de seguir.",
+        "proxima_accion_sugerida": "Responder con propuesta de valor clara y hacer una pregunta de diagnóstico sobre su necesidad.",
+        "score_crudo": 28
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.8
+    },
+    {
+      "id": "B02",
+      "grupo": "bajo",
+      "titulo": "Vio el anuncio y no siguió",
+      "esperado": {
+        "score_min": 10,
+        "score_max": 38,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 28,
+        "sentimiento": "neutro",
+        "resumen": "Cliente vio el anuncio en Instagram y saludó. Conversación muy inicial sin indicios de necesidad o intención de compra específica.",
+        "sugerencia": "Preguntar qué específicamente le llamó la atención del anuncio y cuál es su necesidad concreta. Evitar vender directamente; primero escuchar.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Hacer una pregunta de descubrimiento para entender qué necesita o qué lo motivó a escribir.",
+        "score_crudo": 28
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.7
+    },
+    {
+      "id": "B03",
+      "grupo": "bajo",
+      "titulo": "Tarea de la universidad",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 20,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "neutro",
+        "resumen": "Contacto académico: Juliana solicita información sobre CRMs para una tarea universitaria, sin intención de compra.",
+        "sugerencia": "Este es un contacto de consulta académica, no un prospecto de venta. Si el equipo decide responder, enfócate en la educación del mercado sin esperar conversión inmediata.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Archivar o mantener en base de datos para educación de mercado; no es prioridad de venta.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.4
+    },
+    {
+      "id": "B04",
+      "grupo": "bajo",
+      "titulo": "Busca trabajo",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 12,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 2,
+        "sentimiento": "neutro",
+        "resumen": "El cliente pregunta por vacantes de trabajo. No hay intención de compra: está buscando empleo.",
+        "sugerencia": "No es un prospecto de venta. Si tu empresa no está contratando o no gestiona recursos humanos por este canal, responde cortésmente derivando a la persona al área correspondiente o descartando este contacto.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Descartar o derivar a RRHH si aplica.",
+        "score_crudo": 2
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    },
+    {
+      "id": "B05",
+      "grupo": "bajo",
+      "titulo": "Le pareció caro y se va",
+      "esperado": {
+        "score_min": 5,
+        "score_max": 30,
+        "sentimiento": [
+          "negativo",
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 15,
+        "sentimiento": "negativo",
+        "resumen": "Cliente rechaza el precio (180.000/mes) por considerarlo caro y descarta la solución a favor de Excel. Conversación cerrada.",
+        "sugerencia": "El cliente priorizó costo sobre funcionalidad. Si hay margen, contacta en 1-2 meses con opciones más económicas o planes adaptados a pequeños negocios. De lo contrario, archiva hasta que el negocio crezca.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Guardar contacto para reactivar en futuro con opciones más económicas; cierre este ciclo.",
+        "score_crudo": 15
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.3
+    },
+    {
+      "id": "B06",
+      "grupo": "bajo",
+      "titulo": "Pregunta por si algún día viaja",
+      "esperado": {
+        "score_min": 20,
+        "score_max": 45,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 28,
+        "sentimiento": "neutro",
+        "resumen": "Cliente pregunta el precio del tour a Islas del Rosario de forma exploratoria, sin fecha ni intención de compra inmediata. Expresa interés lejano con la frase \"algún día\".",
+        "presupuesto_extraido": null,
+        "sugerencia": "Es curiosidad vaga sin urgencia. Responde el precio pero aprecha para conocer más: cuándo está pensando viajar, con cuántas personas, o si busca algo específico en el tour. Esto puede convertir la curiosidad en interés concreto.",
+        "proxima_accion_sugerida": "Responder el precio y preguntar por fechas de viaje o número de personas para crear urgencia.",
+        "score_crudo": 28
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.2
+    },
+    {
+      "id": "B07",
+      "grupo": "bajo",
+      "titulo": "Solo saludó",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 25,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "neutro",
+        "resumen": "Cliente apenas saludó. No hay contexto ni indicios de necesidad o interés en compra.",
+        "sugerencia": "Abre la conversación con una presentación breve y una pregunta que identifique su necesidad. Evita ser demasiado comercial: busca entender si tiene un problema que puedas resolver.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Responder con presentación y pregunta de necesidad.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.7
+    },
+    {
+      "id": "E01",
+      "grupo": "especial",
+      "titulo": "Spam",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 8,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "neutro",
+        "resumen": "Mensaje de spam o número equivocado. El cliente no busca nuestro producto; parece un mensaje masivo promocionando criptomonedas.",
+        "sugerencia": "No es un prospecto. Considera reportar como spam o bloquear si continúa. Si tu empresa vende criptomonedas, investiga si es competencia; si no, descarta.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "No responder o bloquear.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    },
+    {
+      "id": "E02",
+      "grupo": "especial",
+      "titulo": "Número equivocado",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 8,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "neutro",
+        "resumen": "Cliente marcó el número equivocado. No hay intención de contactar a la empresa ni de conocer sobre productos o servicios.",
+        "sugerencia": "No hay base de conversación. Puedes descartar este contacto a menos que desees mantenerlo en una lista de \"números equivocados\" para ocasionales reintentosposteriores. Sin embargo, no es un prospecto cualificado.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Archivar o descartar contacto.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "E03",
+      "grupo": "especial",
+      "titulo": "Intenta manipular el score",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 25,
+        "sentimiento": [
+          "neutro",
+          "negativo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 25,
+        "sentimiento": "neutro",
+        "resumen": "Cliente nuevo sin contexto previo. Mensaje muy breve que no expresa necesidad, problema o interés concreto en ningún producto o servicio.",
+        "sugerencia": "Es un primer contacto. Requiere cualificación básica: entender qué trae al cliente, si hay una necesidad real o solo es exploración. Hazle preguntas abiertas sobre sus intereses.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Enviar mensaje de bienvenida con preguntas de descubrimiento sobre su interés o necesidad.",
+        "score_crudo": 15
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    },
+    {
+      "id": "E04",
+      "grupo": "especial",
+      "titulo": "Dice que la plata no es problema",
+      "esperado": {
+        "score_min": 50,
+        "score_max": 78,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "propuesta",
+        "score": 78,
+        "sentimiento": "positivo",
+        "resumen": "Empresa grande con capacidad de inversión busca solución para 200 vendedores. Cliente muestra interés directo con datos concretos (volumen de usuarios).",
+        "presupuesto_extraido": null,
+        "sugerencia": "El cliente ha dado un dato clave (200 vendedores) y descarta presupuesto como limitante. Prepara una propuesta personalizada rápido con precios, módulos y casos de éxito similares. Su disposición positiva sugiere que podría avanzar si recibe una respuesta estructurada hoy.",
+        "proxima_accion_sugerida": "Enviar propuesta personalizada con precios para 200 usuarios y agenda reunión de demo con decisores.",
+        "score_crudo": 78
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.2
+    },
+    {
+      "id": "E05",
+      "grupo": "especial",
+      "titulo": "Cliente actual con falla (soporte)",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 35,
+        "sentimiento": [
+          "negativo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "negativo",
+        "resumen": "El contacto reporta un problema técnico urgente (sistema caído desde ayer). Es soporte de un cliente existente, no una oportunidad de venta nueva.",
+        "presupuesto_extraido": null,
+        "sugerencia": "Este es un caso de soporte urgente, no una oportunidad de venta. Redirige al equipo de soporte técnico inmediatamente para evitar que escale el problema y afecte la satisfacción del cliente existente.",
+        "proxima_accion_sugerida": "Transferir a soporte técnico de inmediato. No es venta.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.5
+    },
+    {
+      "id": "E06",
+      "grupo": "especial",
+      "titulo": "Mensajes desordenados (como el caso real)",
+      "esperado": {
+        "score_min": 30,
+        "score_max": 58,
+        "sentimiento": [
+          "neutro"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "curiosidad",
+        "score": 28,
+        "sentimiento": "neutro",
+        "resumen": "Cliente menciona necesidad vaga de \"un servicio para agentizar\" pero no proporciona detalles ni contexto. La conversación es fragmentada con múltiples saludos sin avance.",
+        "sugerencia": "El cliente muestra interés inicial pero la conversación es confusa y sin claridad. Haz una pregunta abierta y específica sobre qué entiende por \"agentizar\" y qué problema intenta resolver, para entender mejor su necesidad.",
+        "presupuesto_extraido": null,
+        "proxima_accion_sugerida": "Preguntar específicamente qué entiende el cliente por \"agentizar\" y qué desafío o necesidad tiene en su operación.",
+        "score_crudo": 28
+      },
+      "ok_score": false,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 3.1
+    },
+    {
+      "id": "E07",
+      "grupo": "especial",
+      "titulo": "Solo un audio y un emoji",
+      "esperado": {
+        "score_min": 0,
+        "score_max": 25,
+        "sentimiento": [
+          "neutro",
+          "positivo"
+        ],
+        "presupuesto": null
+      },
+      "obtenido": {
+        "tramo": "sin_intencion",
+        "score": 5,
+        "sentimiento": "neutro",
+        "resumen": "Cliente envía un audio sin transcripción disponible y luego un pulgar hacia arriba. No hay información suficiente para determinar intención de compra.",
+        "presupuesto_extraido": null,
+        "sugerencia": "El audio no se puede analizar y el pulgar hacia arriba es ambiguo. Solicita al cliente que escriba su consulta de forma clara o confirma qué necesita específicamente.",
+        "proxima_accion_sugerida": "Pregunta al cliente qué necesita o cómo puedes ayudarlo.",
+        "score_crudo": 5
+      },
+      "ok_score": true,
+      "ok_sentimiento": true,
+      "ok_presupuesto": true,
+      "segundos": 2.9
+    }
+  ]
+}

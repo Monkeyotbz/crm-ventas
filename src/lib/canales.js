@@ -90,3 +90,13 @@ export function formatearHora(iso) {
   }
   return fecha.toLocaleDateString("es-CO", { day: "2-digit", month: "short" });
 }
+
+/** "hace 5 min", "hace 2 h", "hace 3 d". Para saber qué tan fresco está un análisis. */
+export function formatearHace(iso) {
+  if (!iso) return "";
+  const min = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (min < 1) return "hace un momento";
+  if (min < 60) return `hace ${min} min`;
+  if (min < 60 * 24) return `hace ${Math.round(min / 60)} h`;
+  return `hace ${Math.round(min / (60 * 24))} d`;
+}
