@@ -36,6 +36,7 @@ hechos, en vez de dejar que corran.
 |---|---|---|---|---|
 | Tenant `demo-pruebas` con 60 conversaciones, 60 contactos y 124 mensajes de ejemplo | Supabase `crm-ventas`, tenant `demo-pruebas` | 2026-10-20 | `scripts/demo/limpiar-tenant-demo.sql` | ✅ creado y verificado |
 | Usuario de prueba del tenant demo | Supabase Auth | 2026-10-20 | Panel de Supabase → Authentication → Users → borrar | ✅ creado; su tenant se renombra a `demo-pruebas` al sembrar |
+| Filas de `rag_consultas` del tenant `demo-pruebas` (54, `origen = evaluacion`) | Supabase `crm-ventas` | 2026-10-20 | Se borran con el tenant: `scripts/demo/limpiar-tenant-demo.sql` recorre toda tabla con `tenant_id` | ✅ 54 filas, verificado |
 | Fragmentos del RAG en `kb_chunks` del tenant `demo-pruebas` (hasta 32 de catálogo) | Supabase `crm-ventas` | 2026-10-20 | Se borran solos con el tenant: `scripts/demo/limpiar-tenant-demo.sql` recorre toda tabla con `tenant_id`, incluida `kb_chunks` | ✅ 32 filas, verificado |
 
 ### Rastros en el tenant real (decididos, no se borran)

@@ -36,6 +36,10 @@ SET = AQUI / "preguntas.json"
 RESULTADOS = AQUI / "resultados"
 
 MODELO_VOYAGE = "voyage-3.5"
+# Versión del SYSTEM_PROMPT de abajo. SUBIRLA al cambiar el prompt: es lo que permite comparar corridas
+# en rag_metricas_diarias. v1 = reglas 1-6; v2 = + reglas 7-10 (sin adornos, sin políticas inventadas).
+PROMPT_VERSION = "v2"
+PRECIO_VOYAGE_POR_MILLON = 0.06  # US$, [por verificar]
 DIMENSION = 1024
 K = 6
 # US$ por millón de tokens (entrada, salida). ESTIMADO: verificar contra la página de precios.
@@ -94,16 +98,38 @@ def embeber(textos, env):
     """TODAS las consultas en una sola petición: sin tarjeta Voyage limita a 3 peticiones por minuto."""
     for intento in range(2):
         try:
+            t0 = time.time()
             j = http_json("https://api.voyageai.com/v1/embeddings",
                           {"input": textos, "model": MODELO_VOYAGE, "input_type": "query", "output_dimension": DIMENSION},
                           {"Authorization": f"Bearer {env['VOYAGE_API_KEY']}"})
-            return [d["embedding"] for d in j["data"]], j["usage"]["total_tokens"]
+            return [d["embedding"] for d in j["data"]], j["usage"]["total_tokens"], (time.time() - t0) * 1000
         except urllib.error.HTTPError as e:
             if e.code == 429 and intento == 0:
                 print("  (límite de Voyage: espero 62 s y reintento)")
                 time.sleep(62)
                 continue
             raise
+
+
+def id_tenant_demo(env):
+    """Las filas de evaluación se guardan SOLO en demo-pruebas: nunca en un tenant real."""
+    url = f"{env['VITE_SUPABASE_URL']}/rest/v1/tenants?slug=eq.demo-pruebas&select=id"
+    req = urllib.request.Request(url, headers={"apikey": env["SUPABASE_SERVICE_ROLE_KEY"], "Authorization": f"Bearer {env['SUPABASE_SERVICE_ROLE_KEY']}"})
+    with urllib.request.urlopen(req, timeout=30) as r:
+        filas = json.load(r)
+    if not filas:
+        raise SystemExit("✗ No existe el tenant demo-pruebas: no hay dónde registrar (usa --no-registrar).")
+    return filas[0]["id"]
+
+
+def registrar(env, fila):
+    """Una fila por pregunta en rag_consultas (migración 20260921120000). Escribe con la clave de servicio."""
+    req = urllib.request.Request(
+        f"{env['VITE_SUPABASE_URL']}/rest/v1/rag_consultas", data=json.dumps(fila).encode(), method="POST",
+        headers={"content-type": "application/json", "Prefer": "return=minimal",
+                 "apikey": env["SUPABASE_SERVICE_ROLE_KEY"], "Authorization": f"Bearer {env['SUPABASE_SERVICE_ROLE_KEY']}"})
+    with urllib.request.urlopen(req, timeout=30):
+        pass
 
 
 def recuperar(vector, env):
@@ -235,6 +261,7 @@ def main():
     ap.add_argument("--etiqueta", default="base")
     ap.add_argument("--modelo", default="claude-haiku-4-5-20251001")
     ap.add_argument("--solo", default="", help="ids separados por coma")
+    ap.add_argument("--no-registrar", action="store_true", help="no escribir filas en rag_consultas")
     ap.add_argument("--juez", default="claude-sonnet-5-5", help="modelo que audita cada afirmación ('' = sin juez)")
     args = ap.parse_args()
 
@@ -247,12 +274,18 @@ def main():
         preguntas = [p for p in preguntas if p["id"] in ids]
 
     consultas = [" ".join([*p.get("contexto", []), p["pregunta"]]) for p in preguntas]
-    vectores, tok_voyage = embeber(consultas, env)
-    print(f"Voyage: {len(consultas)} consultas, {tok_voyage} tokens\n")
+    vectores, tok_voyage, ms_voyage = embeber(consultas, env)
+    print(f"Voyage: {len(consultas)} consultas, {tok_voyage} tokens, {ms_voyage:.0f} ms\n")
+    tenant_demo = None if args.no_registrar else id_tenant_demo(env)
+    # Las consultas viajan juntas en UNA petición (límite de Voyage sin tarjeta), así que el tiempo y
+    # los tokens del embedding se reparten en partes iguales: en producción serán uno por consulta.
+    ms_emb_c, tok_emb_c = round(ms_voyage / len(consultas)), round(tok_voyage / len(consultas))
 
     filas, t_in, t_out, j_in, j_out = [], 0, 0, 0, 0
-    for p, v in zip(preguntas, vectores):
+    for p, v, consulta in zip(preguntas, vectores, consultas):
+        t_b = time.time()
         frag = recuperar(v, env)
+        ms_busqueda = round((time.time() - t_b) * 1000)
         t0 = time.time()
         salida, ti, to = responder(client, args.modelo, p["pregunta"], p.get("contexto"), frag)
         ms = (time.time() - t0) * 1000
@@ -277,6 +310,25 @@ def main():
                       "sin_respaldo": sin_apoyo, "juez_error": juez_error,
                       "responde": salida["responde"], "respuesta": salida["respuesta"], "fuentes": salida["fuentes"],
                       "recuperados": [f"{f['slug']} {f['sim']:.2f}" for f in frag], "tokens_entrada": ti, "tokens_salida": to, "ms": round(ms)})
+        if tenant_demo:
+            pin, pout = PRECIOS.get(args.modelo, (0, 0))
+            auditada = bool(args.juez) and salida["responde"] and not juez_error
+            registrar(env, {
+                "tenant_id": tenant_demo, "origen": "evaluacion", "consulta_texto": consulta, "k": K,
+                "recuperados": [{"slug": f["slug"], "sim": round(f["sim"], 4)} for f in frag],
+                "sim_max": round(frag[0]["sim"], 4) if frag else None,
+                "ms_embedding": ms_emb_c, "ms_busqueda": ms_busqueda,
+                "respondio": salida["responde"], "fuentes": salida["fuentes"], "ms_llm": round(ms),
+                "tokens_embedding": tok_emb_c, "tokens_entrada": ti, "tokens_salida": to,
+                # Solo lo que costaría en producción: la respuesta y el embedding. La auditoría del juez
+                # es costo de MEDIR, no de atender, y no se suma.
+                "costo_usd": round(ti / 1e6 * pin + to / 1e6 * pout + tok_emb_c / 1e6 * PRECIO_VOYAGE_POR_MILLON, 6),
+                "prompt_version": PROMPT_VERSION, "modelo": args.modelo, "modelo_embedding": MODELO_VOYAGE,
+                "auditada": auditada,
+                "afirmaciones_sin_respaldo": len(sin_apoyo) if auditada else None,
+                "datos_sin_respaldo": sum(1 for a in sin_apoyo if a.get("gravedad") == "dato") if auditada else None,
+                "error": juez_error,
+            })
         marca = "✓" if veredicto == "ok" and not problemas else "✗"
         print(f"{p['id']} {marca} {p['tipo']:<16} {veredicto}" + (f"  ⚠ {'; '.join(problemas)}" if problemas else ""))
 

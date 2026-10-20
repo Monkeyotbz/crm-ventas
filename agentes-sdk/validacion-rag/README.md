@@ -182,3 +182,48 @@ token (`app_metadata.tenant_id`); se simuló ese mismo mecanismo con dos usuario
 así que **no se puede observar** el riesgo conocido de HNSW con muchos tenants (el índice busca los
 vecinos de toda la tabla y la RLS filtra después, lo que podría dejar a un tenant chico con menos
 resultados de los pedidos) `[por verificar]`. Repetirlo con varios tenants cargados antes de vender.
+
+---
+
+## Métricas por consulta (paso 11) — 20 oct 2026 `[medido]`
+
+Migración `20260921120000_rag_consultas.sql` (aplicada): la tabla `rag_consultas` (una fila por pregunta) y la
+vista `rag_metricas_diarias`. La pregunta del cliente NO se copia (ya está en `messages`): se apunta con
+`message_id`; el texto propio solo existe sin cliente de por medio (consola y evaluaciones). La escribe solo
+el servidor; la lee el admin de cada tenant. `evaluar_fidelidad.py` ahora registra una fila por pregunta en
+`demo-pruebas` con `origen = evaluacion` (se apaga con `--no-registrar`). La versión del prompt se declara en
+`PROMPT_VERSION` y hay que **subirla al cambiar el prompt**: es lo que permite comparar corridas.
+
+Comprobado con filas reales: el admin del tenant demo ve las 54; el admin de Hellominus ve 0 en la tabla y en
+la vista; un usuario normal y alguien sin sesión no pueden escribir (`42501`).
+
+### Lección: una sola corrida no basta para comparar `[medido]`
+
+Se corrió el MISMO prompt v2 dos veces. Resultados distintos:
+
+| | v2, corrida 1 | v2, corrida 2 | v1 (otro prompt) |
+|---|---|---|---|
+| Respuestas con algún detalle sin respaldo | 13/37 (35 %) | 8/36 (22 %) | 25/39 (64 %) |
+| … con un **dato** sin respaldo | 4/37 (11 %) | 3/36 (8 %) | 5/39 (13 %) |
+| Afirmaciones sin respaldo, total | 16 | 9 | 34 |
+| Abstenciones indebidas | 3 | 4 | 0 |
+
+- De **v1 a v2** (64 % → 22–35 %, afirmaciones 34 → 9–16) la mejora es **real**: supera la variación entre corridas.
+- Pero **11 % contra 8 %** de datos sin respaldo es ruido: el mismo prompt da las dos cifras. Con 3 o 4 respuestas
+  en juego, **una sola mueve la cifra casi 3 puntos**.
+- Consecuencia: para afirmar que un cambio mejora algo pequeño hay que repetir la corrida (promediar 3 o más) o
+  usar más preguntas. Una corrida sola solo sirve para detectar diferencias grandes.
+
+### Una trampa de la medición y un defecto del prompt
+
+1. **`ms_busqueda` aquí marca 500–600 ms, no los 204 ms de `evaluar-recuperacion.mjs`.** No es que la base sea
+   lenta: este script (Python, `urllib`) abre una conexión nueva en cada petición y el otro la reutiliza.
+   Comparar las dos cifras como si midieran lo mismo sería un error. En producción, una Edge Function en la misma
+   región que la base mediría mucho menos.
+2. **`responde=false` mezcla dos cosas distintas:** «el catálogo no tiene lo que piden» y «el tour existe pero le
+   falta un dato» (un precio sin publicar). En R33 el modelo contestó bien («no tiene precio publicado») pero
+   marcó `responde=false`, y cuenta como abstención indebida. Candidato a v3 del prompt: `responde=false` SOLO si
+   el tour o el tema no está; si el tour existe y falta un dato, `responde=true` y se dice. **No se aplica
+   todavía:** se probará con un set reservado, no contra el mismo que lo reveló.
+3. `pct_abstencion` de la vista (31,5 %) **no es representativo**: el set tiene a propósito 9 preguntas sin
+   respuesta. Con tráfico real será otro número.

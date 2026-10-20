@@ -445,6 +445,14 @@ generó 3 abstenciones nuevas. Los errores que quedan son de contar o generaliza
 afinó más contra el mismo set: falta un set reservado. Costo de la medición ≈ US$0,6 por corrida con
 juez `[calculado]`. El detalle está en `agentes-sdk/validacion-rag/README.md`.
 
+**Métricas por consulta (paso 11, 20 oct 2026):** migración `20260921120000` aplicada (`rag_consultas` +
+vista `rag_metricas_diarias`); sin copiar la pregunta del cliente (se apunta a `messages`); escribe solo el
+servidor. 54 filas reales de evaluación, con el aislamiento comprobado con datos (el admin de otra empresa ve 0).
+**Lección de método `[medido]`:** el MISMO prompt v2, corrido dos veces, dio 11 % y 8 % de respuestas con un dato
+sin respaldo: una sola corrida no sirve para comparar mejoras pequeñas; la de v1 a v2 (64 % → 22–35 % con algún
+detalle sin respaldo) sí es real. Candidato a prompt v3 (a probar con un set reservado): `responde=false` solo si
+el tema no está, no cuando falta un dato de un tour que sí existe.
+
 **Metas de la guía, todavía sin medir (`[por verificar]`):** recall@k ≥ 95 %, MRR ≥ 0,8, < 1.200
 tokens de catálogo por turno, p95 de recuperación < 300 ms, 0 inventos.
 

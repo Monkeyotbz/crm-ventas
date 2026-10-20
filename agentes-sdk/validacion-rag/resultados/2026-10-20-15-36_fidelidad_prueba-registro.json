@@ -1,0 +1,59 @@
+{
+  "etiqueta": "prueba-registro",
+  "modelo": "claude-haiku-4-5-20251001",
+  "correctas": 2,
+  "total": 2,
+  "tokens_entrada": 5818,
+  "tokens_salida": 353,
+  "costo_usd_estimado": 0.0076,
+  "filas": [
+    {
+      "id": "R01",
+      "tipo": "explicita",
+      "pregunta": "Quiero el tour de Guatapé",
+      "veredicto": "ok",
+      "problemas": [],
+      "sin_respaldo": [],
+      "juez_error": null,
+      "responde": true,
+      "respuesta": "Tenemos el tour «Guatapé + Piedra del Peñol» en Guatapé, Antioquia. Es una excursión desde Medellín de 7–9 horas que incluye subir la Piedra del Peñol, recorrer el embalse y disfrutar de los zócalos de colores del pueblo. Incluye guía turístico, transporte, recorrido en lancha y tarjeta de asistencia médica. Para conocer el precio, te invito a consultarlo con el operador.",
+      "fuentes": [
+        "guatape-piedra-del-penol"
+      ],
+      "recuperados": [
+        "guatape-piedra-del-penol 0.62",
+        "travesia-salto-del-angel-jardin 0.55",
+        "travesia-resguardo-indigena-jardin 0.51",
+        "graffiti-tour-comuna-13 0.51",
+        "travesia-cristo-rey-jardin 0.51",
+        "parque-arvi-medellin 0.50"
+      ],
+      "tokens_entrada": 2859,
+      "tokens_salida": 216,
+      "ms": 3450
+    },
+    {
+      "id": "R34",
+      "tipo": "sin_respuesta",
+      "pregunta": "tour en Tokio con sushi",
+      "veredicto": "ok",
+      "problemas": [],
+      "sin_respaldo": [],
+      "juez_error": null,
+      "responde": false,
+      "respuesta": "No tengo información sobre tours en Tokio en nuestro catálogo. Los destinos que ofrecemos están en Colombia: Cartagena, Medellín y Jardín. ¿Te interesa conocer alguna de nuestras experiencias gastronómicas en estas ciudades?",
+      "fuentes": [],
+      "recuperados": [
+        "sibarita-cena-gourmet-cartagena 0.47",
+        "tour-gastronomico-medellin 0.44",
+        "tour-5-islas-vip-deportivo 0.40",
+        "baru-islas-del-rosario 0.40",
+        "isla-del-sol-cartagena 0.40",
+        "travesia-del-amor-jardin 0.40"
+      ],
+      "tokens_entrada": 2959,
+      "tokens_salida": 137,
+      "ms": 1741
+    }
+  ]
+}
