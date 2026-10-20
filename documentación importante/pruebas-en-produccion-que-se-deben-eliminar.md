@@ -36,6 +36,7 @@ hechos, en vez de dejar que corran.
 |---|---|---|---|---|
 | Tenant `demo-pruebas` con ~60 conversaciones de ejemplo | Supabase `crm-ventas`, tenant `demo-pruebas` | *(pendiente de crear)* | `scripts/demo/limpiar-tenant-demo.sql` | ⏳ por crear |
 | Usuario de prueba del tenant demo | Supabase Auth | *(pendiente de crear)* | Panel de Supabase → Authentication → Users → borrar | ⏳ por crear |
+| Fragmentos del RAG en `kb_chunks` del tenant `demo-pruebas` (hasta 32 de catálogo) | Supabase `crm-ventas` | *(pendiente de crear)* | Se borran solos con el tenant: `scripts/demo/limpiar-tenant-demo.sql` recorre toda tabla con `tenant_id`, incluida `kb_chunks` | ⏳ por crear |
 
 ### Rastros en el tenant real (decididos, no se borran)
 
