@@ -129,6 +129,18 @@ cliente ni toca deals.** Es la memoria compartida que leerán después los agent
 está habilitado), así que el último mensaje de una ráfaga puede quedar sin analizar hasta que llegue
 otro. **El score es una estimación, no un dato:** no debe ordenar la bandeja por defecto.
 
+## Pruebas en producción: siempre aisladas, siempre se borran
+
+**Nunca se crean datos de prueba en el tenant real (`hellominus`) ni en el de un cliente.** Toda prueba
+que necesite escribir en producción va en un tenant aparte con slug `demo-pruebas`, que se borra completo
+con `scripts/demo/limpiar-tenant-demo.sql`. Motivo, registro y pasos en
+[`docs/pruebas-en-produccion-que-se-deben-eliminar.md`](docs/pruebas-en-produccion-que-se-deben-eliminar.md).
+
+**Recordatorio para Claude, al abrir cualquier sesión de este proyecto:** lee la fecha de *Última limpieza*
+de ese documento. Si hay datos de prueba vivos y pasaron **más de 4 días** (el usuario pidió que se le
+recuerde dos veces por semana, lunes y jueves), avísale en una frase qué hay que borrar. **No borres nada
+sin que lo pida:** la limpieza es una escritura en producción.
+
 ## La API de ingesta, y por qué su clave no se parece a la del widget
 
 `supabase/functions/ingesta-api/` (candidato [9a], 7 sept 2026) es por donde el sistema propio de
