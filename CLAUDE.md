@@ -51,8 +51,11 @@ la sesión como modo inicial de nuevo.
 
 ## Dónde viven los agentes de este proyecto
 
-`agentes-sdk/` está **vacía a propósito y probablemente se quede así**. Todos los
-agentes de candyCRM son **Edge Functions de Supabase**, en `supabase/functions/`:
+**Ningún agente de producción vive en `agentes-sdk/`** (corregido el 20 oct 2026: esta frase decía que la
+carpeta estaba vacía, y ya no lo está). Ahí solo hay **consolas y bancos de medición** que corren en el
+computador de quien desarrolla, llaman a Claude y NO se despliegan: `chatbot-claude/` (la consola del
+ejercicio de la Academia), `validacion-analista/` y `validacion-rag/`. Todos los agentes de candyCRM que
+atienden a un tenant son **Edge Functions de Supabase**, en `supabase/functions/`:
 
 | Agente | Carpeta | Lo dispara |
 |---|---|---|
@@ -128,6 +131,46 @@ cliente ni toca deals.** Es la memoria compartida que leerán después los agent
 **Límite conocido:** espera mínima de 120 s por conversación y sin barrido periódico (`pg_cron` no
 está habilitado), así que el último mensaje de una ráfaga puede quedar sin analizar hasta que llegue
 otro. **El score es una estimación, no un dato:** no debe ordenar la bandeja por defecto.
+
+## RAG por tenant: qué existe, dónde vive y qué NO conviene "simplificar"
+
+Candidato [10] de `docs/DECISIONES.md` (20 oct 2026). Busca **por significado** en el catálogo de cada
+tenant y responde solo con lo recuperado, citando fuentes. **Hoy no hay pantalla ni agente en producción:**
+existe el motor, la ingesta y la medición. El corpus indexado es el catálogo de Turismo Colombia
+(32 tours) **copiado al tenant `demo-pruebas`**, nunca en un tenant real.
+
+| Pieza | Dónde | Nota |
+|---|---|---|
+| Fragmentos y vectores | tabla `kb_chunks` (`vector(1024)`, HNSW coseno) | Voyage `voyage-3.5`. **Cambiar de modelo obliga a recalcular todos los vectores** |
+| Búsqueda | `public.match_kb_chunks(...)` | `security invoker`, **sin `tenant_id` por parámetro**: el aislamiento lo hace la RLS |
+| Ingesta | `scripts/rag/` | Llama a Voyage, **no a Claude**: por eso es un script y no un agente |
+| Medición que llama a Claude | `agentes-sdk/validacion-rag/` | Haiku responde y Sonnet 5.5 audita cada afirmación |
+| Métricas por consulta | tabla `rag_consultas` + vista `rag_metricas_diarias` | No copia la pregunta del cliente (apunta a `messages`); la escribe solo el servidor |
+
+Lo que no es obvio y conviene no deshacer:
+
+- **El destino de la ingesta está escrito a mano en el código** (`demo-pruebas`), no es parámetro. Es un
+  candado a propósito: un error de tipeo no puede escribir en un tenant real.
+- **`kb_chunks` solo tiene política de lectura.** Se escribe con la clave de servicio, del lado servidor,
+  nunca desde el navegador. Un usuario normal que intenta escribir recibe `42501`.
+- **Un umbral de similitud NO decide el «no lo sé».** Medido: con respuesta la similitud va de 0,33 a 0,74 y
+  sin respuesta de 0,37 a 0,60; el mejor umbral equivale a aceptar todo. Lo decide el modelo que lee lo
+  recuperado, con una instrucción explícita. No agregar un `min_similitud` «para filtrar basura».
+- **La meta de «0 inventos» NO se cumple:** el 8 a 11 % de las respuestas trae un dato sin respaldo. No
+  presentar el RAG como confiable sin decirlo. Detalle y números en `agentes-sdk/validacion-rag/README.md`.
+- **Una sola corrida de evaluación no sirve para comparar mejoras pequeñas:** el mismo prompt dio 11 % y 8 %.
+  Repetir 3 veces o más, y **no afinar el prompt contra el mismo set de preguntas**: falta un set reservado.
+- **`PROMPT_VERSION`** (en `evaluar_fidelidad.py`) se sube cada vez que cambia el prompt: es lo que permite
+  comparar versiones en `rag_metricas_diarias`.
+- **Voyage sin tarjeta limita a 3 peticiones y 10.000 tokens por minuto**: las preguntas de una evaluación
+  viajan juntas en una sola petición.
+- **Riesgo conocido sin verificar:** con muchos tenants cargados el índice HNSW puede devolver menos
+  resultados de los pedidos a un tenant chico (busca primero en toda la tabla y la RLS filtra después). Con un
+  solo tenant con datos no se puede observar: verificarlo antes de vender.
+
+**Dónde vivirá el agente que responde:** hoy es una consola. Si pasa a ser un endpoint, va en
+`supabase/functions/` y **este documento debe decir por qué**, como pasó con los demás agentes (ver *Dónde
+viven los agentes*). Las migraciones del RAG las prepara Claude y **las aplica el usuario** en el SQL Editor.
 
 ## Pruebas en producción: siempre aisladas, siempre se borran
 
