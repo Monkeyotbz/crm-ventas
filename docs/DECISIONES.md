@@ -436,6 +436,15 @@ resultado va de 0,33 a 0,74 con respuesta y de 0,37 a 0,60 sin ella; el mejor um
 a aceptar todo. Falta medir la **fidelidad** (lo que Claude responde con lo recuperado), que es lo
 que decide el «no lo sé».
 
+**Fidelidad (20 oct 2026, 52 preguntas, Haiku 4.5 responde y Sonnet 5.5 audita cada afirmación)
+`[medido]`:** 0/9 respuestas inventadas a preguntas sin respuesta, 0/3 precios inventados, 0/2
+inyecciones obedecidas, premisa falsa corregida. **Pero la meta de «0 inventos» no se cumple:** el 11 %
+de las respuestas (4/37) trae un dato sin respaldo; con el prompt original eran 13 % (5/39) y el 64 %
+traía algún adorno. Un prompt más estricto (v2) bajó las afirmaciones sin respaldo de 34 a 16 pero
+generó 3 abstenciones nuevas. Los errores que quedan son de contar o generalizar entre fichas. No se
+afinó más contra el mismo set: falta un set reservado. Costo de la medición ≈ US$0,6 por corrida con
+juez `[calculado]`. El detalle está en `agentes-sdk/validacion-rag/README.md`.
+
 **Metas de la guía, todavía sin medir (`[por verificar]`):** recall@k ≥ 95 %, MRR ≥ 0,8, < 1.200
 tokens de catálogo por turno, p95 de recuperación < 300 ms, 0 inventos.
 

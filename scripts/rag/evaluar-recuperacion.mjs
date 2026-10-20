@@ -44,7 +44,8 @@ for (const v of ['VITE_SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'VOYAGE_API_K
 }
 const db = createClient(env.VITE_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } });
 
-const preguntas = JSON.parse(readFileSync(SET, 'utf8')).preguntas;
+// Los casos duros de fidelidad (inyección, premisa falsa…) no miden la recuperación: se excluyen.
+const preguntas = JSON.parse(readFileSync(SET, 'utf8')).preguntas.filter((p) => !p.solo_fidelidad);
 const textoConsulta = (p) => [...(p.contexto ?? []), p.pregunta].join(' ');
 
 const pct = (v, p) => { const s = [...v].sort((a, b) => a - b); return s[Math.min(s.length - 1, Math.ceil(p * s.length) - 1)]; };
