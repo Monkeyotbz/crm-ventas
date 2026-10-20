@@ -6,14 +6,67 @@
 
 import { supabase } from "./supabase.js";
 
-export async function listarConversaciones() {
-  const { data, error } = await supabase
-    .from("inbox_conversaciones")
-    .select("*")
-    .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false });
+/** Cuántas conversaciones trae cada tanda. "Ver más" suma otra. */
+export const TANDA_CONVERSACIONES = 50;
 
+/**
+ * Cortes del score de la IA. Son los mismos que `nivel_interes` en la base, que
+ * `estiloScoreLista` y que el panel Copiloto: si cambian, cambian en los cuatro.
+ * `sin_analizar` es score nulo, que NO es lo mismo que score bajo.
+ */
+const FILTROS_INTERES = {
+  alto: (q) => q.gte("score", 75),
+  medio: (q) => q.gte("score", 50).lt("score", 75),
+  bajo: (q) => q.lt("score", 50),
+  sin_analizar: (q) => q.is("score", null),
+};
+
+function aplicarFiltros(q, { canal, interes }) {
+  if (canal && canal !== "todos") q = q.eq("canal", canal);
+  if (interes && FILTROS_INTERES[interes]) q = FILTROS_INTERES[interes](q);
+  return q;
+}
+
+/**
+ * Una tanda de conversaciones, con los filtros aplicados EN LA BASE y no sobre lo
+ * que ya se bajó: con filtro en el cliente, "Interés alto" solo vería las altas de
+ * las primeras 50 y escondería el resto sin avisar.
+ *
+ * Devuelve `{ filas, total }`: `total` es cuántas hay en TODA la lista filtrada,
+ * para saber si queda algo por traer. El orden sigue siendo por fecha, a propósito:
+ * el score es una estimación y no debe decidir el orden por defecto.
+ */
+export async function listarConversaciones({ canal = "todos", interes = null, limite = TANDA_CONVERSACIONES } = {}) {
+  const q = aplicarFiltros(
+    supabase.from("inbox_conversaciones").select("*", { count: "exact" }),
+    { canal, interes },
+  )
+    .order("ultimo_mensaje_at", { ascending: false, nullsFirst: false })
+    .range(0, limite - 1);
+
+  const { data, error, count } = await q;
   if (error) throw new Error(`inbox_conversaciones: ${error.message}`);
-  return data ?? [];
+  return { filas: data ?? [], total: count ?? (data?.length ?? 0) };
+}
+
+/**
+ * Cuántas conversaciones hay en cada nivel de interés, respetando el filtro de
+ * canal. Cuatro consultas de solo conteo (`head: true`, no bajan filas), en
+ * paralelo. RLS las limita a lo que este usuario puede ver, igual que la lista.
+ */
+export async function contarPorInteres({ canal = "todos" } = {}) {
+  const niveles = Object.keys(FILTROS_INTERES);
+  const resultados = await Promise.all(
+    niveles.map(async (nivel) => {
+      const { count, error } = await aplicarFiltros(
+        supabase.from("inbox_conversaciones").select("conversation_id", { count: "exact", head: true }),
+        { canal, interes: nivel },
+      );
+      if (error) throw new Error(`inbox_conversaciones (conteo ${nivel}): ${error.message}`);
+      return [nivel, count ?? 0];
+    }),
+  );
+  return Object.fromEntries(resultados);
 }
 
 export async function listarMensajes(conversationId) {

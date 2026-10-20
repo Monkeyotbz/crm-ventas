@@ -2,8 +2,22 @@ import { CANALES, estiloCanal, estiloScoreLista, formatearHora, iniciales } from
 
 const FILTROS = [{ id: "todos", etiqueta: "Todos" }, ...Object.entries(CANALES).map(([id, c]) => ({ id, etiqueta: c.etiqueta }))];
 
-export default function ListaConversaciones({ conversaciones, filtro, onFiltro, seleccionadaId, onSeleccionar }) {
-  const visibles = conversaciones.filter((c) => filtro === "todos" || c.canal === filtro);
+// Filtros por interés de la IA. Los colores son los de la opción C del canvas (tonos
+// oscuros sobre fondo claro para pasar 4.5:1). `activo` es el relleno sólido al elegirlo.
+const FILTROS_INTERES = [
+  { id: "alto", etiqueta: "Alto", texto: "#a3195b", fondo: "#ffe0ee", borde: "#f4a3c8", activo: "#a3195b" },
+  { id: "medio", etiqueta: "Medio", texto: "#2453a6", fondo: "#e1ecff", borde: "#a9c4f5", activo: "#2453a6" },
+  { id: "bajo", etiqueta: "Bajo", texto: "#5f5480", fondo: "#ece8f4", borde: "#cfc6e2", activo: "#5f5480" },
+  { id: "sin_analizar", etiqueta: "Sin analizar", texto: "#6f6590", fondo: "transparent", borde: "#b9afd0", activo: "#6f6590" },
+];
+
+export default function ListaConversaciones({
+  conversaciones, total, conteos, filtro, onFiltro, interes, onInteres, cargando, onVerMas, seleccionadaId, onSeleccionar,
+}) {
+  // La lista ya llega filtrada por canal e interés desde la base (ver bandeja.js).
+  const visibles = conversaciones;
+  const faltan = Math.max(0, (total ?? visibles.length) - visibles.length);
+  const hayFiltro = filtro !== "todos" || interes != null;
 
   return (
     // El ancho lo decide el contenedor de Bandeja.jsx según el breakpoint
@@ -33,12 +47,38 @@ export default function ListaConversaciones({ conversaciones, filtro, onFiltro, 
             );
           })}
         </div>
+
+        <div role="group" aria-label="Filtrar por interés de la IA" className="flex flex-wrap items-center gap-1.5 mt-2">
+          <span className="text-[10px] font-bold uppercase tracking-wide text-candy-tinta-media mr-0.5">Interés</span>
+          {FILTROS_INTERES.map((f) => {
+            const activo = interes === f.id;
+            const n = conteos?.[f.id];
+            return (
+              <button
+                key={f.id}
+                type="button"
+                aria-pressed={activo}
+                // Volver a pulsar el filtro activo lo quita: "todos" no necesita su propio botón.
+                onClick={() => onInteres(activo ? null : f.id)}
+                className="rounded-full px-2.5 py-1 text-[10.5px] font-bold border transition-colors"
+                style={
+                  activo
+                    ? { background: f.activo, borderColor: f.activo, color: "#fff", boxShadow: "0 3px 8px rgba(0,0,0,0.12)" }
+                    : { background: f.fondo, borderColor: f.borde, color: f.texto, borderStyle: f.id === "sin_analizar" ? "dashed" : "solid" }
+                }
+              >
+                {f.etiqueta}
+                {n != null && <span className="ml-1 font-mono font-semibold">{n}</span>}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto px-2.5 pb-2.5 flex flex-col gap-1.5">
         {visibles.length === 0 && (
           <p className="text-center text-xs text-candy-tinta-tenue py-8 px-3">
-            {filtro === "todos" ? "Todavía no llegó ninguna conversación." : "Nada en este canal todavía."}
+            {hayFiltro ? "Ninguna conversación con estos filtros." : "Todavía no llegó ninguna conversación."}
           </p>
         )}
         {visibles.map((c) => {
@@ -88,6 +128,25 @@ export default function ListaConversaciones({ conversaciones, filtro, onFiltro, 
             </div>
           );
         })}
+
+        {visibles.length > 0 && (
+          <div className="flex flex-col items-center gap-2 pt-2 pb-1">
+            <p className="text-[10.5px] text-candy-tinta-media" aria-live="polite">
+              Mostrando {visibles.length} de {total ?? visibles.length}
+            </p>
+            {faltan > 0 && (
+              <button
+                type="button"
+                onClick={onVerMas}
+                disabled={cargando}
+                className="rounded-full px-4 py-2 min-h-[36px] text-[11px] font-bold border transition-colors disabled:opacity-60"
+                style={{ background: "rgba(255,255,255,0.7)", borderColor: "rgba(255,255,255,0.9)", color: "#5f5480" }}
+              >
+                {cargando ? "Cargando…" : `Ver ${Math.min(faltan, 50)} más`}
+              </button>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

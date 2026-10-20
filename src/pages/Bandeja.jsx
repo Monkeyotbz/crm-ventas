@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import BarraSuperior from "../components/inbox/BarraSuperior.jsx";
 import ListaConversaciones from "../components/inbox/ListaConversaciones.jsx";
 import HiloMensajes from "../components/inbox/HiloMensajes.jsx";
@@ -11,7 +11,7 @@ import MiCuenta from "./MiCuenta.jsx";
 import Catalogo from "./Catalogo.jsx";
 import Panel from "./Panel.jsx";
 import Pipeline from "./Pipeline.jsx";
-import { listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
+import { TANDA_CONVERSACIONES, contarPorInteres, listarConversaciones, suscribirMensajesNuevos } from "../lib/bandeja.js";
 import { obtenerMiRol } from "../lib/configuracionMeta.js";
 import { obtenerModulos } from "../lib/modulos.js";
 
@@ -29,6 +29,8 @@ import { obtenerModulos } from "../lib/modulos.js";
 //   ≥1024px (desktop): las tres columnas fijas, que es el diseño original.
 export default function Bandeja() {
   const [filtro, setFiltro] = useState("todos");
+  const [interes, setInteres] = useState(null); // null | "alto" | "medio" | "bajo" | "sin_analizar"
+  const [limite, setLimite] = useState(TANDA_CONVERSACIONES); // cuántas conversaciones se piden
   const [seleccionadaId, setSeleccionadaId] = useState(null);
   const [pagina, setPagina] = useState("bandeja"); // "bandeja" | "panel" | "pipeline" | "configuracion-meta" | "claves-api" | "mi-cuenta" | "catalogo"
   const [rol, setRol] = useState(null);
@@ -45,10 +47,26 @@ export default function Bandeja() {
     obtenerModulos().then(setModulos).catch(() => setModulos(["crm"]));
   }, []);
 
-  const { data: conversaciones, isLoading, error } = useQuery({
-    queryKey: ["conversaciones"],
-    queryFn: listarConversaciones,
+  // El filtro por canal y el de interés se aplican en la base. `keepPreviousData`
+  // deja la lista anterior en pantalla mientras llega la nueva: sin él, cada clic
+  // en un filtro vaciaría todo y mostraría "Cargando la bandeja…".
+  const { data: lista, isLoading, isFetching, error } = useQuery({
+    queryKey: ["conversaciones", { canal: filtro, interes, limite }],
+    queryFn: () => listarConversaciones({ canal: filtro, interes, limite }),
+    placeholderData: keepPreviousData,
   });
+  const conversaciones = lista?.filas;
+
+  const { data: conteos } = useQuery({
+    queryKey: ["conversaciones-conteo", { canal: filtro }],
+    queryFn: () => contarPorInteres({ canal: filtro }),
+    placeholderData: keepPreviousData,
+  });
+
+  // Cambiar de filtro vuelve a la primera tanda: si no, "Ver más" de un filtro
+  // anterior dejaría la lista nueva con 150 filas pedidas sin que nadie las pidiera.
+  const cambiarFiltro = (nuevo) => { setFiltro(nuevo); setLimite(TANDA_CONVERSACIONES); };
+  const cambiarInteres = (nuevo) => { setInteres(nuevo); setLimite(TANDA_CONVERSACIONES); };
 
   // Mensaje nuevo en cualquier conversación del tenant → refresca la lista
   // (nuevo preview/orden) y, si es la que se está mirando, el hilo también.
@@ -56,15 +74,18 @@ export default function Bandeja() {
   useEffect(() => {
     const desuscribir = suscribirMensajesNuevos((mensaje) => {
       queryClient.invalidateQueries({ queryKey: ["conversaciones"] });
+      queryClient.invalidateQueries({ queryKey: ["conversaciones-conteo"] });
       queryClient.invalidateQueries({ queryKey: ["mensajes", mensaje.conversation_id] });
     });
     return desuscribir;
   }, [queryClient]);
 
-  // Si no hay ninguna seleccionada todavía, elegir la primera de la lista
-  // apenas llega — así la pantalla no arranca vacía a la derecha.
+  // Si no hay ninguna seleccionada todavía —o la que estaba quedó fuera por un
+  // filtro nuevo—, elegir la primera de la lista: así la pantalla no queda vacía
+  // a la derecha ni mostrando una conversación que ya no está en la lista.
   useEffect(() => {
-    if (seleccionadaId == null && conversaciones?.length) {
+    if (!conversaciones?.length) return;
+    if (seleccionadaId == null || !conversaciones.some((c) => c.conversation_id === seleccionadaId)) {
       setSeleccionadaId(conversaciones[0].conversation_id);
     }
   }, [conversaciones, seleccionadaId]);
@@ -154,8 +175,14 @@ export default function Bandeja() {
             >
               <ListaConversaciones
                 conversaciones={conversaciones}
+                total={lista.total}
+                conteos={conteos}
                 filtro={filtro}
-                onFiltro={setFiltro}
+                onFiltro={cambiarFiltro}
+                interes={interes}
+                onInteres={cambiarInteres}
+                cargando={isFetching}
+                onVerMas={() => setLimite((l) => l + TANDA_CONVERSACIONES)}
                 seleccionadaId={seleccionadaId}
                 onSeleccionar={seleccionar}
               />
