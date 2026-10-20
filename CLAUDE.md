@@ -134,7 +134,7 @@ otro. **El score es una estimación, no un dato:** no debe ordenar la bandeja po
 **Nunca se crean datos de prueba en el tenant real (`hellominus`) ni en el de un cliente.** Toda prueba
 que necesite escribir en producción va en un tenant aparte con slug `demo-pruebas`, que se borra completo
 con `scripts/demo/limpiar-tenant-demo.sql`. Motivo, registro y pasos en
-[`docs/pruebas-en-produccion-que-se-deben-eliminar.md`](docs/pruebas-en-produccion-que-se-deben-eliminar.md).
+[`documentación importante/pruebas-en-produccion-que-se-deben-eliminar.md`](documentaci%C3%B3n%20importante/pruebas-en-produccion-que-se-deben-eliminar.md).
 
 **Recordatorio para Claude, al abrir cualquier sesión de este proyecto:** lee la fecha de *Última limpieza*
 de ese documento. Si hay datos de prueba vivos y pasaron **más de 4 días** (el usuario pidió que se le

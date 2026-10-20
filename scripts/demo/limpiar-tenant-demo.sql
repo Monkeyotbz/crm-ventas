@@ -1,5 +1,5 @@
 -- Borra el tenant de PRUEBA 'demo-pruebas' y todo lo que cuelga de él.
--- Documento y motivo: docs/pruebas-en-produccion-que-se-deben-eliminar.md
+-- Documento y motivo: documentación importante/pruebas-en-produccion-que-se-deben-eliminar.md
 --
 -- Seguridad: el slug está escrito a mano abajo y no es un parámetro. Este script NO puede
 -- tocar 'hellominus' ni ningún tenant de cliente. Es idempotente: si el tenant no existe,

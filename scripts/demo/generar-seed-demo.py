@@ -7,7 +7,7 @@ tenant demo muestra scores reales del agente, sin gastar tokens al sembrar). Dup
 
     python scripts/demo/generar-seed-demo.py
 
-Documento y motivo: docs/pruebas-en-produccion-que-se-deben-eliminar.md
+Documento y motivo: documentación importante/pruebas-en-produccion-que-se-deben-eliminar.md
 """
 import glob
 import json
@@ -63,7 +63,7 @@ def main():
 
     sql = f"""-- Siembra el tenant de PRUEBA 'demo-pruebas' con {len(datos)} conversaciones de ejemplo.
 -- GENERADO por scripts/demo/generar-seed-demo.py: no editar a mano, volver a generar.
--- Documento y motivo: docs/pruebas-en-produccion-que-se-deben-eliminar.md
+-- Documento y motivo: documentación importante/pruebas-en-produccion-que-se-deben-eliminar.md
 -- Para borrarlo todo: scripts/demo/limpiar-tenant-demo.sql
 --
 -- ANTES DE CORRERLO:
