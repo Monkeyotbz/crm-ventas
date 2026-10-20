@@ -376,6 +376,45 @@ solo INGESTA, así que un MCP encima de ella hoy únicamente podría *crear* lea
 mover nada. Para que [9b] valga la pena como "operá el CRM por vos", primero haría falta la parte
 de lectura/operación que [9a] dejó afuera.
 
+### [10] RAG por tenant: el Copiloto consulta el catálogo y las FAQ buscando por significado
+Estado: ACEPTADO (20 oct 2026, decisión explícita del usuario)
+Procedencia: traspaso desde la Academia RAG - Búsqueda semántica (decisión D-7 de esa academia),
+  `traspasos/CRM-VENTAS-RAG.md` — documento que vive en la academia, no en este repo.
+Mecanismo: **dos piezas separadas por la regla del laboratorio** (qué *es* cada una, no dónde corre):
+  (a) la **ingesta** llama a una API de embeddings, no a Claude → código determinístico, en
+  `scripts/rag/` (Node, igual que `scripts/importar-catalogo-turismo.mjs`); (b) el **agente que
+  responde con lo recuperado** sí llama a Claude → `agentes-sdk/` mientras sea una consola de
+  medición; si más adelante tiene que ser un endpoint, pasa a `supabase/functions/` y el
+  `CLAUDE.md` dice por qué.
+Composición: un solo agente. Destraba los agentes aplazados [6a] Bot de Catálogo y [6c]
+  Soporte/FAQ, que hoy no tienen contra qué buscar.
+Condición de activación: ninguna pendiente — se acepta de entrada.
+
+**Decisiones tomadas el 20 oct 2026:**
+- **Embeddings: Voyage AI `voyage-3.5`, 1024 dimensiones.** Se eligió sobre OpenAI
+  `text-embedding-3-small` (1536, que no exigía migrar la columna) por ser el que recomienda
+  Anthropic y multilingüe. Costo asumido: `kb_chunks.embedding` pasa de `vector(1536)` a
+  `vector(1024)` con migración nueva (la tabla está vacía, verificado el 20 oct: 0 filas). **Cambiar
+  de modelo después obliga a recalcular todos los vectores.**
+- **Orden: consola primero, Edge Function después.** Se mide recall, tokens y latencia con una
+  consola (patrón de `agentes-sdk/validacion-analista/`) antes de exponerlo como endpoint.
+- **Corpus inicial: el catálogo de Turismo Colombia (32 tours publicados), copiado al tenant
+  `demo-pruebas`.** Nunca se escribe en el tenant real `turismo-colombia`: ver
+  `documentación importante/pruebas-en-produccion-que-se-deben-eliminar.md`.
+- **Migraciones: las prepara Claude y las aplica el usuario** en el SQL Editor, avisando antes.
+  El traspaso pide además avisar al dueño del repo antes de aplicar migraciones a la base real;
+  el usuario decide si y cuándo se lo cuenta a Gabriel.
+
+**Dos diferencias entre el traspaso y la realidad, anotadas para que no se repitan:**
+- El traspaso dice que los cambios llegan a la rama principal "por pull request que revisa el
+  dueño". Aquí se empuja directo a `juanse-candycrm-ventas` y luego a `main`, por decisión del
+  usuario (ver memoria del repo). Manda el `CLAUDE.md`.
+- El traspaso da por hecho el tenant `demo-pruebas`; los scripts existen pero el tenant **todavía
+  no estaba creado** el 20 oct. La ingesta (paso 4) depende de crearlo.
+
+**Metas de la guía, todavía sin medir (`[por verificar]`):** recall@k ≥ 95 %, MRR ≥ 0,8, < 1.200
+tokens de catálogo por turno, p95 de recuperación < 300 ms, 0 inventos.
+
 ---
 
 ## Preguntas abiertas — pendientes de que el usuario retome la decisión
