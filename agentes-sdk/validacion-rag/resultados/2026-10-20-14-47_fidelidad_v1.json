@@ -1,0 +1,1047 @@
+{
+  "etiqueta": "v1",
+  "modelo": "claude-haiku-4-5-20251001",
+  "correctas": 45,
+  "total": 45,
+  "tokens_entrada": 119788,
+  "tokens_salida": 9195,
+  "costo_usd_estimado": 0.1658,
+  "filas": [
+    {
+      "id": "R01",
+      "tipo": "explicita",
+      "pregunta": "Quiero el tour de Guatapé",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tenemos el tour «Guatapé + Piedra del Peñol» para ti. Esta excursión desde Medellín te lleva a subir la famosa Piedra del Peñol, recorrer el embalse y explorar el pueblo de Guatapé con su arquitectura patrimonial de zócalos de colores. Dura entre 7 y 9 horas con salida temprano por la mañana, e incluye guía turístico, transporte, recorrido en lancha y tarjeta de asistencia médica. Para conocer el precio, debes consultarlo directamente con el operador.",
+      "fuentes": [
+        "guatape-piedra-del-penol"
+      ],
+      "recuperados": [
+        "guatape-piedra-del-penol 0.63",
+        "travesia-salto-del-angel-jardin 0.55",
+        "travesia-resguardo-indigena-jardin 0.51",
+        "graffiti-tour-comuna-13 0.51",
+        "travesia-cristo-rey-jardin 0.51",
+        "parque-arvi-medellin 0.50"
+      ],
+      "tokens_entrada": 2590,
+      "tokens_salida": 241,
+      "ms": 3507
+    },
+    {
+      "id": "R02",
+      "tipo": "explicita",
+      "pregunta": "¿Tienen algo en Hacienda Nápoles?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Sí! Tenemos el tour «Parque Temático Hacienda Nápoles» en Doradal, Antioquia. Es un día completo (8–9 horas) perfecto para toda la familia con atracciones acuáticas, safari africano y fauna. Incluye transporte, safari y guía. Para conocer el precio, te invito a consultarlo con el operador.",
+      "fuentes": [
+        "hacienda-napoles"
+      ],
+      "recuperados": [
+        "hacienda-napoles 0.33",
+        "isla-del-encanto-cartagena 0.25",
+        "tour-gastronomico-medellin 0.25",
+        "palmarito-beach-club 0.25",
+        "isla-tierra-bomba 0.24",
+        "centro-historico-plaza-botero 0.24"
+      ],
+      "tokens_entrada": 2613,
+      "tokens_salida": 176,
+      "ms": 2241
+    },
+    {
+      "id": "R03",
+      "tipo": "explicita",
+      "pregunta": "Quiero conocer la Comuna 13",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Excelente elección! Tenemos el **Graffiti tour + Comuna 13** en Medellín, un recorrido guiado de 3 horas por la Comuna 13 con escaleras eléctricas, arte urbano e historias de transformación. Incluye guía local y transporte, con salidas AM y PM desde COP 80.000. También está disponible nuestro **City tour completo** que incluye la Comuna 13 junto con otros atractivos como Pueblito Paisa, Milla de Oro y Parque Botero en 3-4 horas (consultar precio). ¿Te gustaría más detalles de alguno?",
+      "fuentes": [
+        "graffiti-tour-comuna-13",
+        "city-tour-medellin"
+      ],
+      "recuperados": [
+        "graffiti-tour-comuna-13 0.42",
+        "city-tour-medellin 0.34",
+        "travesia-resguardo-indigena-jardin 0.34",
+        "bora-bora-beach-club-cartagena 0.33",
+        "palmarito-beach-club 0.33",
+        "pao-pao-beach-club-cartagena 0.32"
+      ],
+      "tokens_entrada": 2637,
+      "tokens_salida": 256,
+      "ms": 3073
+    },
+    {
+      "id": "R04",
+      "tipo": "explicita",
+      "pregunta": "Información del Parque Arví",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Claro! El Parque Arví es una excursión de medio día en Medellín donde viajas en metrocable hasta este parque natural. Allí encontrarás senderos para caminar, actividades al aire libre y vistas panorámicas hermosas de Medellín y sus alrededores. Es una experiencia de dificultad moderada perfecta para escapar de la ciudad y disfrutar de la naturaleza. Incluye transporte y guía. El precio no está publicado, así que debes consultarlo directamente con el operador.",
+      "fuentes": [
+        "parque-arvi-medellin"
+      ],
+      "recuperados": [
+        "parque-arvi-medellin 0.52",
+        "hacienda-napoles 0.43",
+        "travesia-gallito-de-roca-jardin 0.42",
+        "parque-explora-jardin-botanico 0.41",
+        "travesia-resguardo-indigena-jardin 0.40",
+        "travesia-salto-del-angel-jardin 0.40"
+      ],
+      "tokens_entrada": 2592,
+      "tokens_salida": 213,
+      "ms": 2570
+    },
+    {
+      "id": "R05",
+      "tipo": "explicita",
+      "pregunta": "Quiero ir a Isla Cholón",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Excelente elección! Tenemos el tour «Isla Cholón — full day en lancha» que te lleva a la bahía de Cholón con piscina natural. Sale a las 8:00 a.m. desde Cartagena y regresa a las 4:00 p.m. El tour incluye transporte en lancha, almuerzo típico, hidratación y entradas. Para conocer el precio, debes consultarlo con el operador. ¿Te gustaría más información sobre este tour?",
+      "fuentes": [
+        "isla-cholon-cartagena"
+      ],
+      "recuperados": [
+        "isla-cholon-cartagena 0.64",
+        "tour-5-islas-vip-deportivo 0.56",
+        "isla-del-sol-cartagena 0.56",
+        "isla-tierra-bomba 0.56",
+        "isla-del-encanto-cartagena 0.55",
+        "tour-4-islas-cartagena 0.55"
+      ],
+      "tokens_entrada": 2878,
+      "tokens_salida": 205,
+      "ms": 2145
+    },
+    {
+      "id": "R06",
+      "tipo": "explicita",
+      "pregunta": "¿Hacen el viaje a Playa Blanca?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Claro que sí! Ofrecemos viajes a Playa Blanca de dos formas: el tour «Playa Blanca — full day» es un tour dedicado exclusivamente a esta hermosa playa de arena blanca y agua turquesa en la isla de Barú, con salida a las 7:30 a. m. y regreso a las 3:00 p. m. También puedes visitarla en el «Tour 4 Islas», que recorre cuatro islas del archipiélago incluyendo Playa Blanca. Para conocer los precios y detalles, te invitamos a consultarlos con nuestro operador.",
+      "fuentes": [
+        "playa-blanca-cartagena",
+        "tour-4-islas-cartagena"
+      ],
+      "recuperados": [
+        "playa-blanca-cartagena 0.57",
+        "tour-4-islas-cartagena 0.50",
+        "palmarito-beach-club 0.49",
+        "pao-pao-beach-club-cartagena 0.49",
+        "playa-tranquila-cartagena 0.49",
+        "tour-5-islas-vip-deportivo 0.48"
+      ],
+      "tokens_entrada": 2820,
+      "tokens_salida": 254,
+      "ms": 3066
+    },
+    {
+      "id": "R07",
+      "tipo": "explicita",
+      "pregunta": "Quiero subir a la Piedra del Peñol",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tenemos el tour «Guatapé + Piedra del Peñol» que incluye subir la Piedra del Peñol, además de recorrer el embalse y los zócalos de Guatapé. Es una excursión de 7–9 horas desde Medellín con guía turístico, transporte y recorrido en lancha. Para conocer el precio y confirmar disponibilidad, te invito a consultarlo con el operador.",
+      "fuentes": [
+        "guatape-piedra-del-penol"
+      ],
+      "recuperados": [
+        "guatape-piedra-del-penol 0.52",
+        "travesia-cristo-rey-jardin 0.45",
+        "travesia-salto-del-angel-jardin 0.45",
+        "travesia-filo-de-oro-jardin 0.44",
+        "graffiti-tour-comuna-13 0.43",
+        "palmarito-beach-club 0.43"
+      ],
+      "tokens_entrada": 2704,
+      "tokens_salida": 202,
+      "ms": 2350
+    },
+    {
+      "id": "R08",
+      "tipo": "explicita",
+      "pregunta": "¿Se puede ver el gallito de roca?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Claro que sí! Tenemos un tour especial de avistamiento del Gallito de Roca en Jardín, Antioquia. El tour incluye guía, entrada, hidratación y tarjeta de asistencia médica, con salidas al amanecer (5:30 a.m.) o al atardecer (4:30 p.m.). La experiencia dura aproximadamente 1 hora y es de dificultad fácil. Para conocer el precio, te invitamos a consultarlo directamente con el operador.",
+      "fuentes": [
+        "travesia-gallito-de-roca-jardin"
+      ],
+      "recuperados": [
+        "travesia-gallito-de-roca-jardin 0.49",
+        "travesia-cristo-rey-jardin 0.33",
+        "graffiti-tour-comuna-13 0.31",
+        "travesia-salto-del-angel-jardin 0.31",
+        "travesia-filo-de-oro-jardin 0.31",
+        "guatape-piedra-del-penol 0.30"
+      ],
+      "tokens_entrada": 2689,
+      "tokens_salida": 216,
+      "ms": 2662
+    },
+    {
+      "id": "R09",
+      "tipo": "vaga",
+      "pregunta": "algo tranquilo para mi esposo",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Qué lindo! Tenemos opciones perfectas para ustedes. Recomiendo **Playa Tranquila** en Cartagena: una playa apartada sin multitudes, con almuerzo de pescado frito a bordo. Es un full day muy relajante (7:30 a.m. - 3:00 p.m.) que incluye transporte, comida típica y guía. También está **Isla Tierra Bomba**, una escapada corta con almuerzo en la isla frente al skyline de Cartagena (8:00 a.m. - 4:00 p.m.). Ambas tienen dificultad fácil y son muy tranquilas. ¿Te gustaría más información de alguna?",
+      "fuentes": [
+        "playa-tranquila-cartagena",
+        "isla-tierra-bomba"
+      ],
+      "recuperados": [
+        "travesia-del-amor-jardin 0.41",
+        "playa-tranquila-cartagena 0.33",
+        "isla-tierra-bomba 0.30",
+        "palmarito-beach-club 0.30",
+        "parque-arvi-medellin 0.30",
+        "sibarita-cena-gourmet-cartagena 0.29"
+      ],
+      "tokens_entrada": 2626,
+      "tokens_salida": 273,
+      "ms": 3170
+    },
+    {
+      "id": "R10",
+      "tipo": "vaga",
+      "pregunta": "una fiesta con música y licor en el mar",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Te recomiendo el tour **\"Bahía Rumbera en bote deportivo\"** en Cartagena. Es una fiesta a bordo con barra libre de ron, DJ en vivo, y recorrido por la bahía visitando Manga, Castillo Grande y el galeón pirata. Incluye pasabocas, agua, cumbia, salsa y pachanga, con capacidad para hasta 14 personas. La duración es de aproximadamente 3 horas. El precio no está publicado, así que debes consultarlo directamente con el operador.",
+      "fuentes": [
+        "bahia-rumbera-bote-deportivo"
+      ],
+      "recuperados": [
+        "bahia-rumbera-bote-deportivo 0.53",
+        "sibarita-cena-gourmet-cartagena 0.51",
+        "bora-bora-beach-club-cartagena 0.46",
+        "tour-5-islas-vip-deportivo 0.46",
+        "palmarito-beach-club 0.43",
+        "isla-del-sol-cartagena 0.43"
+      ],
+      "tokens_entrada": 2779,
+      "tokens_salida": 221,
+      "ms": 2755
+    },
+    {
+      "id": "R11",
+      "tipo": "vaga",
+      "pregunta": "caminata exigente en la montaña",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tengo una excelente opción para ti: la **Travesía Salto del Ángel** en Jardín, Antioquia. Es una caminata de 6 a 7 horas con dificultad difícil, que te lleva por el Camino del Diablo y el santuario de los guácharos hasta la cascada Salto del Ángel. Incluye transporte, guía, almuerzo y tarjeta de asistencia médica. El precio hay que consultarlo con el operador. ¿Te gustaría conocer más detalles?",
+      "fuentes": [
+        "travesia-salto-del-angel-jardin"
+      ],
+      "recuperados": [
+        "travesia-filo-de-oro-jardin 0.51",
+        "travesia-salto-del-angel-jardin 0.51",
+        "travesia-cristo-rey-jardin 0.49",
+        "parque-arvi-medellin 0.43",
+        "travesia-finca-cafetera-jardin 0.41",
+        "travesia-resguardo-indigena-jardin 0.41"
+      ],
+      "tokens_entrada": 2696,
+      "tokens_salida": 228,
+      "ms": 2649
+    },
+    {
+      "id": "R12",
+      "tipo": "vaga",
+      "pregunta": "un plan romántico para nuestro aniversario",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Qué especial! Para celebrar su aniversario, les recomiendo el tour **Travesía del Amor — Jardín**, en Antioquia. Es un plan romántico diseñado con decoración, velas, chocolates y una cena con bebida a elección (vino, ron 8 años o whisky). El tour es para 2 personas y se realiza en la noche. Como no tiene precio publicado, pueden consultarlo directamente con el operador. ¡Será una noche inolvidable!",
+      "fuentes": [
+        "travesia-del-amor-jardin"
+      ],
+      "recuperados": [
+        "travesia-del-amor-jardin 0.73",
+        "sibarita-cena-gourmet-cartagena 0.52",
+        "travesia-filo-de-oro-jardin 0.46",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "isla-del-encanto-cartagena 0.45",
+        "tour-5-islas-vip-deportivo 0.45"
+      ],
+      "tokens_entrada": 2689,
+      "tokens_salida": 205,
+      "ms": 2913
+    },
+    {
+      "id": "R13",
+      "tipo": "vaga",
+      "pregunta": "quiero aprender cómo se hace el café",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Excelente idea! Tenemos dos tours perfectos en Jardín, Antioquia donde aprenderás todo el proceso del café. La «Travesía Finca Cafetera» y el «Tour de café en Jardín» te muestran desde la recolección hasta la taza, con degustación incluida. Ambos duran medio día, tienen salidas por la mañana y son muy accesibles. ¡El aprendizaje culinario te espera!",
+      "fuentes": [
+        "travesia-finca-cafetera-jardin",
+        "tour-de-cafe-jardin"
+      ],
+      "recuperados": [
+        "travesia-finca-cafetera-jardin 0.58",
+        "tour-de-cafe-jardin 0.57",
+        "tour-gastronomico-medellin 0.43",
+        "centro-historico-plaza-botero 0.39",
+        "city-tour-chiva-cartagena 0.39",
+        "travesia-filo-de-oro-jardin 0.39"
+      ],
+      "tokens_entrada": 2550,
+      "tokens_salida": 209,
+      "ms": 2825
+    },
+    {
+      "id": "R14",
+      "tipo": "vaga",
+      "pregunta": "algo con piscina y hamacas para descansar todo el día",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tengo varias opciones ideales para ti en Cartagena. Te recomiendo el **Pao Pao Beach Club** o el **Palmarito Beach** en Isla Tierra Bomba: ambos ofrecen piscina, hamacas cómodas, cóctel de bienvenida y almuerzo completo. También está **Bora Bora Beach Club** en Barú, con piscina y bar acondicionado para relajarte todo el día. Todos son tours full day y los precios hay que consultarlos con el operador.",
+      "fuentes": [
+        "pao-pao-beach-club-cartagena",
+        "palmarito-beach-club",
+        "bora-bora-beach-club-cartagena"
+      ],
+      "recuperados": [
+        "pao-pao-beach-club-cartagena 0.58",
+        "isla-del-encanto-cartagena 0.56",
+        "palmarito-beach-club 0.55",
+        "isla-cholon-cartagena 0.52",
+        "bora-bora-beach-club-cartagena 0.51",
+        "isla-del-sol-cartagena 0.51"
+      ],
+      "tokens_entrada": 2836,
+      "tokens_salida": 249,
+      "ms": 2861
+    },
+    {
+      "id": "R15",
+      "tipo": "vaga",
+      "pregunta": "quiero probar la comida típica paisa",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tenemos el Tour gastronómico por Medellín, que te lleva en un viaje culinario por los sabores de la región: probarás platos tradicionales como la bandeja paisa, la arepa de chócolo y la lechona, además de propuestas modernas en restaurantes y mercados locales. El tour dura entre 3 y 4 horas, con salidas disponibles en horarios AM y PM, y va acompañado de un guía. Para conocer el precio, debes consultarlo directamente con el operador.",
+      "fuentes": [
+        "tour-gastronomico-medellin"
+      ],
+      "recuperados": [
+        "tour-gastronomico-medellin 0.60",
+        "pao-pao-beach-club-cartagena 0.56",
+        "playa-tranquila-cartagena 0.53",
+        "sibarita-cena-gourmet-cartagena 0.52",
+        "isla-del-encanto-cartagena 0.51",
+        "palmarito-beach-club 0.51"
+      ],
+      "tokens_entrada": 2720,
+      "tokens_salida": 217,
+      "ms": 2760
+    },
+    {
+      "id": "R16",
+      "tipo": "vaga",
+      "pregunta": "una cena elegante con vino y mariscos",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tenemos la experiencia ideal para ti: el tour «Sibarita — cena gourmet de 5 tiempos» en Cartagena. Es una cena privada de cinco tiempos con maridaje de vino, mariscos frescos y música en vivo. Se realiza de 7:00 p. m. a 9:00 p. m. y está diseñada para grupos desde 2 personas. El precio no está publicado, así que te recomendamos contactar directamente con el operador para más detalles.",
+      "fuentes": [
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "recuperados": [
+        "sibarita-cena-gourmet-cartagena 0.62",
+        "travesia-del-amor-jardin 0.48",
+        "tour-5-islas-vip-deportivo 0.42",
+        "bora-bora-beach-club-cartagena 0.42",
+        "pao-pao-beach-club-cartagena 0.40",
+        "playa-tranquila-cartagena 0.40"
+      ],
+      "tokens_entrada": 2650,
+      "tokens_salida": 220,
+      "ms": 2764
+    },
+    {
+      "id": "R17",
+      "tipo": "vaga",
+      "pregunta": "conocer la historia reciente de la ciudad",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Excelente pregunta! Te recomiendo el **Tour histórico de Medellín**, un recorrido educativo guiado por expertos locales que te llevará a conocer la historia reciente de la ciudad y su increíble proceso de transformación. Tiene una duración de 3–4 horas con salidas en las mañanas y tardes, y es de dificultad fácil. Para conocer el precio, te invito a consultarlo directamente con el operador.",
+      "fuentes": [
+        "tour-historico-medellin"
+      ],
+      "recuperados": [
+        "tour-historico-medellin 0.37",
+        "centro-historico-plaza-botero 0.32",
+        "graffiti-tour-comuna-13 0.30",
+        "city-tour-chiva-cartagena 0.30",
+        "city-tour-medellin 0.28",
+        "bahia-rumbera-bote-deportivo 0.25"
+      ],
+      "tokens_entrada": 2485,
+      "tokens_salida": 194,
+      "ms": 2353
+    },
+    {
+      "id": "R18",
+      "tipo": "vaga",
+      "pregunta": "arte callejero y transformación social",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tenemos el tour «Graffiti tour + Comuna 13» en Medellín, que es perfecto para ti. Es un recorrido guiado por la Comuna 13 donde podrás ver arte urbano, escaleras eléctricas y conocer historias locales de transformación. Dura 3 horas, tiene salidas en horarios AM y PM, es fácil de acceder y cuesta desde COP 80.000. Incluye guía local y transporte. ¡Ideal para experimentar cómo el arte ha transformado esta zona de Medellín!",
+      "fuentes": [
+        "graffiti-tour-comuna-13"
+      ],
+      "recuperados": [
+        "graffiti-tour-comuna-13 0.43",
+        "city-tour-chiva-cartagena 0.37",
+        "centro-historico-plaza-botero 0.34",
+        "city-tour-medellin 0.32",
+        "tour-historico-medellin 0.31",
+        "bahia-rumbera-bote-deportivo 0.29"
+      ],
+      "tokens_entrada": 2484,
+      "tokens_salida": 218,
+      "ms": 2861
+    },
+    {
+      "id": "R19",
+      "tipo": "vaga",
+      "pregunta": "algo cultural con comunidades indígenas y artesanías",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Te recomendamos la **Travesía Resguardo Indígena — Jardín** en Antioquia, donde visitarás el resguardo Karmata Rúa (Cristianía). Durante 3–4 horas podrás conocer el trapiche, explorar tiendas de artesanías locales y compartir un almuerzo típico. El tour incluye transporte, guía y tarjeta de asistencia médica. Para conocer el precio, consulta con el operador.",
+      "fuentes": [
+        "travesia-resguardo-indigena-jardin"
+      ],
+      "recuperados": [
+        "travesia-resguardo-indigena-jardin 0.53",
+        "city-tour-chiva-cartagena 0.48",
+        "guatape-piedra-del-penol 0.46",
+        "bahia-rumbera-bote-deportivo 0.44",
+        "graffiti-tour-comuna-13 0.44",
+        "centro-historico-plaza-botero 0.44"
+      ],
+      "tokens_entrada": 2572,
+      "tokens_salida": 210,
+      "ms": 2763
+    },
+    {
+      "id": "R20",
+      "tipo": "vaga",
+      "pregunta": "un lugar de ciencia interactivo para los niños",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Te recomiendo el tour «Parque Explora + Jardín Botánico» en Medellín. Es un centro interactivo de ciencia y tecnología para todas las edades, ideal para que los niños aprendan y se diviertan. También incluye una visita al Jardín Botánico con plantas tropicales y senderos. Es de medio día, con salidas en la mañana y dificultad fácil. Para conocer el precio, te invito a consultarlo con el operador.",
+      "fuentes": [
+        "parque-explora-jardin-botanico"
+      ],
+      "recuperados": [
+        "parque-explora-jardin-botanico 0.54",
+        "hacienda-napoles 0.41",
+        "travesia-gallito-de-roca-jardin 0.39",
+        "parque-arvi-medellin 0.39",
+        "graffiti-tour-comuna-13 0.38",
+        "travesia-cristo-rey-jardin 0.38"
+      ],
+      "tokens_entrada": 2509,
+      "tokens_salida": 209,
+      "ms": 2567
+    },
+    {
+      "id": "R21",
+      "tipo": "vaga",
+      "pregunta": "safari y animales",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Tenemos una excelente opción para ti! El tour al Parque Temático Hacienda Nápoles en Doradal (Antioquia) te ofrece un día completo en familia con safari africano, atracciones acuáticas y experiencias con fauna. Dura 8–9 horas con salida temprano en la mañana, incluye transporte, guía y entradas. Para conocer el precio, consulta directamente con el operador.",
+      "fuentes": [
+        "hacienda-napoles"
+      ],
+      "recuperados": [
+        "hacienda-napoles 0.51",
+        "travesia-gallito-de-roca-jardin 0.43",
+        "parque-arvi-medellin 0.41",
+        "travesia-salto-del-angel-jardin 0.40",
+        "sibarita-cena-gourmet-cartagena 0.39",
+        "travesia-filo-de-oro-jardin 0.39"
+      ],
+      "tokens_entrada": 2682,
+      "tokens_salida": 193,
+      "ms": 2555
+    },
+    {
+      "id": "R22",
+      "tipo": "vaga",
+      "pregunta": "una isla privada de lujo en lancha rápida",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tenemos el tour **5 Islas — VIP en bote deportivo**, que es exactamente lo que buscas: navegación privada en un bote deportivo de lujo por las Islas del Rosario para hasta 12 personas. Incluye almuerzo completo, bebidas y parada en islas como Cholón, Isla Grande o Playa Blanca. El horario se coordina según tus preferencias. Te recomiendo contactar al operador para conocer el precio y disponibilidad.",
+      "fuentes": [
+        "tour-5-islas-vip-deportivo"
+      ],
+      "recuperados": [
+        "tour-5-islas-vip-deportivo 0.58",
+        "isla-del-encanto-cartagena 0.52",
+        "tour-4-islas-cartagena 0.52",
+        "isla-tierra-bomba 0.51",
+        "isla-del-sol-cartagena 0.51",
+        "isla-cholon-cartagena 0.50"
+      ],
+      "tokens_entrada": 2881,
+      "tokens_salida": 204,
+      "ms": 2767
+    },
+    {
+      "id": "R23",
+      "tipo": "vaga",
+      "pregunta": "una cascada donde bañarme",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tenemos dos opciones perfectas para bañarte en cascadas en Jardín, Antioquia. La **Travesía Filo de Oro** incluye el Charco Corazón y la Cascada del Amor (3–4 h, desde COP 145.000), mientras que la **Travesía Salto del Ángel** te lleva al espectacular Salto del Ángel (6–7 h, precio a consultar). Ambas incluyen guía, almuerzo y tarjeta de asistencia médica. ¿Cuál te interesa más?",
+      "fuentes": [
+        "travesia-filo-de-oro-jardin",
+        "travesia-salto-del-angel-jardin"
+      ],
+      "recuperados": [
+        "travesia-filo-de-oro-jardin 0.52",
+        "travesia-cristo-rey-jardin 0.52",
+        "travesia-salto-del-angel-jardin 0.51",
+        "bora-bora-beach-club-cartagena 0.47",
+        "isla-del-encanto-cartagena 0.46",
+        "isla-cholon-cartagena 0.46"
+      ],
+      "tokens_entrada": 2791,
+      "tokens_salida": 244,
+      "ms": 2979
+    },
+    {
+      "id": "R24",
+      "tipo": "filtro",
+      "pregunta": "tours fáciles en Medellín",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Excelente! Tenemos varios tours fáciles en Medellín para ti:\n\n• **Tour por la ciudad** (3–4 h): Pueblito Paisa, Milla de Oro, Comuna 13, La 70 y Parque Botero. Incluye transporte, entradas y guía.\n\n• **Tour histórico** (3–4 h): Recorrido educativo sobre la historia reciente de Medellín con expertos locales.\n\n• **Centro histórico y Plaza Botero** (2–3 h): Caminata por la arquitectura y esculturas de Fernando Botero.\n\n• **Graffiti Tour + Comuna 13** (3 h): Arte urbano, escaleras eléctricas e historias de transformación. Desde COP 80.000.\n\n• **Tour gastronómico** (3–4 h): Sabores paisas como bandeja paisa, arepa de chócolo y lechona.\n\n• **Parque Explora + Jardín Botánico** (medio día): Centro de ciencia interactivo y jardines temáticos.\n\n¿Cuál te interesa?",
+      "fuentes": [
+        "city-tour-medellin",
+        "tour-historico-medellin",
+        "centro-historico-plaza-botero",
+        "graffiti-tour-comuna-13",
+        "tour-gastronomico-medellin",
+        "parque-explora-jardin-botanico"
+      ],
+      "recuperados": [
+        "city-tour-medellin 0.70",
+        "tour-historico-medellin 0.70",
+        "centro-historico-plaza-botero 0.68",
+        "graffiti-tour-comuna-13 0.67",
+        "tour-gastronomico-medellin 0.66",
+        "parque-explora-jardin-botanico 0.66"
+      ],
+      "tokens_entrada": 2379,
+      "tokens_salida": 416,
+      "ms": 4198
+    },
+    {
+      "id": "R25",
+      "tipo": "filtro",
+      "pregunta": "algo difícil, de más de seis horas",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tengo un tour perfecto para ti: la **Travesía Salto del Ángel** en Jardín, Antioquia. Es una caminata de alta dificultad de 6–7 horas que incluye el Camino del Diablo y el santuario de los guácharos, con almuerzo, guía y más. Para conocer el precio, debes consultarlo directamente con el operador.",
+      "fuentes": [
+        "travesia-salto-del-angel-jardin"
+      ],
+      "recuperados": [
+        "travesia-salto-del-angel-jardin 0.38",
+        "city-tour-chiva-cartagena 0.33",
+        "travesia-filo-de-oro-jardin 0.33",
+        "sibarita-cena-gourmet-cartagena 0.33",
+        "hacienda-napoles 0.32",
+        "graffiti-tour-comuna-13 0.32"
+      ],
+      "tokens_entrada": 2679,
+      "tokens_salida": 185,
+      "ms": 2441
+    },
+    {
+      "id": "R26",
+      "tipo": "filtro",
+      "pregunta": "una excursión de día completo saliendo de Medellín",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "Tenemos dos opciones de día completo saliendo de Medellín:\n\n1. **Hacienda Nápoles** (8–9 horas): un parque temático en Doradal con atracciones acuáticas, safari africano y fauna. Salida temprano en la mañana, perfecto para familias.\n\n2. **Guatapé + Piedra del Peñol** (7–9 horas): sube la icónica Piedra del Peñol, visita el Alto del Chocho y recorre el pueblo colorido de Guatapé en lancha. Dificultad moderada, salida temprano en la mañana.\n\nAmbas incluyen transporte y guía. Para reservar y conocer precios, contacta directamente con el operador.",
+      "fuentes": [
+        "hacienda-napoles",
+        "guatape-piedra-del-penol"
+      ],
+      "recuperados": [
+        "parque-arvi-medellin 0.71",
+        "city-tour-medellin 0.68",
+        "parque-explora-jardin-botanico 0.68",
+        "tour-historico-medellin 0.67",
+        "hacienda-napoles 0.67",
+        "guatape-piedra-del-penol 0.66"
+      ],
+      "tokens_entrada": 2519,
+      "tokens_salida": 285,
+      "ms": 3167
+    },
+    {
+      "id": "R27",
+      "tipo": "filtro",
+      "pregunta": "planes de noche en Cartagena",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "En Cartagena tenemos planes increíbles para la noche. El **City tour en chiva rumbera** es un recorrido de 5:30 p. m. a 9:00 p. m. con música, bebidas y paradas en los principales sitios históricos. También está la **Sibarita — cena gourmet de 5 tiempos**, una experiencia gastronómica privada con maridaje de vino y música en vivo (7:00 p. m. a 9:00 p. m.). Y si buscas ambiente más festivo, la **Bahía Rumbera en bote deportivo** ofrece fiesta a bordo con barra libre, DJ y recorrido por la bahía. Todos tienen precio a consultar con el operador.",
+      "fuentes": [
+        "city-tour-chiva-cartagena",
+        "sibarita-cena-gourmet-cartagena",
+        "bahia-rumbera-bote-deportivo"
+      ],
+      "recuperados": [
+        "city-tour-chiva-cartagena 0.50",
+        "sibarita-cena-gourmet-cartagena 0.48",
+        "travesia-del-amor-jardin 0.45",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "pao-pao-beach-club-cartagena 0.42",
+        "playa-tranquila-cartagena 0.41"
+      ],
+      "tokens_entrada": 2643,
+      "tokens_salida": 299,
+      "ms": 3430
+    },
+    {
+      "id": "R28",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto cuesta el graffiti tour?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "El Graffiti tour + Comuna 13 en Medellín tiene un precio desde COP 80.000. Este incluye guía local y transporte por las escaleras eléctricas y el arte urbano de la Comuna 13.",
+      "fuentes": [
+        "graffiti-tour-comuna-13"
+      ],
+      "recuperados": [
+        "graffiti-tour-comuna-13 0.65",
+        "city-tour-medellin 0.58",
+        "centro-historico-plaza-botero 0.50",
+        "city-tour-chiva-cartagena 0.50",
+        "tour-de-cafe-jardin 0.49",
+        "travesia-resguardo-indigena-jardin 0.49"
+      ],
+      "tokens_entrada": 2487,
+      "tokens_salida": 133,
+      "ms": 1736
+    },
+    {
+      "id": "R29",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto vale el tour de café en Jardín?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "El Tour de café en Jardín tiene un precio desde COP 95.000 por persona. Este incluye degustación de café y guía, con salida en la mañana y duración de medio día. ¡Es una experiencia perfecta para disfrutar del café de origen!",
+      "fuentes": [
+        "tour-de-cafe-jardin"
+      ],
+      "recuperados": [
+        "travesia-finca-cafetera-jardin 0.68",
+        "tour-de-cafe-jardin 0.68",
+        "travesia-filo-de-oro-jardin 0.59",
+        "travesia-resguardo-indigena-jardin 0.57",
+        "travesia-cristo-rey-jardin 0.56",
+        "travesia-gallito-de-roca-jardin 0.55"
+      ],
+      "tokens_entrada": 2667,
+      "tokens_salida": 145,
+      "ms": 1996
+    },
+    {
+      "id": "R30",
+      "tipo": "precio_con_dato",
+      "pregunta": "¿Cuánto cuesta la travesía Filo de Oro?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "La Travesía Filo de Oro en Jardín tiene un precio desde COP 145.000. Este incluye guía, almuerzo típico, hidratación y tarjeta de asistencia médica. El precio puede variar según la modalidad que elijas: caminata, transporte o cabalgata.",
+      "fuentes": [
+        "travesia-filo-de-oro-jardin"
+      ],
+      "recuperados": [
+        "travesia-filo-de-oro-jardin 0.55",
+        "travesia-resguardo-indigena-jardin 0.50",
+        "travesia-finca-cafetera-jardin 0.49",
+        "travesia-salto-del-angel-jardin 0.49",
+        "city-tour-medellin 0.48",
+        "travesia-cristo-rey-jardin 0.48"
+      ],
+      "tokens_entrada": 2752,
+      "tokens_salida": 157,
+      "ms": 1931
+    },
+    {
+      "id": "R31",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Cuánto cuesta el tour a Guatapé?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "El tour a Guatapé + Piedra del Peñol no tiene precio publicado en el catálogo. Te recomiendo que contactes directamente con el operador para conocer los valores exactos y confirmar disponibilidad. ¡Será una experiencia increíble!",
+      "fuentes": [
+        "guatape-piedra-del-penol"
+      ],
+      "recuperados": [
+        "guatape-piedra-del-penol 0.67",
+        "travesia-salto-del-angel-jardin 0.58",
+        "graffiti-tour-comuna-13 0.57",
+        "travesia-resguardo-indigena-jardin 0.57",
+        "city-tour-medellin 0.55",
+        "baru-islas-del-rosario 0.55"
+      ],
+      "tokens_entrada": 2703,
+      "tokens_salida": 147,
+      "ms": 1848
+    },
+    {
+      "id": "R32",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Qué precio tiene Isla Cholón?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "El tour de Isla Cholón no tiene precio publicado en nuestro catálogo. Debes consultarlo directamente con el operador para conocer el valor exacto del full day en lancha.",
+      "fuentes": [
+        "isla-cholon-cartagena"
+      ],
+      "recuperados": [
+        "isla-cholon-cartagena 0.59",
+        "tour-5-islas-vip-deportivo 0.53",
+        "isla-del-sol-cartagena 0.53",
+        "palmarito-beach-club 0.52",
+        "isla-tierra-bomba 0.52",
+        "isla-del-encanto-cartagena 0.52"
+      ],
+      "tokens_entrada": 2875,
+      "tokens_salida": 123,
+      "ms": 1580
+    },
+    {
+      "id": "R33",
+      "tipo": "precio_sin_dato",
+      "pregunta": "¿Cuánto cuesta la cena Sibarita?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "La cena Sibarita no tiene precio publicado en nuestro catálogo. Te invito a que contactes directamente con el operador para conocer el costo de esta experiencia gastronómica privada de cinco tiempos con maridaje de vino.",
+      "fuentes": [
+        "sibarita-cena-gourmet-cartagena"
+      ],
+      "recuperados": [
+        "sibarita-cena-gourmet-cartagena 0.54",
+        "bora-bora-beach-club-cartagena 0.44",
+        "palmarito-beach-club 0.43",
+        "pao-pao-beach-club-cartagena 0.42",
+        "isla-del-encanto-cartagena 0.42",
+        "baru-islas-del-rosario 0.42"
+      ],
+      "tokens_entrada": 2789,
+      "tokens_salida": 145,
+      "ms": 1930
+    },
+    {
+      "id": "R34",
+      "tipo": "sin_respuesta",
+      "pregunta": "tour en Tokio con sushi",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Disculpa, no tengo tours en Tokio en mi catálogo. Los destinos disponibles son Cartagena, Medellín y Jardín en Colombia. ¿Te gustaría explorar alguna experiencia gastronómica en alguno de estos lugares?",
+      "fuentes": [],
+      "recuperados": [
+        "sibarita-cena-gourmet-cartagena 0.47",
+        "tour-gastronomico-medellin 0.45",
+        "tour-5-islas-vip-deportivo 0.41",
+        "baru-islas-del-rosario 0.40",
+        "isla-del-sol-cartagena 0.40",
+        "travesia-del-amor-jardin 0.40"
+      ],
+      "tokens_entrada": 2690,
+      "tokens_salida": 134,
+      "ms": 1745
+    },
+    {
+      "id": "R35",
+      "tipo": "sin_respuesta",
+      "pregunta": "quiero subir a la Torre Eiffel",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lamento, pero no tengo información sobre tours a la Torre Eiffel en nuestro catálogo. Nuestras ofertas se concentran en destinos de Antioquia como Medellín y Jardín. ¿Quizás te interese explorar alguno de nuestros tours en Colombia?",
+      "fuentes": [],
+      "recuperados": [
+        "graffiti-tour-comuna-13 0.50",
+        "parque-arvi-medellin 0.48",
+        "travesia-salto-del-angel-jardin 0.47",
+        "travesia-cristo-rey-jardin 0.47",
+        "centro-historico-plaza-botero 0.46",
+        "parque-explora-jardin-botanico 0.45"
+      ],
+      "tokens_entrada": 2449,
+      "tokens_salida": 144,
+      "ms": 1929
+    },
+    {
+      "id": "R36",
+      "tipo": "sin_respuesta",
+      "pregunta": "un paquete para esquiar en la nieve",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lo siento, no tenemos en nuestro catálogo tours de esquí en la nieve. Nuestros paquetes se enfocannos se enfocan en destinos de playas, islas y aventura en naturaleza. ¿Te gustaría conocer alguna de nuestras otras opciones?",
+      "fuentes": [],
+      "recuperados": [
+        "isla-del-sol-cartagena 0.37",
+        "pao-pao-beach-club-cartagena 0.36",
+        "travesia-del-amor-jardin 0.36",
+        "travesia-salto-del-angel-jardin 0.36",
+        "bora-bora-beach-club-cartagena 0.36",
+        "tour-5-islas-vip-deportivo 0.35"
+      ],
+      "tokens_entrada": 2683,
+      "tokens_salida": 143,
+      "ms": 1840
+    },
+    {
+      "id": "R37",
+      "tipo": "sin_respuesta",
+      "pregunta": "tour por Bogotá y Monserrate",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lamento que no tengo información sobre tours en Bogotá ni al santuario de Monserrate en mi catálogo. Los tours disponibles están en Medellín, Antioquia. Te recomiendo contactar directamente al operador para consultar sobre destinos a Bogotá.",
+      "fuentes": [],
+      "recuperados": [
+        "centro-historico-plaza-botero 0.58",
+        "city-tour-medellin 0.58",
+        "tour-historico-medellin 0.57",
+        "graffiti-tour-comuna-13 0.55",
+        "tour-gastronomico-medellin 0.55",
+        "parque-explora-jardin-botanico 0.54"
+      ],
+      "tokens_entrada": 2381,
+      "tokens_salida": 138,
+      "ms": 1771
+    },
+    {
+      "id": "R38",
+      "tipo": "sin_respuesta",
+      "pregunta": "un hotel en Santa Marta",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lo siento, no tengo información sobre hoteles en Santa Marta en mi catálogo. Los tours que tengo disponibles son exclusivamente en Cartagena, específicamente en las Islas del Rosario, Tierra Bomba y Barú. Te recomiendo que contactes directamente con nuestro equipo para consultar sobre opciones de alojamiento en Santa Marta.",
+      "fuentes": [],
+      "recuperados": [
+        "isla-del-encanto-cartagena 0.46",
+        "palmarito-beach-club 0.46",
+        "pao-pao-beach-club-cartagena 0.45",
+        "isla-del-sol-cartagena 0.45",
+        "bora-bora-beach-club-cartagena 0.44",
+        "tour-5-islas-vip-deportivo 0.44"
+      ],
+      "tokens_entrada": 2801,
+      "tokens_salida": 159,
+      "ms": 2043
+    },
+    {
+      "id": "R39",
+      "tipo": "sin_respuesta",
+      "pregunta": "vuelos baratos a Miami",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Disculpa, no tengo información sobre vuelos en mi catálogo. Mi catálogo incluye tours de playas y club de playa en Cartagena. ¿Te gustaría conocer opciones de pasadías en las Islas del Rosario o en beach clubs locales?",
+      "fuentes": [],
+      "recuperados": [
+        "pao-pao-beach-club-cartagena 0.48",
+        "bora-bora-beach-club-cartagena 0.48",
+        "palmarito-beach-club 0.47",
+        "isla-del-sol-cartagena 0.46",
+        "isla-del-encanto-cartagena 0.46",
+        "playa-tranquila-cartagena 0.46"
+      ],
+      "tokens_entrada": 2810,
+      "tokens_salida": 139,
+      "ms": 2048
+    },
+    {
+      "id": "R40",
+      "tipo": "sin_respuesta",
+      "pregunta": "clases de surf en San Andrés",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lo siento, no tengo información sobre clases de surf en San Andrés en nuestro catálogo. Los tours que disponemos están ubicados en Cartagena y sus alrededores. Te recomiendo contactar directamente con nuestro equipo de operadores para consultar sobre esta actividad en San Andrés.",
+      "fuentes": [],
+      "recuperados": [
+        "pao-pao-beach-club-cartagena 0.46",
+        "isla-del-sol-cartagena 0.44",
+        "bora-bora-beach-club-cartagena 0.44",
+        "palmarito-beach-club 0.43",
+        "playa-blanca-cartagena 0.42",
+        "playa-tranquila-cartagena 0.42"
+      ],
+      "tokens_entrada": 2816,
+      "tokens_salida": 144,
+      "ms": 1847
+    },
+    {
+      "id": "R41",
+      "tipo": "sin_respuesta",
+      "pregunta": "excursión a Machu Picchu",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": false,
+      "respuesta": "Lamento que no tengo información sobre excursiones a Machu Picchu en nuestro catálogo. Los tours que disponemos están ubicados en Antioquia, Colombia (Jardín, Guatapé y Medellín). Te recomiendo contactarnos directamente para consultar si podemos ayudarte con otros destinos o si tienes interés en explorar nuestras maravillosas opciones en Colombia.",
+      "fuentes": [],
+      "recuperados": [
+        "travesia-salto-del-angel-jardin 0.60",
+        "travesia-resguardo-indigena-jardin 0.58",
+        "travesia-cristo-rey-jardin 0.58",
+        "guatape-piedra-del-penol 0.57",
+        "travesia-filo-de-oro-jardin 0.57",
+        "parque-arvi-medellin 0.56"
+      ],
+      "tokens_entrada": 2697,
+      "tokens_salida": 169,
+      "ms": 2240
+    },
+    {
+      "id": "R42",
+      "tipo": "contexto",
+      "pregunta": "¿Qué plan gastronómico hay?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! En Medellín tenemos el **Tour gastronómico por Medellín**, una experiencia de 3–4 horas donde recorres mercados y restaurantes probando platos tradicionales como la bandeja paisa, arepa de chócolo y lechona, además de propuestas modernas. Tiene salidas AM y PM, así que se adapta bien a tu estadía. El precio no está publicado, pero puedes consultarlo directamente con el operador. ¿Te gustaría saber más detalles?",
+      "fuentes": [
+        "tour-gastronomico-medellin"
+      ],
+      "recuperados": [
+        "tour-gastronomico-medellin 0.74",
+        "city-tour-medellin 0.64",
+        "centro-historico-plaza-botero 0.63",
+        "tour-historico-medellin 0.63",
+        "sibarita-cena-gourmet-cartagena 0.61",
+        "graffiti-tour-comuna-13 0.59"
+      ],
+      "tokens_entrada": 2465,
+      "tokens_salida": 210,
+      "ms": 2838
+    },
+    {
+      "id": "R43",
+      "tipo": "contexto",
+      "pregunta": "¿Qué nos recomiendan?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Felicidades por su aniversario! Les recomiendo la «Travesía del Amor — Jardín» en Jardín, Antioquia. Es un plan diseñado especialmente para parejas: incluye decoración con globos y velas, chocolates y una cena con bebida a elección (vino, ron o whisky) en horario de la noche. Es perfecta para celebrar este momento especial. Para conocer el precio, deberá consultarlo con el operador.",
+      "fuentes": [
+        "travesia-del-amor-jardin"
+      ],
+      "recuperados": [
+        "travesia-del-amor-jardin 0.68",
+        "sibarita-cena-gourmet-cartagena 0.54",
+        "tour-gastronomico-medellin 0.46",
+        "city-tour-chiva-cartagena 0.45",
+        "bahia-rumbera-bote-deportivo 0.45",
+        "travesia-filo-de-oro-jardin 0.45"
+      ],
+      "tokens_entrada": 2642,
+      "tokens_salida": 197,
+      "ms": 2544
+    },
+    {
+      "id": "R44",
+      "tipo": "contexto",
+      "pregunta": "¿Hay algo con café?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Claro! En Jardín tenemos dos tours especializados en café. El «Tour de café en Jardín» te lleva a una finca cafetera con el proceso completo del grano a la taza y cata guiada, desde COP 95.000. También está la «Travesía Finca Cafetera — Jardín», que incluye además almuerzo fiambre, hidratación y tarjeta de asistencia médica, también desde COP 95.000. Ambos son fáciles y salen en horario AM.",
+      "fuentes": [
+        "tour-de-cafe-jardin",
+        "travesia-finca-cafetera-jardin"
+      ],
+      "recuperados": [
+        "travesia-finca-cafetera-jardin 0.56",
+        "tour-de-cafe-jardin 0.56",
+        "travesia-filo-de-oro-jardin 0.45",
+        "travesia-cristo-rey-jardin 0.42",
+        "travesia-resguardo-indigena-jardin 0.41",
+        "parque-explora-jardin-botanico 0.40"
+      ],
+      "tokens_entrada": 2616,
+      "tokens_salida": 227,
+      "ms": 2970
+    },
+    {
+      "id": "R45",
+      "tipo": "contexto",
+      "pregunta": "¿Algo con música y fiesta?",
+      "veredicto": "ok",
+      "problemas": [],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tengo dos opciones con mucha música y ambiente festivo para ustedes:\n\n1. **City tour en chiva rumbera**: Recorrido nocturno por Cartagena (5:30 p. m. a 9:00 p. m.) en chiva con música en vivo, barra libre y paradas en los principales monumentos del centro histórico.\n\n2. **Bahía Rumbera en bote deportivo**: Fiesta a bordo en la bahía de Cartagena con barra libre de ron, DJ y música (cumbia, salsa y pachanga). Dura aproximadamente 3 horas y se coordina el horario.\n\nAmbas incluyen música en vivo y ambiente festivo. Para conocer los precios, debes consultar con el operador. ¿Te interesa alguna de estas?",
+      "fuentes": [
+        "city-tour-chiva-cartagena",
+        "bahia-rumbera-bote-deportivo"
+      ],
+      "recuperados": [
+        "city-tour-chiva-cartagena 0.60",
+        "bahia-rumbera-bote-deportivo 0.59",
+        "sibarita-cena-gourmet-cartagena 0.56",
+        "pao-pao-beach-club-cartagena 0.47",
+        "playa-tranquila-cartagena 0.47",
+        "palmarito-beach-club 0.47"
+      ],
+      "tokens_entrada": 2772,
+      "tokens_salida": 299,
+      "ms": 3765
+    }
+  ]
+}

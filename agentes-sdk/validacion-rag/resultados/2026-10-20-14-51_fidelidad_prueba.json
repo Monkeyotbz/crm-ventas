@@ -1,0 +1,75 @@
+{
+  "etiqueta": "prueba",
+  "modelo": "claude-haiku-4-5-20251001",
+  "correctas": 2,
+  "total": 2,
+  "tokens_entrada": 5145,
+  "tokens_salida": 542,
+  "costo_usd_estimado": 0.0079,
+  "filas": [
+    {
+      "id": "R09",
+      "tipo": "vaga",
+      "pregunta": "algo tranquilo para mi esposo",
+      "veredicto": "ok",
+      "problemas": [],
+      "sin_respaldo": [
+        {
+          "texto": "Ambas son experiencias relajantes.",
+          "respaldada": false,
+          "gravedad": "adorno",
+          "motivo": "Los fragmentos no describen ninguno de los dos planes como relajante; es una valoración. «Tranquila» y «sin multitudes» apoyan algo parecido solo en el segundo."
+        }
+      ],
+      "responde": true,
+      "respuesta": "Tenemos opciones perfectas para una experiencia tranquila con tu esposo. Si buscas algo romántico, te recomendamos la **Travesía del Amor en Jardín**, que incluye decoración, velas, chocolates y cena con bebida a elección, ideal para parejas. O si prefieres playas apartadas, la **Playa Tranquila en Cartagena** te lleva a una playa sin multitudes con almuerzo típico a bordo. Ambas son experiencias relajantes. ¿Te gustaría conocer más detalles de alguna?",
+      "fuentes": [
+        "travesia-del-amor-jardin",
+        "playa-tranquila-cartagena"
+      ],
+      "recuperados": [
+        "travesia-del-amor-jardin 0.41",
+        "playa-tranquila-cartagena 0.34",
+        "isla-tierra-bomba 0.30",
+        "palmarito-beach-club 0.30",
+        "parque-arvi-medellin 0.30",
+        "sibarita-cena-gourmet-cartagena 0.30"
+      ],
+      "tokens_entrada": 2626,
+      "tokens_salida": 235,
+      "ms": 3386
+    },
+    {
+      "id": "R26",
+      "tipo": "filtro",
+      "pregunta": "una excursión de día completo saliendo de Medellín",
+      "veredicto": "ok",
+      "problemas": [],
+      "sin_respaldo": [
+        {
+          "texto": "La Piedra del Peñol es icónica",
+          "respaldada": false,
+          "gravedad": "adorno",
+          "motivo": "El fragmento no la califica de icónica"
+        }
+      ],
+      "responde": true,
+      "respuesta": "¡Perfecto! Tengo dos opciones de día completo para ti desde Medellín:\n\n1. **Guatapé + Piedra del Peñol** (7–9 horas): Sube la icónica Piedra del Peñol, visita el Alto del Chocho y recorre el pueblo de Guatapé con sus coloridos zócalos. Incluye transporte, guía, lancha y asistencia médica.\n\n2. **Parque Temático Hacienda Nápoles** (8–9 horas): Disfruta de atracciones acuáticas, safari africano y fauna en Doradal. Incluye transporte, guía y entradas.\n\nAmbas salen temprano a la mañana. ¿Te gustaría conocer más detalles de alguna? Para reservar, consulta con el operador.",
+      "fuentes": [
+        "guatape-piedra-del-penol",
+        "hacienda-napoles"
+      ],
+      "recuperados": [
+        "parque-arvi-medellin 0.71",
+        "city-tour-medellin 0.68",
+        "parque-explora-jardin-botanico 0.68",
+        "tour-historico-medellin 0.67",
+        "hacienda-napoles 0.67",
+        "guatape-piedra-del-penol 0.66"
+      ],
+      "tokens_entrada": 2519,
+      "tokens_salida": 307,
+      "ms": 3165
+    }
+  ]
+}
